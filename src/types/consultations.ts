@@ -1,4 +1,4 @@
-import type { AppointmentSymptoms, PageResponse } from "@/types/appointments";
+import type { AppointmentStatus, AppointmentSymptoms, PageResponse } from "@/types/appointments";
 
 export type ConsultationStatus = "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 export type ConsultationSenderType = "PATIENT" | "DOCTOR";
@@ -8,6 +8,8 @@ export interface ConsultationDetails {
   id: string;
   appointmentId: string;
   status: ConsultationStatus;
+  appointmentStatus: AppointmentStatus;
+  cancellationReason: string | null;
   patientName: string;
   doctorName: string;
   hospitalName: string;

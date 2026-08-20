@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { ConsultationCancellationPanel } from "@/components/consultation-cancellation-panel";
 import { ConsultationChat } from "@/components/consultation-chat";
 import { LoadingPanel } from "@/components/loading-panel";
 import { ConsultationStatusBadge, InlineError, PortalHeading, formatAppointmentTime } from "@/components/portal-ui";
@@ -57,8 +58,9 @@ function DoctorConsultationContent() {
         status: event.status!,
         chatEnabled: event.status !== "CANCELLED",
       } : current);
+      void reconcile();
     }
-  }, []);
+  }, [reconcile]);
 
   const liveStatus = useConsultationEvents(consultationId, handleEvent, reconcile);
 
@@ -201,6 +203,14 @@ function DoctorConsultationContent() {
               {consultation.status === "CANCELLED" ? <p className="text-sm font-semibold text-slate-600">Consultation cancelled</p> : null}
             </div>
           </section>
+
+          {consultation.status === "CANCELLED" ? (
+            <ConsultationCancellationPanel
+              appointmentStatus={consultation.appointmentStatus}
+              cancellationReason={consultation.cancellationReason}
+              viewer="DOCTOR"
+            />
+          ) : null}
 
           <div className="mt-8">
             <ConsultationChat messages={messages} currentSender="DOCTOR"

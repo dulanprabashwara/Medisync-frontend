@@ -68,7 +68,7 @@ export function ConsultationChat({
 
       {consultationStatus === "CANCELLED" ? (
         <div className="mt-5 rounded-2xl bg-slate-100 p-4 text-sm text-slate-700">
-          This online consultation was cancelled. Message history is read-only.
+          This consultation has been cancelled. Message history is available, but new messages cannot be sent.
         </div>
       ) : consultationStatus === "COMPLETED" ? (
         <div className="mt-5 rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-900">
