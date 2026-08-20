@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { inputClassName } from "@/components/auth-card";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
-import { InlineError, PortalHeading, StateBadge, formatAppointmentTime } from "@/components/portal-ui";
+import { ConsultationStatusBadge, InlineError, PortalHeading, StateBadge, formatAppointmentTime } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
 import {
   acceptDoctorAppointment,
@@ -163,18 +164,26 @@ function DoctorAppointmentSection(props: SectionProps) {
                     <p className="mt-2 text-sm text-slate-600">{formatAppointmentTime(appointment.scheduledStart)}</p>
                     <p className="mt-3 text-sm text-slate-700"><span className="font-semibold">Reason:</span> {appointment.symptoms.reasonForVisit}</p>
                   </div>
-                  <StateBadge status={appointment.status} />
+                  <div className="flex flex-col items-end gap-2">
+                    <StateBadge status={appointment.status} />
+                    {appointment.consultationStatus ? <ConsultationStatusBadge status={appointment.consultationStatus} /> : null}
+                  </div>
                 </div>
                 <p className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-700"><span className="font-semibold">Symptoms:</span> {appointment.symptoms.symptoms}</p>
                 <div className="mt-5 flex flex-wrap gap-3">
                   <button className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" onClick={() => props.setExpandedId(expanded ? null : appointment.id)}>{expanded ? "Hide details" : "View details"}</button>
+                  {appointment.consultationId ? (
+                    <Link className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800"
+                      href={`/doctor/consultations/${appointment.consultationId}`}>Open Consultation</Link>
+                  ) : null}
                   {appointment.status === "REQUESTED" ? (
                     <>
                       <button className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60" disabled={props.busy !== null} onClick={() => void props.onAccept(appointment.id)}>{props.busy === appointment.id ? "Processing..." : "Accept"}</button>
                       <button className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60" disabled={props.busy !== null} onClick={() => props.onOpenReason(appointment.id, "reject")}>Decline</button>
                     </>
                   ) : null}
-                  {appointment.status === "CONFIRMED" && new Date(appointment.scheduledStart).getTime() > props.now ? (
+                  {appointment.status === "CONFIRMED" && appointment.consultationStatus === "SCHEDULED"
+                    && new Date(appointment.scheduledStart).getTime() > props.now ? (
                     <button className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60" disabled={props.busy !== null} onClick={() => props.onOpenReason(appointment.id, "cancel")}>Cancel consultation</button>
                   ) : null}
                 </div>

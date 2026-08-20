@@ -1,0 +1,51 @@
+import type { AppointmentSymptoms, PageResponse } from "@/types/appointments";
+
+export type ConsultationStatus = "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+export type ConsultationSenderType = "PATIENT" | "DOCTOR";
+export type ConsultationEventType = "NEW_MESSAGE" | "CONSULTATION_STATUS_CHANGED";
+
+export interface ConsultationDetails {
+  id: string;
+  appointmentId: string;
+  status: ConsultationStatus;
+  patientName: string;
+  doctorName: string;
+  hospitalName: string;
+  departmentName: string;
+  specializationName: string;
+  scheduledStart: string;
+  scheduledEnd: string;
+  symptoms: AppointmentSymptoms;
+  chatEnabled: boolean;
+  startedAt: string | null;
+  completedAt: string | null;
+  cancelledAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ConsultationMessage {
+  messageId: string;
+  consultationId: string;
+  senderType: ConsultationSenderType;
+  senderDisplayName: string;
+  content: string;
+  sentAt: string;
+}
+
+export interface ConsultationEvent {
+  eventType: ConsultationEventType;
+  consultationId: string;
+  message: ConsultationMessage | null;
+  status: ConsultationStatus | null;
+}
+
+export interface ClinicalNote {
+  consultationId: string;
+  noteText: string;
+  finalized: boolean;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export type ConsultationMessagePage = PageResponse<ConsultationMessage>;

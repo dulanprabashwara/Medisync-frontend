@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { AppointmentStatus, SlotStatus } from "@/types/appointments";
+import type { ConsultationStatus } from "@/types/consultations";
 
 export function PortalHeading({
   eyebrow,
@@ -57,6 +58,26 @@ export function formatAppointmentTime(value: string) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
+}
+
+export function ConsultationStatusBadge({ status }: { status: ConsultationStatus }) {
+  const labels: Record<ConsultationStatus, string> = {
+    SCHEDULED: "Scheduled",
+    IN_PROGRESS: "In progress",
+    COMPLETED: "Completed",
+    CANCELLED: "Cancelled",
+  };
+  const tones: Record<ConsultationStatus, string> = {
+    SCHEDULED: "bg-sky-100 text-sky-800",
+    IN_PROGRESS: "bg-amber-100 text-amber-900",
+    COMPLETED: "bg-emerald-100 text-emerald-800",
+    CANCELLED: "bg-slate-200 text-slate-700",
+  };
+  return (
+    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold tracking-wide ${tones[status]}`}>
+      {labels[status]}
+    </span>
+  );
 }
 
 export function InlineError({ message }: { message: string | null }) {

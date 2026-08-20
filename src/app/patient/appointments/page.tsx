@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { inputClassName } from "@/components/auth-card";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
-import { InlineError, PortalHeading, StateBadge, formatAppointmentTime } from "@/components/portal-ui";
+import { ConsultationStatusBadge, InlineError, PortalHeading, StateBadge, formatAppointmentTime } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
 import { cancelPatientAppointment, getPatientAppointments } from "@/lib/api";
 import type { Appointment } from "@/types/appointments";
@@ -125,7 +126,8 @@ function AppointmentSection(props: SectionProps) {
           {props.appointments.map((appointment) => {
             const expanded = props.expandedId === appointment.id;
             const cancellable = (appointment.status === "REQUESTED" || appointment.status === "CONFIRMED")
-              && new Date(appointment.scheduledStart).getTime() > props.now;
+              && new Date(appointment.scheduledStart).getTime() > props.now
+              && (!appointment.consultationStatus || appointment.consultationStatus === "SCHEDULED");
             return (
               <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" key={appointment.id}>
                 <div className="flex flex-wrap items-start justify-between gap-4">
@@ -134,13 +136,20 @@ function AppointmentSection(props: SectionProps) {
                     <p className="mt-1 text-sm font-medium text-teal-700">{appointment.specializationName}</p>
                     <p className="mt-3 text-sm text-slate-600">{formatAppointmentTime(appointment.scheduledStart)} · Affiliated with {appointment.hospitalName}</p>
                   </div>
-                  <StateBadge status={appointment.status} />
+                  <div className="flex flex-col items-end gap-2">
+                    <StateBadge status={appointment.status} />
+                    {appointment.consultationStatus ? <ConsultationStatusBadge status={appointment.consultationStatus} /> : null}
+                  </div>
                 </div>
                 <p className="mt-5 text-sm text-slate-700"><span className="font-semibold">Reason:</span> {appointment.symptoms.reasonForVisit}</p>
                 <div className="mt-5 flex flex-wrap gap-3">
                   <button className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" onClick={() => props.setExpandedId(expanded ? null : appointment.id)}>
                     {expanded ? "Hide details" : "View details"}
                   </button>
+                  {appointment.consultationId ? (
+                    <Link className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800"
+                      href={`/patient/consultations/${appointment.consultationId}`}>Open Online Consultation</Link>
+                  ) : null}
                   {cancellable ? <button className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50" onClick={() => props.setCancelId(props.cancelId === appointment.id ? null : appointment.id)}>Cancel consultation</button> : null}
                 </div>
                 {expanded ? (

@@ -1,6 +1,6 @@
 # MediSync Web
 
-Next.js App Router frontend for MediSync through Phase 2B. MediSync is an online patient-care platform that helps patients find verified doctors, request scheduled online consultations, and avoid unnecessary hospital visits. Supabase Auth handles credentials and sessions. The Spring Boot API remains the source of truth for roles, account status, doctor verification, availability, appointment slots, appointment transitions, and patient-submitted symptoms.
+Next.js App Router frontend for MediSync through Phase 3. MediSync is an online patient-care platform that helps patients find verified doctors, request scheduled online consultations, communicate within confirmed care relationships, and avoid unnecessary hospital visits. Supabase Auth handles credentials and sessions. The Spring Boot API remains the source of truth for roles, account status, doctor verification, scheduling, consultation lifecycle, persistent messages, and clinical notes.
 
 The frontend presents Phase 2 bookings as online consultations. Internal TypeScript names, backend routes, database records, and statuses retain the established `appointment` terminology.
 
@@ -58,16 +58,27 @@ Phase 2A adds an administrator portal for hospital, department, specialization, 
 
 All calls use the centralized authenticated API client. The booking UI sends `slotId` plus the symptom form only; it never treats browser-supplied doctor or schedule values as authoritative. Loading, empty, validation, conflict, and duplicate-submission states are represented on each workflow page.
 
+## Phase 3 online consultation pages
+
+| Route | Purpose |
+| --- | --- |
+| `/patient/consultations/[consultationId]` | Patient-safe details, lifecycle status, persistent history, and consultation-scoped chat |
+| `/doctor/consultations/[consultationId]` | Lifecycle controls, consultation chat, symptoms, and the assigned doctor's private clinical note |
+
+The patient and doctor appointment lists expose consultation links and the `SCHEDULED`, `IN_PROGRESS`, `COMPLETED`, or `CANCELLED` status after an appointment is confirmed. The doctor may start and complete the session. Completed chat remains available for related communication; cancelled chat retains its history but is read-only. Patient screens never request or render clinical-note data.
+
+Messages are saved through authenticated REST before they appear as durable history. A single STOMP client for the open consultation subscribes to `/user/queue/consultation-events` for live message and status delivery. Before every initial connection or reconnect, the client retrieves the latest Supabase session and puts its access token in the STOMP `Authorization` header, never in the WebSocket URL. On connection it reloads REST details and history, deduplicating by message ID, so missed live events do not cause data loss.
+
 ## Product roadmap
 
 - Phase 1: authentication, roles, and security (complete)
 - Phase 2A: reference data, professional profiles, and administrator verification (complete)
 - Phase 2B: availability, doctor discovery, online consultation booking, symptom submission, and booking transitions (complete)
-- Phase 3: online consultation session, secure doctor-patient chat, clinical notes, and consultation status (future)
+- Phase 3: online consultation session, secure doctor-patient chat, private clinical notes, and consultation status (current)
 - Phase 4: digital prescriptions, patient prescription view, and QR support (future)
 - Phase 5: pharmacist scanning, prescription verification, and dispensing (future)
 
-Secure chat is planned only for a patient and doctor with a confirmed consultation relationship. It is not implemented in Phase 2B. Remote monitoring and formal follow-up scheduling are outside the core roadmap.
+Remote monitoring and formal follow-up scheduling are outside the core roadmap.
 
 ## Quality checks
 

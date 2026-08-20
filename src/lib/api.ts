@@ -22,6 +22,12 @@ import type {
   DoctorSummary,
   PageResponse,
 } from "@/types/appointments";
+import type {
+  ClinicalNote,
+  ConsultationDetails,
+  ConsultationMessage,
+  ConsultationMessagePage,
+} from "@/types/consultations";
 
 interface ApiErrorBody {
   error?: string;
@@ -44,6 +50,15 @@ export class ApiError extends Error {
 const apiBaseUrl = (
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080"
 ).replace(/\/$/, "");
+
+export function getConsultationWebSocketUrl() {
+  const url = new URL(apiBaseUrl);
+  url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+  url.pathname = `${url.pathname.replace(/\/$/, "")}/ws`;
+  url.search = "";
+  url.hash = "";
+  return url.toString();
+}
 
 async function apiRequest<T>(
   path: string,
@@ -294,3 +309,72 @@ export const cancelDoctorAppointment = (accessToken: string, appointmentId: stri
     method: "POST",
     body: JSON.stringify({ reason }),
   });
+
+export const getPatientConsultation = (accessToken: string, consultationId: string) =>
+  apiRequest<ConsultationDetails>(`/api/patient/consultations/${consultationId}`, accessToken);
+
+export const getPatientConsultationMessages = (
+  accessToken: string,
+  consultationId: string,
+  page = 0,
+  size = 100,
+) => apiRequest<ConsultationMessagePage>(
+  `/api/patient/consultations/${consultationId}/messages?page=${page}&size=${size}`,
+  accessToken,
+);
+
+export const sendPatientConsultationMessage = (
+  accessToken: string,
+  consultationId: string,
+  content: string,
+) => apiRequest<ConsultationMessage>(
+  `/api/patient/consultations/${consultationId}/messages`,
+  accessToken,
+  { method: "POST", body: JSON.stringify({ content }) },
+);
+
+export const getDoctorConsultation = (accessToken: string, consultationId: string) =>
+  apiRequest<ConsultationDetails>(`/api/doctor/consultations/${consultationId}`, accessToken);
+
+export const getDoctorConsultationMessages = (
+  accessToken: string,
+  consultationId: string,
+  page = 0,
+  size = 100,
+) => apiRequest<ConsultationMessagePage>(
+  `/api/doctor/consultations/${consultationId}/messages?page=${page}&size=${size}`,
+  accessToken,
+);
+
+export const sendDoctorConsultationMessage = (
+  accessToken: string,
+  consultationId: string,
+  content: string,
+) => apiRequest<ConsultationMessage>(
+  `/api/doctor/consultations/${consultationId}/messages`,
+  accessToken,
+  { method: "POST", body: JSON.stringify({ content }) },
+);
+
+export const startDoctorConsultation = (accessToken: string, consultationId: string) =>
+  apiRequest<ConsultationDetails>(`/api/doctor/consultations/${consultationId}/start`, accessToken, {
+    method: "POST",
+  });
+
+export const completeDoctorConsultation = (accessToken: string, consultationId: string) =>
+  apiRequest<ConsultationDetails>(`/api/doctor/consultations/${consultationId}/complete`, accessToken, {
+    method: "POST",
+  });
+
+export const getDoctorClinicalNote = (accessToken: string, consultationId: string) =>
+  apiRequest<ClinicalNote>(`/api/doctor/consultations/${consultationId}/clinical-note`, accessToken);
+
+export const updateDoctorClinicalNote = (
+  accessToken: string,
+  consultationId: string,
+  noteText: string,
+) => apiRequest<ClinicalNote>(
+  `/api/doctor/consultations/${consultationId}/clinical-note`,
+  accessToken,
+  { method: "PUT", body: JSON.stringify({ noteText }) },
+);

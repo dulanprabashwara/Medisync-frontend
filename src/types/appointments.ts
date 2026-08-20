@@ -88,6 +88,9 @@ export interface Appointment {
   confirmedAt: string | null;
   rejectedAt: string | null;
   cancelledAt: string | null;
+  consultationId: string | null;
+  consultationStatus: import("@/types/consultations").ConsultationStatus | null;
+  chatEnabled: boolean;
 }
 
 export interface CreateAppointmentInput {
