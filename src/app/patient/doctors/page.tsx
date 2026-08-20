@@ -115,14 +115,14 @@ function PatientDoctorSearchContent() {
   return (
     <main className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
       <PortalHeading eyebrow="Patient care" title="Find a doctor" backHref="/patient/dashboard"
-        description="Search MediSync's active, administrator-verified doctors and choose a real available appointment time." />
+        description="Search MediSync's active, administrator-verified doctors and choose an available online consultation time." />
 
       <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <form className="grid gap-4 md:grid-cols-2 lg:grid-cols-5" onSubmit={submit}>
           <label className="text-sm font-medium text-slate-700 lg:col-span-2">Doctor name
             <input className={inputClassName} placeholder="Search by name" value={q} onChange={(event) => setQ(event.target.value)} />
           </label>
-          <label className="text-sm font-medium text-slate-700">Hospital
+          <label className="text-sm font-medium text-slate-700">Affiliated hospital
             <select className={inputClassName} value={hospitalId} onChange={(event) => void chooseHospital(event.target.value)}>
               <option value="">All hospitals</option>
               {hospitals.map((hospital) => <option key={hospital.id} value={hospital.id}>{hospital.name}</option>)}
@@ -167,14 +167,14 @@ function PatientDoctorSearchContent() {
                 <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">VERIFIED</span>
               </div>
               <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
-                <div><dt className="text-slate-500">Hospital</dt><dd className="mt-1 font-medium text-slate-900">{doctor.hospitalName}</dd></div>
+                <div><dt className="text-slate-500">Affiliated hospital</dt><dd className="mt-1 font-medium text-slate-900">{doctor.hospitalName}</dd></div>
                 <div><dt className="text-slate-500">Department</dt><dd className="mt-1 font-medium text-slate-900">{doctor.departmentName}</dd></div>
                 <div><dt className="text-slate-500">Qualifications</dt><dd className="mt-1 font-medium text-slate-900">{doctor.qualifications}</dd></div>
                 <div><dt className="text-slate-500">Experience</dt><dd className="mt-1 font-medium text-slate-900">{doctor.yearsOfExperience} years</dd></div>
               </dl>
               {doctor.bioSummary ? <p className="mt-5 text-sm leading-6 text-slate-600">{doctor.bioSummary}</p> : null}
               <Link className="mt-6 inline-flex rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-800" href={`/patient/doctors/${doctor.doctorProfileId}`}>
-                View profile and times
+                View profile and consultation times
               </Link>
             </article>
           ))}

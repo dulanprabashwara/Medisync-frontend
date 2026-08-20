@@ -27,6 +27,17 @@ export function PortalHeading({
 }
 
 export function StateBadge({ status }: { status: AppointmentStatus | SlotStatus }) {
+  const labels: Record<AppointmentStatus | SlotStatus, string> = {
+    AVAILABLE: "Available",
+    RESERVED: "Request pending",
+    BOOKED: "Booked",
+    BLOCKED: "Unavailable",
+    REQUESTED: "Consultation requested",
+    CONFIRMED: "Consultation confirmed",
+    REJECTED: "Consultation request declined",
+    CANCELLED_BY_PATIENT: "Cancelled by patient",
+    CANCELLED_BY_DOCTOR: "Cancelled by doctor",
+  };
   const tone = status === "AVAILABLE" || status === "CONFIRMED"
     ? "bg-emerald-100 text-emerald-800"
     : status === "REQUESTED" || status === "RESERVED"
@@ -36,7 +47,7 @@ export function StateBadge({ status }: { status: AppointmentStatus | SlotStatus 
         : "bg-slate-100 text-slate-700";
   return (
     <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold tracking-wide ${tone}`}>
-      {status.replaceAll("_", " ")}
+      {labels[status]}
     </span>
   );
 }

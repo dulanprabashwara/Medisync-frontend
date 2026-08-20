@@ -35,7 +35,7 @@ function DoctorAppointmentsContent() {
     try {
       setAppointments((await getDoctorAppointments(session.access_token)).content);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Appointment requests could not be loaded.");
+      setError(loadError instanceof Error ? loadError.message : "Consultation requests could not be loaded.");
     } finally {
       setLoading(false);
     }
@@ -65,10 +65,10 @@ function DoctorAppointmentsContent() {
     setError(null);
     try {
       await acceptDoctorAppointment(session.access_token, appointmentId);
-      setMessage("The appointment is confirmed and its slot is booked.");
+      setMessage("The consultation is confirmed and its time is booked.");
       await load();
     } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : "The appointment could not be accepted.");
+      setError(actionError instanceof Error ? actionError.message : "The consultation request could not be accepted.");
     } finally {
       setBusy(null);
     }
@@ -82,16 +82,16 @@ function DoctorAppointmentsContent() {
     try {
       if (current.kind === "reject") {
         await rejectDoctorAppointment(session.access_token, current.id, reason.trim());
-        setMessage("The request was rejected and its slot is available again.");
+        setMessage("The consultation request was declined and its time is available again.");
       } else {
         await cancelDoctorAppointment(session.access_token, current.id, reason.trim());
-        setMessage("The confirmed appointment was cancelled and its slot was released.");
+        setMessage("The confirmed consultation was cancelled and its time is available again.");
       }
       setReasonAction(null);
       setReason("");
       await load();
     } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : "The appointment could not be updated.");
+      setError(actionError instanceof Error ? actionError.message : "The consultation could not be updated.");
     } finally {
       setBusy(null);
     }
@@ -104,24 +104,24 @@ function DoctorAppointmentsContent() {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 lg:px-8 lg:py-14">
-      <PortalHeading eyebrow="Doctor care requests" title="Appointments" backHref="/doctor/dashboard"
-        description="Review only the patients assigned to your slots, including the symptoms they submitted with each request." />
+      <PortalHeading eyebrow="Doctor care requests" title="Online Consultations" backHref="/doctor/dashboard"
+        description="Review consultation requests for your published times, including the symptoms each patient submitted." />
       <div className="mt-7 space-y-3">
         <InlineError message={error} />
         {message ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900" role="status">{message}</div> : null}
       </div>
 
-      {loading ? <LoadingPanel label="Loading appointment requests..." /> : appointments.length === 0 ? (
-        <div className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600">No patients are currently waiting for approval.</div>
+      {loading ? <LoadingPanel label="Loading consultation requests..." /> : appointments.length === 0 ? (
+        <div className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600">No consultation requests are currently waiting for review.</div>
       ) : (
         <div className="mt-9 space-y-10">
-          <DoctorAppointmentSection title="Pending requests" empty="No patients are currently waiting for approval." appointments={groups.pending}
+          <DoctorAppointmentSection title="Pending Consultation Requests" empty="No consultation requests are currently waiting for review." appointments={groups.pending}
             expandedId={expandedId} setExpandedId={setExpandedId} reasonAction={reasonAction} reason={reason} setReason={setReason}
             busy={busy} now={now} onAccept={accept} onOpenReason={openReason} onSubmitReason={submitReasonAction} />
-          <DoctorAppointmentSection title="Confirmed and upcoming" empty="No upcoming confirmed appointments." appointments={groups.confirmed}
+          <DoctorAppointmentSection title="Upcoming Online Consultations" empty="No upcoming confirmed online consultations." appointments={groups.confirmed}
             expandedId={expandedId} setExpandedId={setExpandedId} reasonAction={reasonAction} reason={reason} setReason={setReason}
             busy={busy} now={now} onAccept={accept} onOpenReason={openReason} onSubmitReason={submitReasonAction} />
-          <DoctorAppointmentSection title="Rejected, cancelled, or previous" empty="No appointment history yet." appointments={groups.history}
+          <DoctorAppointmentSection title="Declined, Cancelled, or Previous Consultations" empty="No consultation history yet." appointments={groups.history}
             expandedId={expandedId} setExpandedId={setExpandedId} reasonAction={reasonAction} reason={reason} setReason={setReason}
             busy={busy} now={now} onAccept={accept} onOpenReason={openReason} onSubmitReason={submitReasonAction} />
         </div>
@@ -171,11 +171,11 @@ function DoctorAppointmentSection(props: SectionProps) {
                   {appointment.status === "REQUESTED" ? (
                     <>
                       <button className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60" disabled={props.busy !== null} onClick={() => void props.onAccept(appointment.id)}>{props.busy === appointment.id ? "Processing..." : "Accept"}</button>
-                      <button className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60" disabled={props.busy !== null} onClick={() => props.onOpenReason(appointment.id, "reject")}>Reject</button>
+                      <button className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60" disabled={props.busy !== null} onClick={() => props.onOpenReason(appointment.id, "reject")}>Decline</button>
                     </>
                   ) : null}
                   {appointment.status === "CONFIRMED" && new Date(appointment.scheduledStart).getTime() > props.now ? (
-                    <button className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60" disabled={props.busy !== null} onClick={() => props.onOpenReason(appointment.id, "cancel")}>Cancel appointment</button>
+                    <button className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60" disabled={props.busy !== null} onClick={() => props.onOpenReason(appointment.id, "cancel")}>Cancel consultation</button>
                   ) : null}
                 </div>
                 {expanded ? (
@@ -183,17 +183,17 @@ function DoctorAppointmentSection(props: SectionProps) {
                     <Detail label="Requested at" value={formatAppointmentTime(appointment.createdAt)} />
                     <Detail label="Symptom duration" value={appointment.symptoms.symptomDuration} />
                     <Detail label="Additional notes" value={appointment.symptoms.additionalNotes} />
-                    {appointment.doctorRejectionReason ? <Detail label="Rejection reason" value={appointment.doctorRejectionReason} /> : null}
+                    {appointment.doctorRejectionReason ? <Detail label="Decline reason" value={appointment.doctorRejectionReason} /> : null}
                     {appointment.cancellationReason ? <Detail label="Cancellation reason" value={appointment.cancellationReason} /> : null}
                   </dl>
                 ) : null}
                 {reasonOpen ? (
                   <div className="mt-5 rounded-2xl border border-rose-100 bg-rose-50 p-5">
-                    <label className="text-sm font-medium text-rose-900">{props.reasonAction?.kind === "reject" ? "Rejection" : "Cancellation"} reason <span className="text-rose-700">*</span>
+                    <label className="text-sm font-medium text-rose-900">{props.reasonAction?.kind === "reject" ? "Decline" : "Cancellation"} reason <span className="text-rose-700">*</span>
                       <textarea className={`${inputClassName} min-h-24 resize-y`} maxLength={1000} minLength={3} required value={props.reason} onChange={(event) => props.setReason(event.target.value)} />
                     </label>
                     <button className="mt-4 rounded-xl bg-rose-700 px-5 py-3 text-sm font-semibold text-white disabled:opacity-60" disabled={props.busy !== null || props.reason.trim().length < 3} onClick={() => void props.onSubmitReason()}>
-                      {props.busy === appointment.id ? "Processing..." : props.reasonAction?.kind === "reject" ? "Confirm rejection" : "Confirm cancellation"}
+                      {props.busy === appointment.id ? "Processing..." : props.reasonAction?.kind === "reject" ? "Confirm decline" : "Confirm cancellation"}
                     </button>
                   </div>
                 ) : null}

@@ -73,7 +73,7 @@ function DoctorAvailabilityContent() {
         slotDurationMinutes: duration,
         timeZone,
       });
-      setMessage(`${previewCount} appointment slot${previewCount === 1 ? "" : "s"} created.`);
+      setMessage(`${previewCount} online consultation time${previewCount === 1 ? "" : "s"} created.`);
       await load();
     } catch (createError) {
       setError(createError instanceof Error ? createError.message : "Availability could not be created.");
@@ -90,7 +90,7 @@ function DoctorAvailabilityContent() {
       await setDoctorSlotBlocked(session.access_token, slotId, block);
       await load();
     } catch (slotError) {
-      setError(slotError instanceof Error ? slotError.message : "The slot could not be updated.");
+      setError(slotError instanceof Error ? slotError.message : "The consultation time could not be updated.");
     } finally {
       setBusy(null);
     }
@@ -102,7 +102,7 @@ function DoctorAvailabilityContent() {
     setError(null);
     try {
       await deactivateDoctorAvailability(session.access_token, windowId);
-      setMessage("The availability window was deactivated. Its open slots are now blocked.");
+      setMessage("The consultation availability window was deactivated. Its open times are now unavailable.");
       await load();
     } catch (deactivateError) {
       setError(deactivateError instanceof Error ? deactivateError.message : "Availability could not be deactivated.");
@@ -113,8 +113,8 @@ function DoctorAvailabilityContent() {
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
-      <PortalHeading eyebrow="Doctor scheduling" title="Availability" backHref="/doctor/dashboard"
-        description="Publish specific future windows. MediSync generates the actual appointment slots patients can request." />
+      <PortalHeading eyebrow="Doctor scheduling" title="Consultation Availability" backHref="/doctor/dashboard"
+        description="Publish specific future windows for online consultations. MediSync generates the times patients can request." />
 
       <div className="mt-7 space-y-3">
         <InlineError message={error} />
@@ -122,7 +122,7 @@ function DoctorAvailabilityContent() {
       </div>
 
       <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <h2 className="text-xl font-semibold text-slate-950">Create an availability window</h2>
+        <h2 className="text-xl font-semibold text-slate-950">Create consultation availability</h2>
         <p className="mt-2 text-sm text-slate-600">Times are interpreted in {timeZone} and stored with their absolute timezone.</p>
         <form className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-4" onSubmit={create}>
           <label className="text-sm font-medium text-slate-700">Date
@@ -134,13 +134,13 @@ function DoctorAvailabilityContent() {
           <label className="text-sm font-medium text-slate-700">End time
             <input className={inputClassName} required type="time" value={endsAt} onChange={(event) => setEndsAt(event.target.value)} />
           </label>
-          <label className="text-sm font-medium text-slate-700">Appointment duration
+          <label className="text-sm font-medium text-slate-700">Consultation duration
             <select className={inputClassName} value={duration} onChange={(event) => setDuration(Number(event.target.value))}>
               {durations.map((value) => <option key={value} value={value}>{value} minutes</option>)}
             </select>
           </label>
           <div className="flex items-center justify-between gap-4 rounded-2xl bg-teal-50 p-4 md:col-span-2 lg:col-span-4">
-            <p className="text-sm font-medium text-teal-900">Preview: {previewCount} complete slot{previewCount === 1 ? "" : "s"} will be generated.</p>
+            <p className="text-sm font-medium text-teal-900">Preview: {previewCount} complete consultation time{previewCount === 1 ? "" : "s"} will be generated.</p>
             <button className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60"
               disabled={busy !== null || previewCount < 1} type="submit">
               {busy === "create" ? "Creating..." : "Create availability"}
@@ -150,7 +150,7 @@ function DoctorAvailabilityContent() {
       </section>
 
       <section className="mt-10" aria-labelledby="availability-list-heading">
-        <h2 className="text-2xl font-semibold text-slate-950" id="availability-list-heading">Your availability windows</h2>
+        <h2 className="text-2xl font-semibold text-slate-950" id="availability-list-heading">Your consultation availability</h2>
         {loading ? <LoadingPanel label="Loading availability..." /> : windows.length === 0 ? (
           <div className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600">You have not created any availability yet.</div>
         ) : (
@@ -163,7 +163,7 @@ function DoctorAvailabilityContent() {
                       <h3 className="font-semibold text-slate-950">{formatAppointmentTime(availability.startsAt)}</h3>
                       <span className={`rounded-full px-3 py-1 text-xs font-bold ${availability.active ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-600"}`}>{availability.active ? "ACTIVE" : "INACTIVE"}</span>
                     </div>
-                    <p className="mt-2 text-sm text-slate-600">Until {formatAppointmentTime(availability.endsAt)} · {availability.slotDurationMinutes}-minute slots · {availability.timeZone}</p>
+                    <p className="mt-2 text-sm text-slate-600">Until {formatAppointmentTime(availability.endsAt)} · {availability.slotDurationMinutes}-minute consultations · {availability.timeZone}</p>
                   </div>
                   {availability.active && new Date(availability.endsAt).getTime() > now ? (
                     <button className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60"

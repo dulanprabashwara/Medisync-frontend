@@ -46,7 +46,7 @@ function PatientDoctorDetailsContent() {
       setSlots(await getPatientDoctorSlots(session.access_token, doctorId, from, to));
       setSelectedSlot(null);
     } catch (slotError) {
-      setError(slotError instanceof Error ? slotError.message : "Appointment times could not be loaded.");
+      setError(slotError instanceof Error ? slotError.message : "Online consultation times could not be loaded.");
     } finally {
       setSlotsLoading(false);
     }
@@ -84,7 +84,7 @@ function PatientDoctorDetailsContent() {
       await createPatientAppointment(session.access_token, { slotId: selectedSlot.id, ...booking });
       router.push("/patient/appointments?created=1");
     } catch (bookingError) {
-      setError(bookingError instanceof Error ? bookingError.message : "The appointment request could not be submitted.");
+      setError(bookingError instanceof Error ? bookingError.message : "The online consultation request could not be submitted.");
       await loadSlots();
     } finally {
       setSubmitting(false);
@@ -97,14 +97,14 @@ function PatientDoctorDetailsContent() {
     <main className="mx-auto max-w-6xl px-6 py-10 lg:px-8 lg:py-14">
       <PortalHeading eyebrow="Verified doctor" title={doctor?.displayName ?? "Doctor profile"}
         backHref="/patient/doctors" backLabel="Back to doctor search"
-        description={doctor ? `${doctor.specializationName} · ${doctor.hospitalName}` : "Doctor details"} />
+        description={doctor ? `${doctor.specializationName} · Affiliated with ${doctor.hospitalName}` : "Doctor details"} />
       <div className="mt-7"><InlineError message={error} /></div>
 
       {doctor ? (
         <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-5">
             <dl className="grid flex-1 gap-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
-              <div><dt className="text-slate-500">Hospital</dt><dd className="mt-1 font-semibold text-slate-950">{doctor.hospitalName}</dd></div>
+              <div><dt className="text-slate-500">Affiliated hospital</dt><dd className="mt-1 font-semibold text-slate-950">{doctor.hospitalName}</dd></div>
               <div><dt className="text-slate-500">Department</dt><dd className="mt-1 font-semibold text-slate-950">{doctor.departmentName}</dd></div>
               <div><dt className="text-slate-500">Specialization</dt><dd className="mt-1 font-semibold text-slate-950">{doctor.specializationName}</dd></div>
               <div><dt className="text-slate-500">Qualifications</dt><dd className="mt-1 font-semibold text-slate-950">{doctor.qualifications}</dd></div>
@@ -118,7 +118,7 @@ function PatientDoctorDetailsContent() {
 
       <section className="mt-9" aria-labelledby="available-times-heading">
         <div className="flex flex-wrap items-end justify-between gap-5">
-          <div><h2 className="text-2xl font-semibold text-slate-950" id="available-times-heading">Available appointment times</h2><p className="mt-2 text-sm text-slate-600">Only future, open slots are shown.</p></div>
+          <div><h2 className="text-2xl font-semibold text-slate-950" id="available-times-heading">Available Online Consultation Times</h2><p className="mt-2 text-sm text-slate-600">Only future online consultation times that are open for requests are shown.</p></div>
           <div className="flex flex-wrap items-end gap-3">
             <label className="text-sm font-medium text-slate-700">From
               <input className={`${inputClassName} min-w-40`} type="date" value={from} onChange={(event) => setFrom(event.target.value)} />
@@ -132,8 +132,8 @@ function PatientDoctorDetailsContent() {
           </div>
         </div>
 
-        {slotsLoading ? <LoadingPanel label="Loading appointment times..." /> : slots.length === 0 ? (
-          <div className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600">No appointment slots are currently available.</div>
+        {slotsLoading ? <LoadingPanel label="Loading online consultation times..." /> : slots.length === 0 ? (
+          <div className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600">No online consultation times are currently available.</div>
         ) : (
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {slots.map((slot) => (
@@ -149,11 +149,11 @@ function PatientDoctorDetailsContent() {
 
       {selectedSlot ? (
         <section className="mt-9 rounded-3xl border border-teal-200 bg-white p-6 shadow-sm sm:p-8" aria-labelledby="booking-form-heading">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">Selected time</p>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">Book Online Consultation</p>
           <h2 className="mt-2 text-2xl font-semibold text-slate-950" id="booking-form-heading">Request {formatAppointmentTime(selectedSlot.startsAt)}</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">Describe what you want the doctor to review. MediSync records your words; it does not diagnose your symptoms.</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">You are requesting an online consultation with {doctor?.displayName ?? "this doctor"}. Describe what you want the doctor to review; MediSync records your words and does not diagnose your symptoms.</p>
           <form className="mt-6 space-y-5" onSubmit={requestAppointment}>
-            <label className="block text-sm font-medium text-slate-700">Reason for visit <span className="text-rose-600">*</span>
+            <label className="block text-sm font-medium text-slate-700">Reason for consultation <span className="text-rose-600">*</span>
               <input className={inputClassName} maxLength={300} required value={booking.reasonForVisit} onChange={(event) => setBooking({ ...booking, reasonForVisit: event.target.value })} />
             </label>
             <label className="block text-sm font-medium text-slate-700">Symptoms <span className="text-rose-600">*</span>
@@ -168,7 +168,7 @@ function PatientDoctorDetailsContent() {
               </label>
             </div>
             <button className="rounded-xl bg-teal-700 px-6 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60" disabled={submitting} type="submit">
-              {submitting ? "Requesting appointment..." : "Request appointment"}
+              {submitting ? "Requesting online consultation..." : "Request online consultation"}
             </button>
           </form>
         </section>

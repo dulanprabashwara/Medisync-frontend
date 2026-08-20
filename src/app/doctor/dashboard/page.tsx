@@ -33,12 +33,10 @@ const emptyForm: DoctorProfileInput = {
 };
 
 const futureModules = [
-  { title: "Availability", phase: "Available", href: "/doctor/availability" },
-  { title: "Appointments", phase: "Available", href: "/doctor/appointments" },
-  { title: "Patients", phase: "Later phase" },
-  { title: "Messages", phase: "Later phase" },
+  { title: "Consultation Availability", phase: "Available", href: "/doctor/availability" },
+  { title: "Online Consultations", phase: "Available", href: "/doctor/appointments" },
+  { title: "Patient Chat", phase: "Later phase" },
   { title: "Prescriptions", phase: "Later phase" },
-  { title: "Monitoring", phase: "Later phase" },
 ];
 
 function DoctorDashboardContent() {
@@ -183,7 +181,7 @@ function DoctorDashboardContent() {
           <p className="mt-2 text-emerald-900">Your MediSync doctor account is active. Sensitive identity fields are now locked.</p>
           <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
             <ProfileDetail label="Registration" value={doctor.medicalRegistrationNumber} />
-            <ProfileDetail label="Hospital" value={doctor.hospitalName} />
+            <ProfileDetail label="Affiliated Hospital" value={doctor.hospitalName} />
             <ProfileDetail label="Department" value={doctor.departmentName} />
             <ProfileDetail label="Specialization" value={doctor.specializationName} />
             <ProfileDetail label="Qualifications" value={doctor.qualifications} />
@@ -230,9 +228,9 @@ function DoctorDashboardContent() {
                 <input className={inputClassName} type="number" min={0} value={form.yearsOfExperience ?? ""}
                   onChange={(event) => setForm({ ...form, yearsOfExperience: event.target.value === "" ? null : Number(event.target.value) })} />
               </Field>
-              <Field label="Hospital" required>
+              <Field label="Affiliated hospital" required>
                 <select className={inputClassName} value={form.hospitalId ?? ""} onChange={(event) => void chooseHospital(event.target.value)}>
-                  <option value="">Select hospital</option>
+                  <option value="">Select affiliated hospital</option>
                   {hospitals.map((hospital) => <option key={hospital.id} value={hospital.id}>{hospital.name}{hospital.city ? ` - ${hospital.city}` : ""}</option>)}
                 </select>
               </Field>

@@ -29,7 +29,7 @@ function PatientAppointmentsContent() {
       const page = await getPatientAppointments(session.access_token);
       setAppointments(page.content);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Your appointments could not be loaded.");
+      setError(loadError instanceof Error ? loadError.message : "Your online consultations could not be loaded.");
     } finally {
       setLoading(false);
     }
@@ -38,7 +38,7 @@ function PatientAppointmentsContent() {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       if (new URLSearchParams(window.location.search).get("created") === "1") {
-        setMessage("Your appointment request was submitted. The doctor can now review it.");
+        setMessage("Your online consultation request was submitted. The doctor can now review it.");
       }
       setNow(Date.now());
       void load();
@@ -64,10 +64,10 @@ function PatientAppointmentsContent() {
       await cancelPatientAppointment(session.access_token, appointmentId, cancelReason.trim());
       setCancelId(null);
       setCancelReason("");
-      setMessage("The appointment was cancelled and its slot was released.");
+      setMessage("The consultation was cancelled and its time is available again.");
       await load();
     } catch (cancelError) {
-      setError(cancelError instanceof Error ? cancelError.message : "The appointment could not be cancelled.");
+      setError(cancelError instanceof Error ? cancelError.message : "The consultation could not be cancelled.");
     } finally {
       setBusy(null);
     }
@@ -75,24 +75,24 @@ function PatientAppointmentsContent() {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 lg:px-8 lg:py-14">
-      <PortalHeading eyebrow="Patient care" title="My appointments" backHref="/patient/dashboard"
-        description="Track appointment requests, confirmed times, rejection reasons, and cancellations." />
+      <PortalHeading eyebrow="Patient care" title="My Online Consultations" backHref="/patient/dashboard"
+        description="Track online consultation requests, confirmed times, declined requests, and cancellations." />
       <div className="mt-7 space-y-3">
         <InlineError message={error} />
         {message ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900" role="status">{message}</div> : null}
       </div>
 
-      {loading ? <LoadingPanel label="Loading your appointments..." /> : appointments.length === 0 ? (
-        <div className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600">You have no appointment requests yet.</div>
+      {loading ? <LoadingPanel label="Loading your online consultations..." /> : appointments.length === 0 ? (
+        <div className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600">You have no online consultation requests yet.</div>
       ) : (
         <div className="mt-9 space-y-10">
-          <AppointmentSection title="Pending requests" empty="You have no requests waiting for a doctor." appointments={groups.pending}
+          <AppointmentSection title="Pending Consultation Requests" empty="You have no consultation requests waiting for a doctor." appointments={groups.pending}
             expandedId={expandedId} setExpandedId={setExpandedId} cancelId={cancelId} setCancelId={setCancelId}
             cancelReason={cancelReason} setCancelReason={setCancelReason} busy={busy} now={now} onCancel={cancel} />
-          <AppointmentSection title="Upcoming confirmed" empty="You have no upcoming confirmed appointments." appointments={groups.confirmed}
+          <AppointmentSection title="Upcoming Online Consultations" empty="You have no upcoming confirmed online consultations." appointments={groups.confirmed}
             expandedId={expandedId} setExpandedId={setExpandedId} cancelId={cancelId} setCancelId={setCancelId}
             cancelReason={cancelReason} setCancelReason={setCancelReason} busy={busy} now={now} onCancel={cancel} />
-          <AppointmentSection title="Previous, rejected, or cancelled" empty="No appointment history yet." appointments={groups.history}
+          <AppointmentSection title="Previous, Declined, or Cancelled Consultations" empty="No consultation history yet." appointments={groups.history}
             expandedId={expandedId} setExpandedId={setExpandedId} cancelId={cancelId} setCancelId={setCancelId}
             cancelReason={cancelReason} setCancelReason={setCancelReason} busy={busy} now={now} onCancel={cancel} />
         </div>
@@ -132,7 +132,7 @@ function AppointmentSection(props: SectionProps) {
                   <div>
                     <h3 className="text-lg font-semibold text-slate-950">{appointment.doctorName}</h3>
                     <p className="mt-1 text-sm font-medium text-teal-700">{appointment.specializationName}</p>
-                    <p className="mt-3 text-sm text-slate-600">{formatAppointmentTime(appointment.scheduledStart)} · {appointment.hospitalName}</p>
+                    <p className="mt-3 text-sm text-slate-600">{formatAppointmentTime(appointment.scheduledStart)} · Affiliated with {appointment.hospitalName}</p>
                   </div>
                   <StateBadge status={appointment.status} />
                 </div>
@@ -141,7 +141,7 @@ function AppointmentSection(props: SectionProps) {
                   <button className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" onClick={() => props.setExpandedId(expanded ? null : appointment.id)}>
                     {expanded ? "Hide details" : "View details"}
                   </button>
-                  {cancellable ? <button className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50" onClick={() => props.setCancelId(props.cancelId === appointment.id ? null : appointment.id)}>Cancel appointment</button> : null}
+                  {cancellable ? <button className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50" onClick={() => props.setCancelId(props.cancelId === appointment.id ? null : appointment.id)}>Cancel consultation</button> : null}
                 </div>
                 {expanded ? (
                   <dl className="mt-5 grid gap-4 rounded-2xl bg-slate-50 p-5 text-sm sm:grid-cols-2">
@@ -149,7 +149,7 @@ function AppointmentSection(props: SectionProps) {
                     <Detail label="Symptoms" value={appointment.symptoms.symptoms} />
                     <Detail label="Symptom duration" value={appointment.symptoms.symptomDuration} />
                     <Detail label="Additional notes" value={appointment.symptoms.additionalNotes} />
-                    {appointment.doctorRejectionReason ? <Detail label="Doctor rejection reason" value={appointment.doctorRejectionReason} /> : null}
+                    {appointment.doctorRejectionReason ? <Detail label="Doctor's decline reason" value={appointment.doctorRejectionReason} /> : null}
                     {appointment.cancellationReason ? <Detail label="Cancellation reason" value={appointment.cancellationReason} /> : null}
                   </dl>
                 ) : null}

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const principles = [
   ["Secure by design", "Supabase authentication and server-enforced access keep identity and application roles separate."],
-  ["Care that can travel", "A foundation for clinicians and appropriate patients to stay connected beyond hospital walls."],
+  ["Care that can travel", "Schedule online consultations with verified doctors and avoid unnecessary hospital visits."],
   ["People remain in control", "MediSync supports healthcare professionals; it does not replace clinical judgement."],
 ];
 
@@ -18,7 +18,7 @@ export default function HomePage() {
             More room for care, wherever patients are.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-            MediSync is building a secure digital bridge between patients, doctors, pharmacists, and hospital teams—starting with trusted identity and role-based access.
+            MediSync is a secure online patient-care platform where patients can find verified doctors and request scheduled online consultations. Future clinical tools will be introduced in clearly defined phases.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <Link className="rounded-xl bg-teal-700 px-6 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-800" href="/register">
@@ -31,8 +31,8 @@ export default function HomePage() {
         </div>
         <div className="relative overflow-hidden rounded-[2rem] border border-teal-100 bg-slate-950 p-8 text-white shadow-2xl shadow-teal-950/10 sm:p-10">
           <div className="absolute -right-20 -top-20 size-64 rounded-full bg-teal-500/20 blur-3xl" />
-          <p className="relative text-xs font-bold uppercase tracking-[0.18em] text-teal-300">Phase 1 foundation</p>
-          <h2 className="relative mt-4 text-3xl font-semibold tracking-tight">One trusted identity. The right portal.</h2>
+          <p className="relative text-xs font-bold uppercase tracking-[0.18em] text-teal-300">Secure care foundation</p>
+          <h2 className="relative mt-4 text-3xl font-semibold tracking-tight">One trusted identity. Scheduled online care.</h2>
           <div className="relative mt-8 grid gap-3 sm:grid-cols-2">
             {['Patient', 'Doctor', 'Pharmacist', 'Administrator'].map((role, index) => (
               <div className="rounded-2xl border border-white/10 bg-white/5 p-5" key={role}>

@@ -1,6 +1,8 @@
 # MediSync Web
 
-Next.js App Router frontend for MediSync through Phase 2B. Supabase Auth handles credentials and sessions. The Spring Boot API remains the source of truth for roles, account status, doctor verification, availability, appointment slots, appointment transitions, and patient-submitted symptoms.
+Next.js App Router frontend for MediSync through Phase 2B. MediSync is an online patient-care platform that helps patients find verified doctors, request scheduled online consultations, and avoid unnecessary hospital visits. Supabase Auth handles credentials and sessions. The Spring Boot API remains the source of truth for roles, account status, doctor verification, availability, appointment slots, appointment transitions, and patient-submitted symptoms.
+
+The frontend presents Phase 2 bookings as online consultations. Internal TypeScript names, backend routes, database records, and statuses retain the established `appointment` terminology.
 
 ## Requirements
 
@@ -44,17 +46,28 @@ Public onboarding offers Patient, Doctor, and Pharmacist only. There is no publi
 
 Phase 2A adds an administrator portal for hospital, department, specialization, and doctor-verification management. Pending doctors complete a database-backed professional profile, submit it for review, and become active only after an administrator approves it.
 
-## Phase 2B pages
+## Phase 2B online consultation pages
 
 | Route | Purpose |
 | --- | --- |
-| `/doctor/availability` | Create date-based windows, inspect generated slots, block/unblock open slots, and safely deactivate windows |
-| `/doctor/appointments` | Review assigned symptoms and accept, reject, or doctor-cancel appointments |
+| `/doctor/availability` | Create online consultation availability, inspect generated times, block/unblock open times, and safely deactivate windows |
+| `/doctor/appointments` | Review consultation requests and accept, decline, or doctor-cancel online consultations |
 | `/patient/doctors` | Search ACTIVE VERIFIED doctors by name and professional reference filters |
-| `/patient/doctors/[doctorId]` | View a patient-safe profile, select an AVAILABLE future slot, and submit symptoms |
-| `/patient/appointments` | View own pending, confirmed, rejected, and cancelled appointments and cancel eligible appointments |
+| `/patient/doctors/[doctorId]` | View a patient-safe profile, select an AVAILABLE future online consultation time, and submit symptoms |
+| `/patient/appointments` | View pending, confirmed, declined, and cancelled online consultations and cancel eligible consultations |
 
 All calls use the centralized authenticated API client. The booking UI sends `slotId` plus the symptom form only; it never treats browser-supplied doctor or schedule values as authoritative. Loading, empty, validation, conflict, and duplicate-submission states are represented on each workflow page.
+
+## Product roadmap
+
+- Phase 1: authentication, roles, and security (complete)
+- Phase 2A: reference data, professional profiles, and administrator verification (complete)
+- Phase 2B: availability, doctor discovery, online consultation booking, symptom submission, and booking transitions (complete)
+- Phase 3: online consultation session, secure doctor-patient chat, clinical notes, and consultation status (future)
+- Phase 4: digital prescriptions, patient prescription view, and QR support (future)
+- Phase 5: pharmacist scanning, prescription verification, and dispensing (future)
+
+Secure chat is planned only for a patient and doctor with a confirmed consultation relationship. It is not implemented in Phase 2B. Remote monitoring and formal follow-up scheduling are outside the core roadmap.
 
 ## Quality checks
 
