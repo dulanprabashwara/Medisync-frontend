@@ -11,6 +11,17 @@ import type {
   OnboardingInput,
   SpecializationReference,
 } from "@/types/user";
+import type {
+  Appointment,
+  AppointmentSlot,
+  AppointmentStatus,
+  AvailabilityWindow,
+  CreateAppointmentInput,
+  CreateAvailabilityInput,
+  DoctorDetails,
+  DoctorSummary,
+  PageResponse,
+} from "@/types/appointments";
 
 interface ApiErrorBody {
   error?: string;
@@ -180,6 +191,106 @@ export const verifyDoctor = (accessToken: string, doctorId: string) =>
 
 export const rejectDoctor = (accessToken: string, doctorId: string, reason: string) =>
   apiRequest<AdminDoctorReview>(`/api/admin/doctors/${doctorId}/reject`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  });
+
+export const getDoctorAvailability = (accessToken: string) =>
+  apiRequest<AvailabilityWindow[]>("/api/doctor/availability", accessToken);
+
+export const createDoctorAvailability = (accessToken: string, input: CreateAvailabilityInput) =>
+  apiRequest<AvailabilityWindow>("/api/doctor/availability", accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+
+export const deactivateDoctorAvailability = (accessToken: string, windowId: string) =>
+  apiRequest<AvailabilityWindow>(`/api/doctor/availability/${windowId}/deactivate`, accessToken, {
+    method: "PATCH",
+  });
+
+export const setDoctorSlotBlocked = (accessToken: string, slotId: string, blocked: boolean) =>
+  apiRequest<AppointmentSlot>(
+    `/api/doctor/availability/slots/${slotId}/${blocked ? "block" : "unblock"}`,
+    accessToken,
+    { method: "POST" },
+  );
+
+export interface DoctorSearchFilters {
+  q?: string;
+  hospitalId?: string;
+  departmentId?: string;
+  specializationId?: string;
+  page?: number;
+  size?: number;
+}
+
+export const searchPatientDoctors = (accessToken: string, filters: DoctorSearchFilters) => {
+  const query = new URLSearchParams();
+  if (filters.q) query.set("q", filters.q);
+  if (filters.hospitalId) query.set("hospitalId", filters.hospitalId);
+  if (filters.departmentId) query.set("departmentId", filters.departmentId);
+  if (filters.specializationId) query.set("specializationId", filters.specializationId);
+  query.set("page", String(filters.page ?? 0));
+  query.set("size", String(filters.size ?? 10));
+  return apiRequest<PageResponse<DoctorSummary>>(`/api/patient/doctors?${query}`, accessToken);
+};
+
+export const getPatientDoctor = (accessToken: string, doctorId: string) =>
+  apiRequest<DoctorDetails>(`/api/patient/doctors/${doctorId}`, accessToken);
+
+export const getPatientDoctorSlots = (
+  accessToken: string,
+  doctorId: string,
+  from: string,
+  to: string,
+) => apiRequest<AppointmentSlot[]>(
+  `/api/patient/doctors/${doctorId}/slots?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+  accessToken,
+);
+
+export const createPatientAppointment = (accessToken: string, input: CreateAppointmentInput) =>
+  apiRequest<Appointment>("/api/patient/appointments", accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+
+export const getPatientAppointments = (accessToken: string, page = 0, size = 50) =>
+  apiRequest<PageResponse<Appointment>>(
+    `/api/patient/appointments?page=${page}&size=${size}`,
+    accessToken,
+  );
+
+export const cancelPatientAppointment = (accessToken: string, appointmentId: string, reason: string) =>
+  apiRequest<Appointment>(`/api/patient/appointments/${appointmentId}/cancel`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ reason: reason || null }),
+  });
+
+export const getDoctorAppointments = (
+  accessToken: string,
+  status?: AppointmentStatus,
+  page = 0,
+  size = 50,
+) => {
+  const query = new URLSearchParams({ page: String(page), size: String(size) });
+  if (status) query.set("status", status);
+  return apiRequest<PageResponse<Appointment>>(`/api/doctor/appointments?${query}`, accessToken);
+};
+
+export const acceptDoctorAppointment = (accessToken: string, appointmentId: string) =>
+  apiRequest<Appointment>(`/api/doctor/appointments/${appointmentId}/accept`, accessToken, {
+    method: "POST",
+  });
+
+export const rejectDoctorAppointment = (accessToken: string, appointmentId: string, reason: string) =>
+  apiRequest<Appointment>(`/api/doctor/appointments/${appointmentId}/reject`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  });
+
+export const cancelDoctorAppointment = (accessToken: string, appointmentId: string, reason: string) =>
+  apiRequest<Appointment>(`/api/doctor/appointments/${appointmentId}/cancel`, accessToken, {
     method: "POST",
     body: JSON.stringify({ reason }),
   });

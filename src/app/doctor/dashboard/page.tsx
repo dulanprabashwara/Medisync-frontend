@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { FormAlert, inputClassName } from "@/components/auth-card";
 import { useAuth } from "@/components/auth-provider";
@@ -32,12 +33,12 @@ const emptyForm: DoctorProfileInput = {
 };
 
 const futureModules = [
-  ["Availability", "Coming in Phase 2B"],
-  ["Appointments", "Coming in Phase 2B"],
-  ["Patients", "Later phase"],
-  ["Messages", "Later phase"],
-  ["Prescriptions", "Later phase"],
-  ["Monitoring", "Later phase"],
+  { title: "Availability", phase: "Available", href: "/doctor/availability" },
+  { title: "Appointments", phase: "Available", href: "/doctor/appointments" },
+  { title: "Patients", phase: "Later phase" },
+  { title: "Messages", phase: "Later phase" },
+  { title: "Prescriptions", phase: "Later phase" },
+  { title: "Monitoring", phase: "Later phase" },
 ];
 
 function DoctorDashboardContent() {
@@ -275,12 +276,14 @@ function DoctorDashboardContent() {
       )}
 
       <section className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Future doctor modules">
-        {futureModules.map(([title, phase]) => (
-          <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" key={title}>
-            <span className="text-xs font-bold uppercase tracking-wide text-slate-400">{phase}</span>
-            <h2 className="mt-4 font-semibold text-slate-900">{title}</h2>
-          </article>
-        ))}
+        {futureModules.map((module) => {
+          const content = <><span className={`text-xs font-bold uppercase tracking-wide ${verified && module.href ? "text-teal-700" : "text-slate-400"}`}>{verified && module.href ? module.phase : module.href ? "Verification required" : module.phase}</span><h2 className="mt-4 font-semibold text-slate-900">{module.title}</h2></>;
+          return verified && module.href ? (
+            <Link className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:border-teal-300 hover:shadow-md" href={module.href} key={module.title}>{content}</Link>
+          ) : (
+            <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" key={module.title}>{content}</article>
+          );
+        })}
       </section>
     </main>
   );

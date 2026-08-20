@@ -1,6 +1,6 @@
 # MediSync Web
 
-Next.js App Router frontend for MediSync Phase 2A. Supabase Auth handles registration, email confirmation, login, password recovery, session persistence, and logout. The Spring Boot API remains the source of truth for MediSync profiles, roles, account status, healthcare reference data, and doctor verification.
+Next.js App Router frontend for MediSync through Phase 2B. Supabase Auth handles credentials and sessions. The Spring Boot API remains the source of truth for roles, account status, doctor verification, availability, appointment slots, appointment transitions, and patient-submitted symptoms.
 
 ## Requirements
 
@@ -43,6 +43,18 @@ Registration creates only a Supabase Auth account. Once authenticated, the front
 Public onboarding offers Patient, Doctor, and Pharmacist only. There is no public Admin choice or Admin registration endpoint.
 
 Phase 2A adds an administrator portal for hospital, department, specialization, and doctor-verification management. Pending doctors complete a database-backed professional profile, submit it for review, and become active only after an administrator approves it.
+
+## Phase 2B pages
+
+| Route | Purpose |
+| --- | --- |
+| `/doctor/availability` | Create date-based windows, inspect generated slots, block/unblock open slots, and safely deactivate windows |
+| `/doctor/appointments` | Review assigned symptoms and accept, reject, or doctor-cancel appointments |
+| `/patient/doctors` | Search ACTIVE VERIFIED doctors by name and professional reference filters |
+| `/patient/doctors/[doctorId]` | View a patient-safe profile, select an AVAILABLE future slot, and submit symptoms |
+| `/patient/appointments` | View own pending, confirmed, rejected, and cancelled appointments and cancel eligible appointments |
+
+All calls use the centralized authenticated API client. The booking UI sends `slotId` plus the symptom form only; it never treats browser-supplied doctor or schedule values as authoritative. Loading, empty, validation, conflict, and duplicate-submission states are represented on each workflow page.
 
 ## Quality checks
 

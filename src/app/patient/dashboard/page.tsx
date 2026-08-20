@@ -5,7 +5,8 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/components/auth-provider";
 
 const patientModules = [
-  { title: "Appointments", description: "Doctor discovery and booking are coming in Phase 2.", phase: "Phase 2" },
+  { title: "Find a Doctor", description: "Search verified doctors and request an available appointment slot.", phase: "Available", href: "/patient/doctors" },
+  { title: "Appointments", description: "Track requests, confirmations, rejection reasons, and cancellations.", phase: "Available", href: "/patient/appointments" },
   { title: "Prescriptions", description: "Your digital prescriptions will appear here in a later phase.", phase: "Planned" },
   { title: "Messages", description: "Secure care-team conversations are planned for a later phase.", phase: "Planned" },
   { title: "Remote monitoring", description: "Share doctor-requested readings from home in a later phase.", phase: "Planned" },
