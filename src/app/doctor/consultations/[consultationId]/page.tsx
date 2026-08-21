@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { ConsultationCancellationPanel } from "@/components/consultation-cancellation-panel";
 import { ConsultationChat } from "@/components/consultation-chat";
+import { DoctorConsultationPrescriptions } from "@/components/doctor-consultation-prescriptions";
 import { LoadingPanel } from "@/components/loading-panel";
 import { ConsultationStatusBadge, InlineError, PortalHeading, formatAppointmentTime } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -217,6 +218,8 @@ function DoctorConsultationContent() {
               consultationStatus={consultation.status} liveStatus={liveStatus}
               sending={sending} onSend={send} />
           </div>
+
+          {session ? <DoctorConsultationPrescriptions accessToken={session.access_token} consultationId={consultationId} consultationStatus={consultation.status} /> : null}
 
           <section className="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm sm:p-8" aria-labelledby="clinical-note-heading">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-800">Doctor only</p>

@@ -7,7 +7,7 @@ import { useAuth } from "@/components/auth-provider";
 const patientModules = [
   { title: "Find a Doctor", description: "Search verified doctors and request an available online consultation time.", phase: "Available", href: "/patient/doctors" },
   { title: "Online Consultations", description: "Track consultation requests, confirmations, declined requests, and cancellations.", phase: "Available", href: "/patient/appointments" },
-  { title: "Prescriptions", description: "Your digital prescriptions will appear here in a later phase.", phase: "Planned" },
+  { title: "Prescriptions", description: "View issued digital prescriptions, medication instructions, and secure QR codes.", phase: "Available", href: "/patient/prescriptions" },
   { title: "Doctor Chat", description: "Secure chat will be available for confirmed consultation relationships in a later phase.", phase: "Planned" },
 ];
 

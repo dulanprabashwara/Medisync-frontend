@@ -1,6 +1,6 @@
 # MediSync Web
 
-Next.js App Router frontend for MediSync through Phase 3. MediSync is an online patient-care platform that helps patients find verified doctors, request scheduled online consultations, communicate within confirmed care relationships, and avoid unnecessary hospital visits. Supabase Auth handles credentials and sessions. The Spring Boot API remains the source of truth for roles, account status, doctor verification, scheduling, consultation lifecycle, persistent messages, and clinical notes.
+Next.js App Router frontend for MediSync through Phase 4. MediSync is an online patient-care platform that helps patients find verified doctors, request scheduled online consultations, communicate within confirmed care relationships, and avoid unnecessary hospital visits. Supabase Auth handles credentials and sessions. The Spring Boot API remains the source of truth for roles, account status, doctor verification, scheduling, consultation lifecycle, persistent messages, clinical notes, and digital prescriptions.
 
 The frontend presents Phase 2 bookings as online consultations. Internal TypeScript names, backend routes, database records, and statuses retain the established `appointment` terminology.
 
@@ -69,13 +69,24 @@ The patient and doctor appointment lists expose consultation links and the `SCHE
 
 Messages are saved through authenticated REST before they appear as durable history. A single STOMP client for the open consultation subscribes to `/user/queue/consultation-events` for live message and status delivery. Before every initial connection or reconnect, the client retrieves the latest Supabase session and puts its access token in the STOMP `Authorization` header, never in the WebSocket URL. On connection it reloads REST details and history, deduplicating by message ID, so missed live events do not cause data loss.
 
+## Phase 4 digital prescription pages
+
+| Route | Purpose |
+| --- | --- |
+| `/doctor/prescriptions` | Doctor prescription and draft history |
+| `/doctor/prescriptions/[prescriptionId]` | Structured draft editor, issue confirmation, immutable details, and cancellation |
+| `/patient/prescriptions` | Patient list of issued and cancelled prescriptions |
+| `/patient/prescriptions/[prescriptionId]` | Medication details, status, print view, and active QR rendering |
+
+The doctor consultation room exposes prescription history and a create/continue-draft action. Patient list responses contain no QR material. Detail pages render the opaque server payload with `qrcode.react` but never display its raw token. Cancelled and expired prescriptions do not render a usable QR. Pharmacist scanning and verification remain Phase 5 placeholders.
+
 ## Product roadmap
 
 - Phase 1: authentication, roles, and security (complete)
 - Phase 2A: reference data, professional profiles, and administrator verification (complete)
 - Phase 2B: availability, doctor discovery, online consultation booking, symptom submission, and booking transitions (complete)
-- Phase 3: online consultation session, secure doctor-patient chat, private clinical notes, and consultation status (current)
-- Phase 4: digital prescriptions, patient prescription view, and QR support (future)
+- Phase 3: online consultation session, secure doctor-patient chat, private clinical notes, and consultation status (complete)
+- Phase 4: digital prescriptions, patient prescription view, and QR support (current)
 - Phase 5: pharmacist scanning, prescription verification, and dispensing (future)
 
 Remote monitoring and formal follow-up scheduling are outside the core roadmap.

@@ -36,7 +36,7 @@ const futureModules = [
   { title: "Consultation Availability", phase: "Available", href: "/doctor/availability" },
   { title: "Online Consultations", phase: "Available", href: "/doctor/appointments" },
   { title: "Patient Chat", phase: "Later phase" },
-  { title: "Prescriptions", phase: "Later phase" },
+  { title: "Prescriptions", phase: "Available", href: "/doctor/prescriptions" },
 ];
 
 function DoctorDashboardContent() {

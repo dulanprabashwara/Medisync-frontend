@@ -28,6 +28,12 @@ import type {
   ConsultationMessage,
   ConsultationMessagePage,
 } from "@/types/consultations";
+import type {
+  DoctorPrescription,
+  PatientPrescriptionDetail,
+  PatientPrescriptionSummary,
+  PrescriptionDraftInput,
+} from "@/types/prescriptions";
 
 interface ApiErrorBody {
   error?: string;
@@ -378,3 +384,30 @@ export const updateDoctorClinicalNote = (
   accessToken,
   { method: "PUT", body: JSON.stringify({ noteText }) },
 );
+
+export const getDoctorPrescriptions = (accessToken: string, page = 0, size = 20) =>
+  apiRequest<PageResponse<DoctorPrescription>>(`/api/doctor/prescriptions?page=${page}&size=${size}`, accessToken);
+
+export const getDoctorPrescription = (accessToken: string, id: string) =>
+  apiRequest<DoctorPrescription>(`/api/doctor/prescriptions/${id}`, accessToken);
+
+export const getConsultationPrescriptions = (accessToken: string, consultationId: string) =>
+  apiRequest<DoctorPrescription[]>(`/api/doctor/consultations/${consultationId}/prescriptions`, accessToken);
+
+export const createPrescriptionDraft = (accessToken: string, consultationId: string) =>
+  apiRequest<DoctorPrescription>(`/api/doctor/consultations/${consultationId}/prescriptions`, accessToken, { method: "POST" });
+
+export const updatePrescriptionDraft = (accessToken: string, id: string, input: PrescriptionDraftInput) =>
+  apiRequest<DoctorPrescription>(`/api/doctor/prescriptions/${id}`, accessToken, { method: "PUT", body: JSON.stringify(input) });
+
+export const issuePrescription = (accessToken: string, id: string) =>
+  apiRequest<DoctorPrescription>(`/api/doctor/prescriptions/${id}/issue`, accessToken, { method: "POST" });
+
+export const cancelPrescription = (accessToken: string, id: string, reason: string) =>
+  apiRequest<DoctorPrescription>(`/api/doctor/prescriptions/${id}/cancel`, accessToken, { method: "POST", body: JSON.stringify({ reason }) });
+
+export const getPatientPrescriptions = (accessToken: string, page = 0, size = 20) =>
+  apiRequest<PageResponse<PatientPrescriptionSummary>>(`/api/patient/prescriptions?page=${page}&size=${size}`, accessToken);
+
+export const getPatientPrescription = (accessToken: string, id: string) =>
+  apiRequest<PatientPrescriptionDetail>(`/api/patient/prescriptions/${id}`, accessToken);
