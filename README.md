@@ -74,11 +74,15 @@ Messages are saved through authenticated REST before they appear as durable hist
 | Route | Purpose |
 | --- | --- |
 | `/doctor/prescriptions` | Doctor prescription and draft history |
-| `/doctor/prescriptions/[prescriptionId]` | Structured draft editor, issue confirmation, immutable details, and cancellation |
+| `/doctor/prescriptions/[prescriptionId]` | Lifecycle-aware draft editor, explicit draft discard, issue confirmation, immutable details, and cancellation |
 | `/patient/prescriptions` | Patient list of issued and cancelled prescriptions |
-| `/patient/prescriptions/[prescriptionId]` | Medication details, status, print view, and active QR rendering |
+| `/patient/prescriptions/[prescriptionId]` | Medication details, status, print view, and on-demand secure QR generation |
 
-The doctor consultation room exposes prescription history and a create/continue-draft action. Patient list responses contain no QR material. Detail pages render the opaque server payload with `qrcode.react` but never display its raw token. Cancelled and expired prescriptions do not render a usable QR. Pharmacist scanning and verification remain Phase 5 placeholders.
+The doctor consultation room exposes prescription history and a create/continue-draft action only while the consultation is scheduled or in progress. Issuance is shown only in progress. Completed consultations keep existing prescriptions viewable and chat writable, but hide prescribing controls; a legacy completed draft is read-only and can only be discarded.
+
+Patient list responses contain no QR material. An eligible detail page provides a **Generate QR** action; the raw opaque payload exists only in browser component state for that response, disappears on refresh, and regeneration invalidates the earlier QR. Cancelled prescription screens show status, date, and reason without medicine items, general instructions, QR controls, or an internal prescription UUID. All prescription UUIDs remain routing details only and are not rendered as labels.
+
+Availability forms reject obvious past starts before submission. Doctor and patient scheduling screens remove elapsed windows/slots on a lightweight one-minute clock refresh, while the backend remains authoritative for future and lead-time checks.
 
 ## Product roadmap
 
@@ -87,7 +91,7 @@ The doctor consultation room exposes prescription history and a create/continue-
 - Phase 2B: availability, doctor discovery, online consultation booking, symptom submission, and booking transitions (complete)
 - Phase 3: online consultation session, secure doctor-patient chat, private clinical notes, and consultation status (complete)
 - Phase 4: digital prescriptions, patient prescription view, and QR support (current)
-- Phase 5: pharmacist scanning, prescription verification, and dispensing (future)
+- Phase 5: Pharmacist QR Scanning, Prescription Verification, Medicine Dispensing, and Dispensing History (future)
 
 Remote monitoring and formal follow-up scheduling are outside the core roadmap.
 

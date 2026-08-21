@@ -37,6 +37,7 @@ function PatientDoctorDetailsContent() {
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [now, setNow] = useState(0);
 
   const loadSlots = useCallback(async () => {
     if (!session || !doctorId || !from || !to) return;
@@ -75,9 +76,23 @@ function PatientDoctorDetailsContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doctorId, session]);
 
+  useEffect(() => {
+    const initial = window.setTimeout(() => setNow(Date.now()), 0);
+    const minuteTimer = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => { window.clearTimeout(initial); window.clearInterval(minuteTimer); };
+  }, []);
+
+  const visibleSlots = slots.filter((slot) => new Date(slot.startsAt).getTime() > now);
+
   async function requestAppointment(event: FormEvent) {
     event.preventDefault();
     if (!session || !selectedSlot) return;
+    if (new Date(selectedSlot.startsAt).getTime() <= Date.now()) {
+      setSelectedSlot(null);
+      setError("This consultation time is no longer available. Choose a future time.");
+      await loadSlots();
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -132,11 +147,11 @@ function PatientDoctorDetailsContent() {
           </div>
         </div>
 
-        {slotsLoading ? <LoadingPanel label="Loading online consultation times..." /> : slots.length === 0 ? (
+        {slotsLoading ? <LoadingPanel label="Loading online consultation times..." /> : visibleSlots.length === 0 ? (
           <div className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600">No online consultation times are currently available.</div>
         ) : (
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {slots.map((slot) => (
+            {visibleSlots.map((slot) => (
               <button aria-pressed={selectedSlot?.id === slot.id} className={`rounded-2xl border p-4 text-left transition ${selectedSlot?.id === slot.id ? "border-teal-600 bg-teal-50 ring-4 ring-teal-600/10" : "border-slate-200 bg-white hover:border-teal-300"}`}
                 key={slot.id} onClick={() => setSelectedSlot(slot)}>
                 <span className="block font-semibold text-slate-950">{formatAppointmentTime(slot.startsAt)}</span>
@@ -147,7 +162,7 @@ function PatientDoctorDetailsContent() {
         )}
       </section>
 
-      {selectedSlot ? (
+      {selectedSlot && new Date(selectedSlot.startsAt).getTime() > now ? (
         <section className="mt-9 rounded-3xl border border-teal-200 bg-white p-6 shadow-sm sm:p-8" aria-labelledby="booking-form-heading">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">Book Online Consultation</p>
           <h2 className="mt-2 text-2xl font-semibold text-slate-950" id="booking-form-heading">Request {formatAppointmentTime(selectedSlot.startsAt)}</h2>

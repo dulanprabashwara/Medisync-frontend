@@ -24,6 +24,16 @@ export async function refreshSupabaseSession(request: NextRequest) {
     },
   });
 
-  await supabase.auth.getClaims();
+  // Session refresh must not hold every page navigation indefinitely when the
+  // auth service or network is temporarily unavailable. Client auth can retry.
+  try {
+    await Promise.race([
+      supabase.auth.getClaims(),
+      new Promise<void>((resolve) => setTimeout(resolve, 8_000)),
+    ]);
+  } catch {
+    // Continue with the current cookies; protected pages still validate through
+    // Supabase and the API before showing role-specific data.
+  }
   return response;
 }

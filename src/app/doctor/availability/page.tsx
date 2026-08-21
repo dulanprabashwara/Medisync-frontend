@@ -49,7 +49,8 @@ function DoctorAvailabilityContent() {
       setNow(Date.now());
       void load();
     }, 0);
-    return () => window.clearTimeout(timer);
+    const minuteTimer = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => { window.clearTimeout(timer); window.clearInterval(minuteTimer); };
   }, [load]);
 
   const previewCount = useMemo(() => {
@@ -66,10 +67,22 @@ function DoctorAvailabilityContent() {
     setBusy("create");
     setError(null);
     setMessage(null);
+    const start = new Date(`${date}T${startsAt}`);
+    const end = new Date(`${date}T${endsAt}`);
+    if (start.getTime() <= Date.now()) {
+      setError("Availability must start in the future.");
+      setBusy(null);
+      return;
+    }
+    if (end.getTime() <= start.getTime()) {
+      setError("Availability end must be after its start.");
+      setBusy(null);
+      return;
+    }
     try {
       await createDoctorAvailability(session.access_token, {
-        startsAt: new Date(`${date}T${startsAt}`).toISOString(),
-        endsAt: new Date(`${date}T${endsAt}`).toISOString(),
+        startsAt: start.toISOString(),
+        endsAt: end.toISOString(),
         slotDurationMinutes: duration,
         timeZone,
       });
@@ -81,6 +94,13 @@ function DoctorAvailabilityContent() {
       setBusy(null);
     }
   }
+
+  const visibleWindows = windows
+    .filter((availability) => new Date(availability.endsAt).getTime() > now)
+    .map((availability) => ({
+      ...availability,
+      slots: availability.slots.filter((slot) => new Date(slot.startsAt).getTime() > now),
+    }));
 
   async function toggleSlot(slotId: string, block: boolean) {
     if (!session) return;
@@ -126,7 +146,7 @@ function DoctorAvailabilityContent() {
         <p className="mt-2 text-sm text-slate-600">Times are interpreted in {timeZone} and stored with their absolute timezone.</p>
         <form className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-4" onSubmit={create}>
           <label className="text-sm font-medium text-slate-700">Date
-            <input className={inputClassName} min={new Date().toISOString().slice(0, 10)} required type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+            <input className={inputClassName} min={new Date().toLocaleDateString("en-CA")} required type="date" value={date} onChange={(event) => setDate(event.target.value)} />
           </label>
           <label className="text-sm font-medium text-slate-700">Start time
             <input className={inputClassName} required type="time" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} />
@@ -151,11 +171,11 @@ function DoctorAvailabilityContent() {
 
       <section className="mt-10" aria-labelledby="availability-list-heading">
         <h2 className="text-2xl font-semibold text-slate-950" id="availability-list-heading">Your consultation availability</h2>
-        {loading ? <LoadingPanel label="Loading availability..." /> : windows.length === 0 ? (
+        {loading ? <LoadingPanel label="Loading availability..." /> : visibleWindows.length === 0 ? (
           <div className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600">You have not created any availability yet.</div>
         ) : (
           <div className="mt-5 space-y-5">
-            {windows.map((availability) => (
+            {visibleWindows.map((availability) => (
               <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" key={availability.id}>
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>

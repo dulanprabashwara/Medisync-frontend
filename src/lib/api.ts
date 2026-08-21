@@ -33,6 +33,7 @@ import type {
   PatientPrescriptionDetail,
   PatientPrescriptionSummary,
   PrescriptionDraftInput,
+  PrescriptionQrResponse,
 } from "@/types/prescriptions";
 
 interface ApiErrorBody {
@@ -71,10 +72,14 @@ async function apiRequest<T>(
   accessToken: string,
   init: RequestInit = {},
 ): Promise<T> {
-  let response: Response;
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 15_000);
+  const abortFromCaller = () => controller.abort();
+  init.signal?.addEventListener("abort", abortFromCaller, { once: true });
   try {
-    response = await fetch(`${apiBaseUrl}${path}`, {
+    const response = await fetch(`${apiBaseUrl}${path}`, {
       ...init,
+      signal: controller.signal,
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${accessToken}`,
@@ -83,25 +88,31 @@ async function apiRequest<T>(
       },
       cache: "no-store",
     });
-  } catch {
+
+    const body = (await response.json().catch(() => ({}))) as ApiErrorBody | T;
+    if (!response.ok) {
+      const errorBody = body as ApiErrorBody;
+      throw new ApiError(
+        response.status,
+        errorBody.error || "REQUEST_FAILED",
+        errorBody.message || "The request could not be completed.",
+        errorBody.fieldErrors,
+      );
+    }
+    return body as T;
+  } catch (requestError) {
+    if (requestError instanceof ApiError) throw requestError;
     throw new ApiError(
       0,
-      "BACKEND_UNAVAILABLE",
-      "The MediSync API is unavailable. Check that the backend is running.",
+      controller.signal.aborted ? "REQUEST_TIMEOUT" : "BACKEND_UNAVAILABLE",
+      controller.signal.aborted
+        ? "The MediSync API did not respond in time. Check that the backend is running, then try again."
+        : "The MediSync API is unavailable. Check that the backend is running.",
     );
+  } finally {
+    window.clearTimeout(timeout);
+    init.signal?.removeEventListener("abort", abortFromCaller);
   }
-
-  const body = (await response.json().catch(() => ({}))) as ApiErrorBody | T;
-  if (!response.ok) {
-    const errorBody = body as ApiErrorBody;
-    throw new ApiError(
-      response.status,
-      errorBody.error || "REQUEST_FAILED",
-      errorBody.message || "The request could not be completed.",
-      errorBody.fieldErrors,
-    );
-  }
-  return body as T;
 }
 
 export const getMyProfile = (accessToken: string) =>
@@ -406,8 +417,14 @@ export const issuePrescription = (accessToken: string, id: string) =>
 export const cancelPrescription = (accessToken: string, id: string, reason: string) =>
   apiRequest<DoctorPrescription>(`/api/doctor/prescriptions/${id}/cancel`, accessToken, { method: "POST", body: JSON.stringify({ reason }) });
 
+export const discardPrescriptionDraft = (accessToken: string, id: string) =>
+  apiRequest<void>(`/api/doctor/prescriptions/${id}`, accessToken, { method: "DELETE" });
+
 export const getPatientPrescriptions = (accessToken: string, page = 0, size = 20) =>
   apiRequest<PageResponse<PatientPrescriptionSummary>>(`/api/patient/prescriptions?page=${page}&size=${size}`, accessToken);
 
 export const getPatientPrescription = (accessToken: string, id: string) =>
   apiRequest<PatientPrescriptionDetail>(`/api/patient/prescriptions/${id}`, accessToken);
+
+export const generatePatientPrescriptionQr = (accessToken: string, id: string) =>
+  apiRequest<PrescriptionQrResponse>(`/api/patient/prescriptions/${id}/qr`, accessToken, { method: "POST" });

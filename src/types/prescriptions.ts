@@ -17,7 +17,7 @@ export interface PrescriptionItem {
 export type PrescriptionItemInput = Omit<PrescriptionItem, "id" | "position">;
 
 export interface DoctorPrescription {
-  id: string; consultationId: string; status: PrescriptionStatus; patientName: string;
+  id: string; consultationId: string; consultationStatus: "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"; status: PrescriptionStatus; patientName: string;
   doctorName: string; medicalRegistrationNumber: string; hospitalName: string;
   departmentName: string; specializationName: string; consultationScheduledStart: string;
   validityDays: number; generalInstructions: string | null; items: PrescriptionItem[];
@@ -32,9 +32,13 @@ export interface PatientPrescriptionSummary {
 }
 
 export interface PatientPrescriptionDetail extends Omit<DoctorPrescription,
-  "validityDays" | "createdAt" | "updatedAt"> {
-  qrPayload: string | null;
-  qrUsable: boolean;
+  "validityDays" | "createdAt" | "updatedAt" | "consultationStatus"> {
+  qrGenerationAllowed: boolean;
+}
+
+export interface PrescriptionQrResponse {
+  qrPayload: string;
+  expiresAt: string;
 }
 
 export interface PrescriptionDraftInput {

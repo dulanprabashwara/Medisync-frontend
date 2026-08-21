@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -25,6 +26,20 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+async function withTimeout<T>(promise: PromiseLike<T>, milliseconds: number, message: string): Promise<T> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      Promise.resolve(promise),
+      new Promise<T>((_resolve, reject) => {
+        timeout = setTimeout(() => reject(new Error(message)), milliseconds);
+      }),
+    ]);
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
+}
+
 async function fetchProfile(session: Session): Promise<MediSyncProfile | null> {
   try {
     return await getMyProfile(session.access_token);
@@ -41,19 +56,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<MediSyncProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const sessionRef = useRef<Session | null>(null);
+  const profileRef = useRef<MediSyncProfile | null>(null);
+  const operationRef = useRef(0);
 
   const applySession = useCallback(async (nextSession: Session | null) => {
+    const operation = ++operationRef.current;
+    sessionRef.current = nextSession;
     setSession(nextSession);
     setError(null);
     if (!nextSession) {
+      profileRef.current = null;
       setProfile(null);
       setLoading(false);
       return;
     }
 
     try {
-      setProfile(await fetchProfile(nextSession));
+      const nextProfile = await fetchProfile(nextSession);
+      if (operation !== operationRef.current) return;
+      profileRef.current = nextProfile;
+      setProfile(nextProfile);
     } catch (profileError) {
+      if (operation !== operationRef.current) return;
+      profileRef.current = null;
       setProfile(null);
       setError(
         profileError instanceof Error
@@ -61,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           : "Your MediSync profile could not be loaded.",
       );
     } finally {
-      setLoading(false);
+      if (operation === operationRef.current) setLoading(false);
     }
   }, []);
 
@@ -82,18 +108,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return () => window.clearTimeout(timer);
     }
 
-    void client.auth.getSession().then(({ data, error: sessionError }) => {
+    void (async () => {
+      try {
+        const { data, error: sessionError } = await withTimeout(
+          client.auth.getSession(),
+          10_000,
+          "The authentication service did not respond in time. Refresh the page to try again.",
+        );
+        if (!active) return;
+        if (sessionError) throw sessionError;
+        await applySession(data.session);
+      } catch (sessionError) {
+        if (!active) return;
+        setError(sessionError instanceof Error ? sessionError.message : "Your secure session could not be checked.");
+        setLoading(false);
+      }
+    })();
+
+    const { data: listener } = client.auth.onAuthStateChange((event, nextSession) => {
       if (!active) return;
-      if (sessionError) {
-        setError(sessionError.message);
+
+      // getSession above owns initialization. Supabase also emits INITIAL_SESSION,
+      // so processing both would duplicate the profile request and restart the loader.
+      if (event === "INITIAL_SESSION") return;
+
+      const sameUser = sessionRef.current?.user.id === nextSession?.user.id;
+      if ((event === "TOKEN_REFRESHED" || event === "SIGNED_IN") && sameUser && profileRef.current) {
+        sessionRef.current = nextSession;
+        setSession(nextSession);
+        setError(null);
         setLoading(false);
         return;
       }
-      void applySession(data.session);
-    });
 
-    const { data: listener } = client.auth.onAuthStateChange((_event, nextSession) => {
-      if (!active) return;
       setLoading(true);
       window.setTimeout(() => void applySession(nextSession), 0);
     });
@@ -106,17 +153,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = useCallback(async () => {
     const client = getSupabaseBrowserClient();
-    const { data, error: sessionError } = await client.auth.getSession();
+    let authResult: Awaited<ReturnType<typeof client.auth.getSession>>;
+    try {
+      authResult = await withTimeout(
+        client.auth.getSession(),
+        10_000,
+        "The authentication service did not respond in time. Refresh the page to try again.",
+      );
+    } catch (sessionError) {
+      setError(sessionError instanceof Error ? sessionError.message : "Your secure session could not be checked.");
+      setLoading(false);
+      return null;
+    }
+    const { data, error: sessionError } = authResult;
     if (sessionError || !data.session) {
+      operationRef.current += 1;
+      sessionRef.current = null;
+      profileRef.current = null;
       setSession(null);
       setProfile(null);
       if (sessionError) setError(sessionError.message);
+      setLoading(false);
       return null;
     }
 
     setLoading(true);
     try {
       const nextProfile = await fetchProfile(data.session);
+      sessionRef.current = data.session;
+      profileRef.current = nextProfile;
       setSession(data.session);
       setProfile(nextProfile);
       setError(null);
@@ -127,7 +192,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           ? profileError.message
           : "Your MediSync profile could not be loaded.",
       );
-      throw profileError;
+      return null;
     } finally {
       setLoading(false);
     }
@@ -136,9 +201,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     const client = getSupabaseBrowserClient();
     await client.auth.signOut();
+    operationRef.current += 1;
+    sessionRef.current = null;
+    profileRef.current = null;
     setSession(null);
     setProfile(null);
     setError(null);
+    setLoading(false);
   }, []);
 
   const value = useMemo(
