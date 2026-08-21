@@ -1,4 +1,5 @@
 export type PrescriptionStatus = "DRAFT" | "ISSUED" | "CANCELLED";
+export type DispensingStatus = "NOT_DISPENSED" | "DISPENSED";
 
 export interface PrescriptionItem {
   id: string;
@@ -22,13 +23,15 @@ export interface DoctorPrescription {
   departmentName: string; specializationName: string; consultationScheduledStart: string;
   validityDays: number; generalInstructions: string | null; items: PrescriptionItem[];
   issuedAt: string | null; validUntil: string | null; expired: boolean;
+  dispensingStatus: DispensingStatus; dispensedAt: string | null; dispensingPharmacy: string | null;
   cancelledAt: string | null; cancellationReason: string | null; createdAt: string; updatedAt: string;
 }
 
 export interface PatientPrescriptionSummary {
   id: string; consultationId: string; doctorName: string; specializationName: string;
   hospitalName: string; issuedAt: string; validUntil: string; status: Exclude<PrescriptionStatus, "DRAFT">;
-  expired: boolean; medicineCount: number;
+  expired: boolean; dispensingStatus: DispensingStatus; dispensedAt: string | null;
+  dispensingPharmacy: string | null; medicineCount: number;
 }
 
 export interface PatientPrescriptionDetail extends Omit<DoctorPrescription,

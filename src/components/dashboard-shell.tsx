@@ -15,6 +15,7 @@ export function DashboardShell({
   intro,
   modules,
   pendingMessage,
+  noticeTitle = "Verification pending",
 }: {
   role: UserRole;
   portalName: string;
@@ -22,6 +23,7 @@ export function DashboardShell({
   intro: string;
   modules: ModuleCard[];
   pendingMessage?: string;
+  noticeTitle?: string;
 }) {
   return (
     <main className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
@@ -33,7 +35,7 @@ export function DashboardShell({
 
       {pendingMessage ? (
         <section className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950" role="status">
-          <p className="font-semibold">Verification pending</p>
+          <p className="font-semibold">{noticeTitle}</p>
           <p className="mt-1 text-sm leading-6 text-amber-900">{pendingMessage}</p>
         </section>
       ) : null}

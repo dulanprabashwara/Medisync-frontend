@@ -1,6 +1,7 @@
 import type {
   AdminDepartment,
   AdminDoctorReview,
+  AdminPharmacistReview,
   AdminHospital,
   AdminSpecialization,
   DepartmentReference,
@@ -9,6 +10,8 @@ import type {
   HospitalReference,
   MediSyncProfile,
   OnboardingInput,
+  PharmacistProfessionalProfile,
+  PharmacistProfileInput,
   SpecializationReference,
 } from "@/types/user";
 import type {
@@ -35,6 +38,12 @@ import type {
   PrescriptionDraftInput,
   PrescriptionQrResponse,
 } from "@/types/prescriptions";
+import type {
+  DispensationHistoryDetail,
+  DispensationHistoryPage,
+  DispensePrescriptionResult,
+  PharmacyPrescriptionVerification,
+} from "@/types/pharmacy";
 
 interface ApiErrorBody {
   error?: string;
@@ -223,6 +232,38 @@ export const verifyDoctor = (accessToken: string, doctorId: string) =>
 
 export const rejectDoctor = (accessToken: string, doctorId: string, reason: string) =>
   apiRequest<AdminDoctorReview>(`/api/admin/doctors/${doctorId}/reject`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  });
+
+export const getPharmacistProfessionalProfile = (accessToken: string) =>
+  apiRequest<PharmacistProfessionalProfile>("/api/pharmacist/professional-profile", accessToken);
+
+export const updatePharmacistProfessionalProfile = (
+  accessToken: string,
+  input: PharmacistProfileInput,
+) => apiRequest<PharmacistProfessionalProfile>("/api/pharmacist/professional-profile", accessToken, {
+  method: "PUT",
+  body: JSON.stringify(input),
+});
+
+export const submitPharmacistVerification = (accessToken: string) =>
+  apiRequest<PharmacistProfessionalProfile>(
+    "/api/pharmacist/professional-profile/submit-verification",
+    accessToken,
+    { method: "POST" },
+  );
+
+export const getPendingPharmacists = (accessToken: string) =>
+  apiRequest<AdminPharmacistReview[]>("/api/admin/pharmacists/pending", accessToken);
+
+export const verifyPharmacist = (accessToken: string, pharmacistId: string) =>
+  apiRequest<AdminPharmacistReview>(`/api/admin/pharmacists/${pharmacistId}/verify`, accessToken, {
+    method: "POST",
+  });
+
+export const rejectPharmacist = (accessToken: string, pharmacistId: string, reason: string) =>
+  apiRequest<AdminPharmacistReview>(`/api/admin/pharmacists/${pharmacistId}/reject`, accessToken, {
     method: "POST",
     body: JSON.stringify({ reason }),
   });
@@ -428,3 +469,24 @@ export const getPatientPrescription = (accessToken: string, id: string) =>
 
 export const generatePatientPrescriptionQr = (accessToken: string, id: string) =>
   apiRequest<PrescriptionQrResponse>(`/api/patient/prescriptions/${id}/qr`, accessToken, { method: "POST" });
+
+export const verifyPharmacistPrescription = (accessToken: string, qrPayload: string) =>
+  apiRequest<PharmacyPrescriptionVerification>("/api/pharmacist/prescriptions/verify", accessToken, {
+    method: "POST",
+    body: JSON.stringify({ qrPayload }),
+  });
+
+export const dispensePharmacistPrescription = (
+  accessToken: string,
+  qrPayload: string,
+  note: string,
+) => apiRequest<DispensePrescriptionResult>("/api/pharmacist/prescriptions/dispense", accessToken, {
+  method: "POST",
+  body: JSON.stringify({ qrPayload, note: note.trim() || null }),
+});
+
+export const getPharmacistDispensations = (accessToken: string, page = 0, size = 20) =>
+  apiRequest<DispensationHistoryPage>(`/api/pharmacist/dispensations?page=${page}&size=${size}`, accessToken);
+
+export const getPharmacistDispensation = (accessToken: string, id: string) =>
+  apiRequest<DispensationHistoryDetail>(`/api/pharmacist/dispensations/${id}`, accessToken);

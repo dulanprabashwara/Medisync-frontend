@@ -13,20 +13,24 @@ import {
   getAdminHospitals,
   getAdminSpecializations,
   getPendingDoctors,
+  getPendingPharmacists,
   rejectDoctor,
+  rejectPharmacist,
   updateAdminDepartment,
   updateAdminHospital,
   updateAdminSpecialization,
   verifyDoctor,
+  verifyPharmacist,
 } from "@/lib/api";
 import type {
   AdminDepartment,
   AdminDoctorReview,
+  AdminPharmacistReview,
   AdminHospital,
   AdminSpecialization,
 } from "@/types/user";
 
-type AdminTab = "doctors" | "hospitals" | "departments" | "specializations";
+type AdminTab = "doctors" | "pharmacists" | "hospitals" | "departments" | "specializations";
 
 const emptyHospital = { id: "", name: "", addressLine: "", city: "", phone: "", active: true };
 const emptyDepartment = { id: "", hospitalId: "", name: "", active: true };
@@ -39,7 +43,9 @@ function AdminDashboardContent() {
   const [departments, setDepartments] = useState<AdminDepartment[]>([]);
   const [specializations, setSpecializations] = useState<AdminSpecialization[]>([]);
   const [doctors, setDoctors] = useState<AdminDoctorReview[]>([]);
+  const [pharmacists, setPharmacists] = useState<AdminPharmacistReview[]>([]);
   const [selectedDoctor, setSelectedDoctor] = useState<AdminDoctorReview | null>(null);
+  const [selectedPharmacist, setSelectedPharmacist] = useState<AdminPharmacistReview | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [hospitalForm, setHospitalForm] = useState(emptyHospital);
   const [departmentForm, setDepartmentForm] = useState(emptyDepartment);
@@ -54,16 +60,18 @@ function AdminDashboardContent() {
     if (showLoader) setLoading(true);
     setError(null);
     try {
-      const [hospitalValues, departmentValues, specializationValues, doctorValues] = await Promise.all([
+      const [hospitalValues, departmentValues, specializationValues, doctorValues, pharmacistValues] = await Promise.all([
         getAdminHospitals(session.access_token),
         getAdminDepartments(session.access_token),
         getAdminSpecializations(session.access_token),
         getPendingDoctors(session.access_token),
+        getPendingPharmacists(session.access_token),
       ]);
       setHospitals(hospitalValues);
       setDepartments(departmentValues);
       setSpecializations(specializationValues);
       setDoctors(doctorValues);
+      setPharmacists(pharmacistValues);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Administration data could not be loaded.");
     } finally {
@@ -204,6 +212,28 @@ function AdminDashboardContent() {
     });
   }
 
+  async function approvePharmacist(pharmacist: AdminPharmacistReview) {
+    if (!session || !window.confirm(`Approve ${pharmacist.firstName} ${pharmacist.lastName} as a verified pharmacist?`)) return;
+    await runAction(`pharmacist-${pharmacist.pharmacistId}`, "Pharmacist verified and activated.", async () => {
+      await verifyPharmacist(session.access_token, pharmacist.pharmacistId);
+      setSelectedPharmacist(null);
+    });
+  }
+
+  async function rejectSelectedPharmacist() {
+    if (!session || !selectedPharmacist) return;
+    if (!rejectionReason.trim()) {
+      setError("Enter a rejection reason.");
+      return;
+    }
+    if (!window.confirm(`Reject ${selectedPharmacist.firstName} ${selectedPharmacist.lastName}'s submission?`)) return;
+    await runAction(`pharmacist-${selectedPharmacist.pharmacistId}`, "Pharmacist submission rejected with feedback.", async () => {
+      await rejectPharmacist(session.access_token, selectedPharmacist.pharmacistId, rejectionReason.trim());
+      setSelectedPharmacist(null);
+      setRejectionReason("");
+    });
+  }
+
   if (loading) return <LoadingPanel label="Loading the administration portal..." />;
 
   return (
@@ -213,7 +243,7 @@ function AdminDashboardContent() {
         Welcome, {profile?.firstName ?? "Administrator"}
       </h1>
       <p className="mt-3 max-w-3xl leading-7 text-slate-600">
-        Manage trusted reference data and review submitted doctor professional profiles.
+        Manage trusted reference data and review submitted doctor and pharmacist professional profiles.
       </p>
 
       <div className="mt-7 space-y-3">
@@ -223,6 +253,7 @@ function AdminDashboardContent() {
 
       <nav className="mt-8 flex flex-wrap gap-2" aria-label="Administration sections">
         <TabButton active={tab === "doctors"} onClick={() => setTab("doctors")}>Pending doctors ({doctors.length})</TabButton>
+        <TabButton active={tab === "pharmacists"} onClick={() => setTab("pharmacists")}>Pending pharmacists ({pharmacists.length})</TabButton>
         <TabButton active={tab === "hospitals"} onClick={() => setTab("hospitals")}>Hospitals</TabButton>
         <TabButton active={tab === "departments"} onClick={() => setTab("departments")}>Departments</TabButton>
         <TabButton active={tab === "specializations"} onClick={() => setTab("specializations")}>Specializations</TabButton>
@@ -256,6 +287,21 @@ function AdminDashboardContent() {
                   </button>
                 </article>
               ))}
+            </div>
+          )}
+        </section>
+      ) : null}
+
+      {tab === "pharmacists" ? (
+        <section className="mt-7">
+          <SectionHeading title="Pending pharmacists" description="Review submitted professional registration and pharmacy information." />
+          {pharmacists.length === 0 ? <EmptyState message="No pharmacists are currently awaiting verification." /> : (
+            <div className="mt-5 grid gap-4 lg:grid-cols-2">
+              {pharmacists.map((pharmacist) => <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" key={pharmacist.pharmacistId}>
+                <div className="flex items-start justify-between gap-4"><div><h2 className="text-lg font-semibold text-slate-950">{pharmacist.firstName} {pharmacist.lastName}</h2><p className="mt-1 text-sm text-slate-600">{pharmacist.professionalRegistrationNumber}</p></div><span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">Pending</span></div>
+                <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2"><ReviewDetail label="Pharmacy" value={pharmacist.pharmacyName} /><ReviewDetail label="Pharmacy registration" value={pharmacist.pharmacyRegistrationNumber || "Not provided"} /><ReviewDetail label="Submitted" value={new Date(pharmacist.submittedForVerificationAt).toLocaleString()} /></dl>
+                <button className="mt-5 rounded-xl border border-teal-700 px-4 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-50" onClick={() => { setSelectedPharmacist(pharmacist); setRejectionReason(""); }}>Review profile</button>
+              </article>)}
             </div>
           )}
         </section>
@@ -322,6 +368,18 @@ function AdminDashboardContent() {
               <button className="rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white disabled:opacity-60" disabled={busy !== null} onClick={() => void approveDoctor(selectedDoctor)}>{busy ? "Processing..." : "Approve doctor"}</button>
               <button className="rounded-xl bg-rose-700 px-5 py-3 text-sm font-semibold text-white disabled:opacity-60" disabled={busy !== null} onClick={() => void rejectSelectedDoctor()}>{busy ? "Processing..." : "Reject with reason"}</button>
             </div>
+          </section>
+        </div>
+      ) : null}
+
+      {selectedPharmacist ? (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/50 p-4 sm:p-8" role="dialog" aria-modal="true" aria-label="Pharmacist verification review">
+          <section className="mx-auto max-w-3xl rounded-3xl bg-white p-6 shadow-2xl sm:p-8">
+            <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">Pharmacist review</p><h2 className="mt-2 text-2xl font-semibold">{selectedPharmacist.firstName} {selectedPharmacist.lastName}</h2></div><button className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100" onClick={() => setSelectedPharmacist(null)}>Close</button></div>
+            <dl className="mt-7 grid gap-5 sm:grid-cols-2"><ReviewDetail label="Email" value={selectedPharmacist.email} /><ReviewDetail label="Phone" value={selectedPharmacist.phone || "Not provided"} /><ReviewDetail label="Professional registration" value={selectedPharmacist.professionalRegistrationNumber} /><ReviewDetail label="Pharmacy" value={selectedPharmacist.pharmacyName} /><ReviewDetail label="Pharmacy registration" value={selectedPharmacist.pharmacyRegistrationNumber || "Not provided"} /><ReviewDetail label="Qualifications" value={selectedPharmacist.qualifications || "Not provided"} /></dl>
+            <div className="mt-5 rounded-2xl bg-slate-50 p-4"><p className="text-xs font-bold uppercase text-slate-500">Pharmacy address</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{selectedPharmacist.pharmacyAddress}</p></div>
+            <label className="mt-6 block text-sm font-semibold text-slate-700">Rejection reason<textarea className={`${inputClassName} min-h-24 resize-y`} maxLength={1000} value={rejectionReason} onChange={(event) => setRejectionReason(event.target.value)} placeholder="Required only when rejecting" /></label>
+            <div className="mt-6 flex flex-wrap gap-3"><button className="rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white disabled:opacity-60" disabled={busy !== null} onClick={() => void approvePharmacist(selectedPharmacist)}>{busy ? "Processing..." : "Approve pharmacist"}</button><button className="rounded-xl bg-rose-700 px-5 py-3 text-sm font-semibold text-white disabled:opacity-60" disabled={busy !== null} onClick={() => void rejectSelectedPharmacist()}>{busy ? "Processing..." : "Reject with reason"}</button></div>
           </section>
         </div>
       ) : null}

@@ -128,5 +128,48 @@ export interface AdminDoctorReview {
   verifiedAt: string | null;
 }
 
+export interface PharmacistProfessionalProfile {
+  id: string;
+  professionalRegistrationNumber: string | null;
+  pharmacyName: string | null;
+  pharmacyRegistrationNumber: string | null;
+  pharmacyAddress: string | null;
+  qualifications: string | null;
+  verificationStatus: VerificationStatus;
+  verificationRejectionReason: string | null;
+  submittedForVerificationAt: string | null;
+  verifiedAt: string | null;
+  profileComplete: boolean;
+  submitted: boolean;
+  editable: boolean;
+  pharmacyAccessAllowed: boolean;
+}
+
+export interface PharmacistProfileInput {
+  professionalRegistrationNumber: string;
+  pharmacyName: string;
+  pharmacyRegistrationNumber: string;
+  pharmacyAddress: string;
+  qualifications: string;
+}
+
+export interface AdminPharmacistReview {
+  pharmacistId: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string | null;
+  professionalRegistrationNumber: string;
+  pharmacyName: string;
+  pharmacyRegistrationNumber: string | null;
+  pharmacyAddress: string;
+  qualifications: string | null;
+  verificationStatus: VerificationStatus;
+  verificationRejectionReason: string | null;
+  submittedForVerificationAt: string;
+  verifiedAt: string | null;
+}
+
 export const dashboardPath = (role: UserRole): string =>
   `/${role.toLowerCase()}/dashboard`;

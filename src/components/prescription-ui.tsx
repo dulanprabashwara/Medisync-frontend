@@ -1,9 +1,10 @@
 import { QRCodeSVG } from "qrcode.react";
-import type { PrescriptionItem, PrescriptionStatus } from "@/types/prescriptions";
+import type { DispensingStatus, PrescriptionItem, PrescriptionStatus } from "@/types/prescriptions";
 
-export function PrescriptionStatusBadge({ status, expired = false }: { status: PrescriptionStatus; expired?: boolean }) {
-  const label = status === "CANCELLED" ? "Cancelled" : expired ? "Expired" : status === "ISSUED" ? "Issued" : "Draft";
-  const tone = status === "CANCELLED" ? "bg-rose-100 text-rose-800" : expired ? "bg-amber-100 text-amber-900" : status === "ISSUED" ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-700";
+export function PrescriptionStatusBadge({ status, expired = false, dispensingStatus = "NOT_DISPENSED" }: { status: PrescriptionStatus; expired?: boolean; dispensingStatus?: DispensingStatus }) {
+  const dispensed = status === "ISSUED" && dispensingStatus === "DISPENSED";
+  const label = status === "CANCELLED" ? "Cancelled" : dispensed ? "Dispensed" : expired ? "Expired" : status === "ISSUED" ? "Active" : "Draft";
+  const tone = status === "CANCELLED" ? "bg-rose-100 text-rose-800" : dispensed ? "bg-sky-100 text-sky-800" : expired ? "bg-amber-100 text-amber-900" : status === "ISSUED" ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-700";
   return <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${tone}`}>{label}</span>;
 }
 

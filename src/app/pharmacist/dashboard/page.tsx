@@ -1,18 +1,55 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dashboard-shell";
+import { LoadingPanel } from "@/components/loading-panel";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/components/auth-provider";
-
-const pharmacyModules = [
-  { title: "Scan prescription", description: "Secure QR scanning is reserved for the prescription phase.", phase: "Planned" },
-  { title: "Prescription verification", description: "Verification will expose only the information needed for safe dispensing.", phase: "Planned" },
-  { title: "Dispensing history", description: "A controlled dispensing record will be introduced in a later phase.", phase: "Planned" },
-];
+import { getPharmacistProfessionalProfile } from "@/lib/api";
+import type { PharmacistProfessionalProfile } from "@/types/user";
 
 function PharmacistDashboardContent() {
-  const { profile } = useAuth();
-  return <DashboardShell role="PHARMACIST" portalName="MediSync Pharmacy Portal" welcome={`Welcome, ${profile?.firstName ?? "Pharmacist"}`} intro="Your pharmacy workspace is ready for future verified prescription services." pendingMessage="Your pharmacist account is awaiting verification. Pharmacy features will become available after verification." modules={pharmacyModules} />;
+  const { profile, session } = useAuth();
+  const [professional, setProfessional] = useState<PharmacistProfessionalProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    if (!session) return;
+    try {
+      setProfessional(await getPharmacistProfessionalProfile(session.access_token));
+    } finally {
+      setLoading(false);
+    }
+  }, [session]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => void load(), 0);
+    return () => window.clearTimeout(timer);
+  }, [load]);
+
+  if (loading) return <LoadingPanel label="Loading the pharmacy portal..." />;
+
+  const verified = professional?.pharmacyAccessAllowed === true;
+  const modules = verified ? [
+    { title: "Scan prescription", description: "Scan and securely verify a patient's one-time prescription QR.", phase: "Available", href: "/pharmacist/scan" },
+    { title: "Dispensing history", description: "Review prescriptions dispensed through your verified professional account.", phase: "Available", href: "/pharmacist/dispensing-history" },
+    { title: "Professional profile", description: "Review your verified registration and pharmacy information.", phase: "Verified", href: "/pharmacist/profile" },
+  ] : [
+    { title: "Professional profile", description: "Complete your pharmacy credentials and submit them for administrator review.", phase: "Required", href: "/pharmacist/profile" },
+  ];
+
+  const rejected = professional?.verificationStatus === "REJECTED";
+  const notice = verified ? undefined : rejected
+    ? professional.verificationRejectionReason || "Your submission was rejected. Update your profile and submit it again."
+    : professional?.submitted
+      ? "Your professional profile is awaiting administrator review. Scanner and dispensing access remain locked."
+      : "Complete and submit your professional profile before using prescription verification or dispensing.";
+
+  return <DashboardShell role="PHARMACIST" portalName="MediSync Pharmacy Portal"
+    welcome={`Welcome, ${profile?.firstName ?? "Pharmacist"}`}
+    intro="Verify digital prescriptions, dispense them once, and maintain an accountable dispensing history."
+    pendingMessage={notice} noticeTitle={rejected ? "Verification rejected" : "Professional verification required"}
+    modules={modules} />;
 }
 
 export default function PharmacistDashboardPage() {

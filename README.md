@@ -1,6 +1,6 @@
 # MediSync Web
 
-Next.js App Router frontend for MediSync through Phase 4. MediSync is an online patient-care platform that helps patients find verified doctors, request scheduled online consultations, communicate within confirmed care relationships, and avoid unnecessary hospital visits. Supabase Auth handles credentials and sessions. The Spring Boot API remains the source of truth for roles, account status, doctor verification, scheduling, consultation lifecycle, persistent messages, clinical notes, and digital prescriptions.
+Next.js App Router frontend for the complete MediSync core workflow through Phase 5. Patients can move from verified-doctor discovery and consultation to a secure digital prescription; verified pharmacists can scan, verify, and dispense it exactly once. Supabase Auth handles credentials and sessions. The Spring Boot API remains the source of truth for role/account status, professional verification, scheduling, consultations, prescriptions, token hashing, and dispensing.
 
 The frontend presents Phase 2 bookings as online consultations. Internal TypeScript names, backend routes, database records, and statuses retain the established `appointment` terminology.
 
@@ -84,14 +84,35 @@ Patient list responses contain no QR material. An eligible detail page provides 
 
 Availability forms reject obvious past starts before submission. Doctor and patient scheduling screens remove elapsed windows/slots on a lightweight one-minute clock refresh, while the backend remains authoritative for future and lead-time checks.
 
+## Phase 5 pharmacist and dispensing pages
+
+| Route | Purpose |
+| --- | --- |
+| `/pharmacist/profile` | Complete, submit, correct, and review pharmacist professional verification status |
+| `/pharmacist/scan` | Browser-camera QR scanning, manual development fallback, safe prescription review, and explicit dispensing confirmation |
+| `/pharmacist/dispensing-history` | Newest-first owned dispensing history with immutable medication detail |
+| `/admin/dashboard` | Adds pending pharmacist review, approval, and rejection alongside doctor verification |
+
+The scanner dynamically imports `html5-qrcode` only in the browser, prefers the rear camera, stops camera resources after detection/unmount, and suppresses duplicate detections. The raw payload remains only in React component state, is sent in an authenticated POST body, and is cleared after successful dispensing. It is never placed in a URL, browser storage, cookie, or console log. Manual paste provides the same backend verification path without persisting the value.
+
+Patient prescription pages derive **Active**, **Dispensed**, **Expired**, and **Cancelled** display state. Dispensed details show date/pharmacy and remove QR generation. Doctor lists/details show fulfillment status and remove cancellation after dispensing. Pharmacist screens never request symptoms, consultation chat, or private clinical notes.
+
+```text
+Patient generates QR → verified pharmacist scans → authenticated Spring Boot POST
+→ SHA-256 token lookup → safe medicine review → explicit confirmation
+→ single dispensing record + QR revocation → patient/doctor Dispensed status
+```
+
 ## Product roadmap
 
 - Phase 1: authentication, roles, and security (complete)
 - Phase 2A: reference data, professional profiles, and administrator verification (complete)
 - Phase 2B: availability, doctor discovery, online consultation booking, symptom submission, and booking transitions (complete)
 - Phase 3: online consultation session, secure doctor-patient chat, private clinical notes, and consultation status (complete)
-- Phase 4: digital prescriptions, patient prescription view, and QR support (current)
-- Phase 5: Pharmacist QR Scanning, Prescription Verification, Medicine Dispensing, and Dispensing History (future)
+- Phase 4: digital prescriptions, patient prescription view, and hashed on-demand QR support (complete)
+- Phase 5: pharmacist verification, QR scanning and verification, dispensing, reuse prevention, and dispensing history (complete)
+
+**MEDISYNC CORE PROJECT COMPLETE** after authenticated browser acceptance succeeds.
 
 Remote monitoring and formal follow-up scheduling are outside the core roadmap.
 
