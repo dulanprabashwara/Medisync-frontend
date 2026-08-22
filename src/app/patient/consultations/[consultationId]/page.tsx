@@ -66,11 +66,16 @@ function PatientConsultationContent() {
     return () => window.clearTimeout(timer);
   }, [reconcile]);
 
-  async function send(content: string) {
+  async function send(content: string, images: File[]) {
     if (!session) throw new Error("Your authentication session has expired.");
     setSending(true);
     try {
-      const message = await sendPatientConsultationMessage(session.access_token, consultationId, content);
+      const message = await sendPatientConsultationMessage(
+        session.access_token,
+        consultationId,
+        content,
+        images,
+      );
       setMessages((current) => mergeConsultationMessages(current, [message]));
     } finally {
       setSending(false);

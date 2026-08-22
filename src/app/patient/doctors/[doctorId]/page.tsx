@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element -- private signed URLs are short-lived and cannot use a stable Next image host. */
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -118,6 +119,7 @@ function PatientDoctorDetailsContent() {
       {doctor ? (
         <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-5">
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-teal-100 text-2xl font-bold text-teal-900">{doctor.profileImageUrl ? <img src={doctor.profileImageUrl} alt="" className="h-full w-full object-cover" /> : doctor.displayName.replace("Dr. ", "").charAt(0)}</div>
             <dl className="grid flex-1 gap-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
               <div><dt className="text-slate-500">Affiliated hospital</dt><dd className="mt-1 font-semibold text-slate-950">{doctor.hospitalName}</dd></div>
               <div><dt className="text-slate-500">Department</dt><dd className="mt-1 font-semibold text-slate-950">{doctor.departmentName}</dd></div>

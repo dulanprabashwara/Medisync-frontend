@@ -1,10 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { FormAlert, inputClassName } from "@/components/auth-card";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { ProtectedRoute } from "@/components/protected-route";
+import { AdminNavigation } from "@/components/admin-navigation";
+import { ProfileImageEditor } from "@/components/profile-image-editor";
 import {
   createAdminDepartment,
   createAdminHospital,
@@ -246,6 +249,9 @@ function AdminDashboardContent() {
         Manage trusted reference data and review submitted doctor and pharmacist professional profiles.
       </p>
 
+      <AdminNavigation />
+      <ProfileImageEditor />
+
       <div className="mt-7 space-y-3">
         {error ? <FormAlert message={error} /> : null}
         {message ? <FormAlert message={message} success /> : null}
@@ -313,6 +319,7 @@ function AdminDashboardContent() {
           {hospitals.length === 0 ? <EmptyState message="No hospitals have been added yet." /> : hospitals.map((hospital) => (
             <MasterRow key={hospital.id} title={hospital.name} subtitle={[hospital.city, hospital.addressLine].filter(Boolean).join(" - ") || "No location provided"}
               active={hospital.active} busy={busy === `hospital-${hospital.id}`}
+              doctorCount={hospital.doctorCount ?? 0} doctorsHref={`/admin/users?role=DOCTOR&hospitalId=${hospital.id}`}
               onEdit={() => setHospitalForm({ id: hospital.id, name: hospital.name, addressLine: hospital.addressLine ?? "", city: hospital.city ?? "", phone: hospital.phone ?? "", active: hospital.active })}
               onToggle={() => void toggleHospital(hospital)} />
           ))}
@@ -325,6 +332,7 @@ function AdminDashboardContent() {
           {departments.length === 0 ? <EmptyState message="No departments have been configured yet." /> : departments.map((department) => (
             <MasterRow key={department.id} title={department.name} subtitle={department.hospitalName} active={department.active}
               busy={busy === `department-${department.id}`}
+              doctorCount={department.doctorCount ?? 0} doctorsHref={`/admin/users?role=DOCTOR&departmentId=${department.id}`}
               onEdit={() => setDepartmentForm({ id: department.id, hospitalId: department.hospitalId, name: department.name, active: department.active })}
               onToggle={() => void toggleDepartment(department)} />
           ))}
@@ -337,6 +345,7 @@ function AdminDashboardContent() {
           {specializations.length === 0 ? <EmptyState message="No specializations have been added yet." /> : specializations.map((specialization) => (
             <MasterRow key={specialization.id} title={specialization.name} subtitle={specialization.description || "No description"}
               active={specialization.active} busy={busy === `specialization-${specialization.id}`}
+              doctorCount={specialization.doctorCount ?? 0} doctorsHref={`/admin/users?role=DOCTOR&specializationId=${specialization.id}`}
               onEdit={() => setSpecializationForm({ id: specialization.id, name: specialization.name, description: specialization.description ?? "", active: specialization.active })}
               onToggle={() => void toggleSpecialization(specialization)} />
           ))}
@@ -403,8 +412,8 @@ function MasterSection({ title, description, form, children }: { title: string; 
   return <section className="mt-7 grid gap-7 lg:grid-cols-[22rem_1fr]"><div><SectionHeading title={title} description={description} />{form}</div><div className="space-y-3">{children}</div></section>;
 }
 
-function MasterRow({ title, subtitle, active, busy, onEdit, onToggle }: { title: string; subtitle: string; active: boolean; busy: boolean; onEdit: () => void; onToggle: () => void }) {
-  return <article className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center"><div><div className="flex items-center gap-2"><h3 className="font-semibold text-slate-950">{title}</h3><span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${active ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>{active ? "Active" : "Inactive"}</span></div><p className="mt-1 text-sm text-slate-600">{subtitle}</p></div><div className="flex gap-2"><button className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700" onClick={onEdit}>Edit</button><button className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 disabled:opacity-60" disabled={busy} onClick={onToggle}>{busy ? "Saving..." : active ? "Deactivate" : "Activate"}</button></div></article>;
+function MasterRow({ title, subtitle, active, busy, doctorCount, doctorsHref, onEdit, onToggle }: { title: string; subtitle: string; active: boolean; busy: boolean; doctorCount: number; doctorsHref: string; onEdit: () => void; onToggle: () => void }) {
+  return <article className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center"><div><div className="flex items-center gap-2"><h3 className="font-semibold text-slate-950">{title}</h3><span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${active ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>{active ? "Active" : "Inactive"}</span></div><p className="mt-1 text-sm text-slate-600">{subtitle}</p><Link href={doctorsHref} className="mt-2 inline-block text-sm font-semibold text-teal-700">Doctors: {doctorCount} · View doctors</Link></div><div className="flex gap-2"><button className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700" onClick={onEdit}>Edit</button><button className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 disabled:opacity-60" disabled={busy} onClick={onToggle}>{busy ? "Saving..." : active ? "Deactivate" : "Activate"}</button></div></article>;
 }
 
 function ReviewDetail({ label, value }: { label: string; value: string }) {

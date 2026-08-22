@@ -6,6 +6,7 @@ import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { PortalHeading } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
+import { ProfileImageEditor } from "@/components/profile-image-editor";
 import {
   getPharmacistProfessionalProfile,
   submitPharmacistVerification,
@@ -172,6 +173,7 @@ function Content() {
     <PortalHeading eyebrow="Pharmacist verification" title="Professional profile"
       description="Administrator verification is required before prescription scanning or dispensing."
       backHref="/pharmacist/dashboard" />
+    <ProfileImageEditor />
     <div className="mt-7 space-y-3">{error ? <FormAlert message={error} /> : null}{message ? <FormAlert message={message} success /> : null}</div>
     {value?.verificationStatus === "REJECTED" ? <section className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-950"><h2 className="font-semibold">Verification rejected</h2><p className="mt-2 whitespace-pre-wrap text-sm">{value.verificationRejectionReason}</p><p className="mt-2 text-sm">Correct the profile and submit it again.</p></section> : null}
     {value?.submitted ? <section className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950"><h2 className="font-semibold">Awaiting administrator review</h2><p className="mt-2 text-sm">Submitted {value.submittedForVerificationAt ? new Date(value.submittedForVerificationAt).toLocaleString() : "recently"}. Professional fields are locked during review.</p></section> : null}

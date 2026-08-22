@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element -- private signed URLs are short-lived and cannot use a stable Next image host. */
 
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
@@ -160,9 +161,12 @@ function PatientDoctorSearchContent() {
           {results?.content.map((doctor) => (
             <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" key={doctor.doctorProfileId}>
               <div className="flex items-start justify-between gap-4">
-                <div>
+                <div className="flex items-center gap-4">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-teal-100 font-bold text-teal-900">{doctor.profileImageUrl ? <img src={doctor.profileImageUrl} alt="" className="h-full w-full object-cover" /> : doctor.displayName.replace("Dr. ", "").charAt(0)}</div>
+                  <div>
                   <h2 className="text-xl font-semibold text-slate-950">{doctor.displayName}</h2>
                   <p className="mt-1 font-medium text-teal-700">{doctor.specializationName}</p>
+                  </div>
                 </div>
                 <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">VERIFIED</span>
               </div>

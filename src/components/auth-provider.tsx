@@ -11,7 +11,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { ApiError, getMyProfile } from "@/lib/api";
+import { ApiError, getMyProfile, setLatestApiAccessToken } from "@/lib/api";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { MediSyncProfile } from "@/types/user";
 
@@ -19,6 +19,7 @@ interface AuthContextValue {
   session: Session | null;
   profile: MediSyncProfile | null;
   loading: boolean;
+  refreshing: boolean;
   error: string | null;
   refreshProfile: () => Promise<MediSyncProfile | null>;
   signOut: () => Promise<void>;
@@ -55,6 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<MediSyncProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const sessionRef = useRef<Session | null>(null);
   const profileRef = useRef<MediSyncProfile | null>(null);
@@ -62,8 +64,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const applySession = useCallback(async (nextSession: Session | null) => {
     const operation = ++operationRef.current;
+    const sameUser = sessionRef.current?.user.id === nextSession?.user.id;
     sessionRef.current = nextSession;
-    setSession(nextSession);
+    setLatestApiAccessToken(nextSession?.access_token ?? null);
+    if (!sameUser || !nextSession) setSession(nextSession);
     setError(null);
     if (!nextSession) {
       profileRef.current = null;
@@ -79,13 +83,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(nextProfile);
     } catch (profileError) {
       if (operation !== operationRef.current) return;
-      profileRef.current = null;
-      setProfile(null);
-      setError(
-        profileError instanceof Error
-          ? profileError.message
-          : "Your MediSync profile could not be loaded.",
-      );
+      const canKeepCurrentProfile = profileRef.current &&
+        sessionRef.current?.user.id === nextSession.user.id;
+      if (!canKeepCurrentProfile) {
+        profileRef.current = null;
+        setProfile(null);
+        setError(
+          profileError instanceof Error
+            ? profileError.message
+            : "Your MediSync profile could not be loaded.",
+        );
+      }
     } finally {
       if (operation === operationRef.current) setLoading(false);
     }
@@ -135,13 +143,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const sameUser = sessionRef.current?.user.id === nextSession?.user.id;
       if ((event === "TOKEN_REFRESHED" || event === "SIGNED_IN") && sameUser && profileRef.current) {
         sessionRef.current = nextSession;
-        setSession(nextSession);
+        setLatestApiAccessToken(nextSession?.access_token ?? null);
         setError(null);
         setLoading(false);
         return;
       }
 
-      setLoading(true);
+      if (!profileRef.current || !sameUser) setLoading(true);
       window.setTimeout(() => void applySession(nextSession), 0);
     });
 
@@ -169,6 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (sessionError || !data.session) {
       operationRef.current += 1;
       sessionRef.current = null;
+      setLatestApiAccessToken(null);
       profileRef.current = null;
       setSession(null);
       setProfile(null);
@@ -177,42 +186,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return null;
     }
 
-    setLoading(true);
+    const existingProfile = profileRef.current;
+    setRefreshing(true);
     try {
       const nextProfile = await fetchProfile(data.session);
       sessionRef.current = data.session;
+      setLatestApiAccessToken(data.session.access_token);
       profileRef.current = nextProfile;
-      setSession(data.session);
+      if (session?.user.id !== data.session.user.id) setSession(data.session);
       setProfile(nextProfile);
       setError(null);
       return nextProfile;
     } catch (profileError) {
-      setError(
-        profileError instanceof Error
-          ? profileError.message
-          : "Your MediSync profile could not be loaded.",
-      );
-      return null;
+      if (!existingProfile) {
+        setError(
+          profileError instanceof Error
+            ? profileError.message
+            : "Your MediSync profile could not be loaded.",
+        );
+      }
+      return existingProfile;
     } finally {
-      setLoading(false);
+      setRefreshing(false);
+      if (!existingProfile) setLoading(false);
     }
-  }, []);
+  }, [session]);
+
+  useEffect(() => {
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible" && sessionRef.current && profileRef.current) {
+        void refreshProfile();
+      }
+    };
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    return () => document.removeEventListener("visibilitychange", refreshWhenVisible);
+  }, [refreshProfile]);
 
   const signOut = useCallback(async () => {
     const client = getSupabaseBrowserClient();
     await client.auth.signOut();
     operationRef.current += 1;
     sessionRef.current = null;
+    setLatestApiAccessToken(null);
     profileRef.current = null;
     setSession(null);
     setProfile(null);
     setError(null);
     setLoading(false);
+    setRefreshing(false);
   }, []);
 
   const value = useMemo(
-    () => ({ session, profile, loading, error, refreshProfile, signOut }),
-    [session, profile, loading, error, refreshProfile, signOut],
+    () => ({ session, profile, loading, refreshing, error, refreshProfile, signOut }),
+    [session, profile, loading, refreshing, error, refreshProfile, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

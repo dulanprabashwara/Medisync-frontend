@@ -31,8 +31,19 @@ export interface ConsultationMessage {
   consultationId: string;
   senderType: ConsultationSenderType;
   senderDisplayName: string;
-  content: string;
+  senderProfileImageUrl: string | null;
+  content: string | null;
+  attachments: ConsultationMessageAttachment[];
   sentAt: string;
+}
+
+export interface ConsultationMessageAttachment {
+  id: string;
+  contentType: "image/jpeg" | "image/png" | "image/webp";
+  originalFilename: string | null;
+  byteSize: number;
+  position: number;
+  signedUrl: string | null;
 }
 
 export interface ConsultationEvent {

@@ -5,6 +5,7 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/components/auth-provider";
 
 const patientModules = [
+  { title: "My Profile", description: "Add or update your private MediSync profile photo.", phase: "Available", href: "/patient/profile" },
   { title: "Find a Doctor", description: "Search verified doctors and request an available online consultation time.", phase: "Available", href: "/patient/doctors" },
   { title: "Online Consultations", description: "Track consultation requests, confirmations, declined requests, and cancellations.", phase: "Available", href: "/patient/appointments" },
   { title: "Prescriptions", description: "View issued digital prescriptions, medication instructions, and secure QR codes.", phase: "Available", href: "/patient/prescriptions" },

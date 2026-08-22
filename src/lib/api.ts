@@ -13,6 +13,7 @@ import type {
   PharmacistProfessionalProfile,
   PharmacistProfileInput,
   SpecializationReference,
+  AccountStatusDetails,
 } from "@/types/user";
 import type {
   Appointment,
@@ -44,6 +45,16 @@ import type {
   DispensePrescriptionResult,
   PharmacyPrescriptionVerification,
 } from "@/types/pharmacy";
+import type {
+  ActivityResponse,
+  AdminUserDetail,
+  AdminUserSummary,
+  AnalyticsPoint,
+  AnalyticsSummary,
+  AuditEvent,
+} from "@/types/admin";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import type { AccountStatus, UserRole, VerificationStatus } from "@/types/user";
 
 interface ApiErrorBody {
   error?: string;
@@ -67,6 +78,12 @@ const apiBaseUrl = (
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080"
 ).replace(/\/$/, "");
 
+let latestAccessToken: string | null = null;
+
+export function setLatestApiAccessToken(accessToken: string | null) {
+  latestAccessToken = accessToken;
+}
+
 export function getConsultationWebSocketUrl() {
   const url = new URL(apiBaseUrl);
   url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
@@ -80,24 +97,33 @@ async function apiRequest<T>(
   path: string,
   accessToken: string,
   init: RequestInit = {},
+  authenticationRetry = true,
 ): Promise<T> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 15_000);
   const abortFromCaller = () => controller.abort();
   init.signal?.addEventListener("abort", abortFromCaller, { once: true });
   try {
+    const isFormData = typeof FormData !== "undefined" && init.body instanceof FormData;
     const response = await fetch(`${apiBaseUrl}${path}`, {
       ...init,
       signal: controller.signal,
       headers: {
         Accept: "application/json",
-        Authorization: `Bearer ${accessToken}`,
-        ...(init.body ? { "Content-Type": "application/json" } : {}),
+        Authorization: `Bearer ${latestAccessToken || accessToken}`,
+        ...(init.body && !isFormData ? { "Content-Type": "application/json" } : {}),
         ...init.headers,
       },
       cache: "no-store",
     });
 
+    if (response.status === 401 && authenticationRetry) {
+      const { data, error } = await getSupabaseBrowserClient().auth.refreshSession();
+      if (!error && data.session?.access_token) {
+        setLatestApiAccessToken(data.session.access_token);
+        return apiRequest<T>(path, data.session.access_token, init, false);
+      }
+    }
     const body = (await response.json().catch(() => ({}))) as ApiErrorBody | T;
     if (!response.ok) {
       const errorBody = body as ApiErrorBody;
@@ -126,6 +152,21 @@ async function apiRequest<T>(
 
 export const getMyProfile = (accessToken: string) =>
   apiRequest<MediSyncProfile>("/api/users/me", accessToken);
+
+export const getMyAccountStatus = (accessToken: string) =>
+  apiRequest<AccountStatusDetails>("/api/users/me/account-status", accessToken);
+
+export const uploadMyProfileImage = (accessToken: string, file: File) => {
+  const form = new FormData();
+  form.append("file", file);
+  return apiRequest<MediSyncProfile>("/api/users/me/profile-image", accessToken, {
+    method: "POST",
+    body: form,
+  });
+};
+
+export const removeMyProfileImage = (accessToken: string) =>
+  apiRequest<MediSyncProfile>("/api/users/me/profile-image", accessToken, { method: "DELETE" });
 
 export const completeOnboarding = (
   accessToken: string,
@@ -169,7 +210,7 @@ export const getAdminHospitals = (accessToken: string) =>
 
 export const createAdminHospital = (
   accessToken: string,
-  input: Omit<AdminHospital, "id" | "createdAt" | "updatedAt">,
+  input: Omit<AdminHospital, "id" | "createdAt" | "updatedAt" | "doctorCount">,
 ) => apiRequest<AdminHospital>("/api/admin/hospitals", accessToken, {
   method: "POST",
   body: JSON.stringify(input),
@@ -177,7 +218,7 @@ export const createAdminHospital = (
 
 export const updateAdminHospital = (
   accessToken: string,
-  hospital: Omit<AdminHospital, "createdAt" | "updatedAt">,
+  hospital: Omit<AdminHospital, "createdAt" | "updatedAt" | "doctorCount">,
 ) => apiRequest<AdminHospital>(`/api/admin/hospitals/${hospital.id}`, accessToken, {
   method: "PUT",
   body: JSON.stringify(hospital),
@@ -385,11 +426,8 @@ export const sendPatientConsultationMessage = (
   accessToken: string,
   consultationId: string,
   content: string,
-) => apiRequest<ConsultationMessage>(
-  `/api/patient/consultations/${consultationId}/messages`,
-  accessToken,
-  { method: "POST", body: JSON.stringify({ content }) },
-);
+  images: File[] = [],
+) => sendConsultationMessage("patient", accessToken, consultationId, content, images);
 
 export const getDoctorConsultation = (accessToken: string, consultationId: string) =>
   apiRequest<ConsultationDetails>(`/api/doctor/consultations/${consultationId}`, accessToken);
@@ -408,11 +446,28 @@ export const sendDoctorConsultationMessage = (
   accessToken: string,
   consultationId: string,
   content: string,
-) => apiRequest<ConsultationMessage>(
-  `/api/doctor/consultations/${consultationId}/messages`,
-  accessToken,
-  { method: "POST", body: JSON.stringify({ content }) },
-);
+  images: File[] = [],
+) => sendConsultationMessage("doctor", accessToken, consultationId, content, images);
+
+function sendConsultationMessage(
+  role: "patient" | "doctor",
+  accessToken: string,
+  consultationId: string,
+  content: string,
+  images: File[],
+) {
+  const path = `/api/${role}/consultations/${consultationId}/messages`;
+  if (images.length === 0) {
+    return apiRequest<ConsultationMessage>(path, accessToken, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    });
+  }
+  const form = new FormData();
+  if (content.trim()) form.append("content", content.trim());
+  images.forEach((image) => form.append("images", image));
+  return apiRequest<ConsultationMessage>(path, accessToken, { method: "POST", body: form });
+}
 
 export const startDoctorConsultation = (accessToken: string, consultationId: string) =>
   apiRequest<ConsultationDetails>(`/api/doctor/consultations/${consultationId}/start`, accessToken, {
@@ -455,6 +510,11 @@ export const updatePrescriptionDraft = (accessToken: string, id: string, input: 
 export const issuePrescription = (accessToken: string, id: string) =>
   apiRequest<DoctorPrescription>(`/api/doctor/prescriptions/${id}/issue`, accessToken, { method: "POST" });
 
+export const confirmPrescriptionPayment = (accessToken: string, id: string) =>
+  apiRequest<DoctorPrescription>(`/api/doctor/prescriptions/${id}/confirm-payment`, accessToken, {
+    method: "POST",
+  });
+
 export const cancelPrescription = (accessToken: string, id: string, reason: string) =>
   apiRequest<DoctorPrescription>(`/api/doctor/prescriptions/${id}/cancel`, accessToken, { method: "POST", body: JSON.stringify({ reason }) });
 
@@ -490,3 +550,81 @@ export const getPharmacistDispensations = (accessToken: string, page = 0, size =
 
 export const getPharmacistDispensation = (accessToken: string, id: string) =>
   apiRequest<DispensationHistoryDetail>(`/api/pharmacist/dispensations/${id}`, accessToken);
+
+export interface AdminUserFilters {
+  q?: string;
+  role?: UserRole;
+  status?: AccountStatus;
+  verificationStatus?: VerificationStatus;
+  hospitalId?: string;
+  departmentId?: string;
+  specializationId?: string;
+  createdFrom?: string;
+  createdTo?: string;
+  page?: number;
+  size?: number;
+}
+
+export const getAdminUsers = (accessToken: string, filters: AdminUserFilters = {}) => {
+  const query = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") query.set(key, String(value));
+  });
+  query.set("page", String(filters.page ?? 0));
+  query.set("size", String(filters.size ?? 20));
+  return apiRequest<PageResponse<AdminUserSummary>>(`/api/admin/users?${query}`, accessToken);
+};
+
+export const getAdminDoctors = (accessToken: string, filters: Omit<AdminUserFilters, "role"> = {}) => {
+  const query = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (key !== "role" && value !== undefined && value !== "") query.set(key, String(value));
+  });
+  query.set("page", String(filters.page ?? 0));
+  query.set("size", String(filters.size ?? 20));
+  return apiRequest<PageResponse<AdminUserSummary>>(`/api/admin/doctors?${query}`, accessToken);
+};
+
+export const getAdminUser = (accessToken: string, userId: string) =>
+  apiRequest<AdminUserDetail>(`/api/admin/users/${userId}`, accessToken);
+
+export const banAdminUser = (accessToken: string, userId: string, reason: string) =>
+  apiRequest<AdminUserDetail>(`/api/admin/users/${userId}/ban`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  });
+
+export const unbanAdminUser = (accessToken: string, userId: string) =>
+  apiRequest<AdminUserDetail>(`/api/admin/users/${userId}/unban`, accessToken, { method: "POST" });
+
+export interface AuditFilters {
+  action?: string;
+  actorUserId?: string;
+  actorRole?: UserRole;
+  targetType?: string;
+  targetId?: string;
+  targetUserId?: string;
+  from?: string;
+  to?: string;
+  page?: number;
+  size?: number;
+}
+
+export const getAdminAuditEvents = (accessToken: string, filters: AuditFilters = {}) => {
+  const query = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") query.set(key, String(value));
+  });
+  query.set("page", String(filters.page ?? 0));
+  query.set("size", String(filters.size ?? 50));
+  return apiRequest<PageResponse<AuditEvent>>(`/api/admin/audit-logs?${query}`, accessToken);
+};
+
+export const getAdminAnalyticsSummary = (accessToken: string) =>
+  apiRequest<AnalyticsSummary>("/api/admin/analytics/summary", accessToken);
+
+export const getAdminAnalyticsTimeseries = (accessToken: string, days: 7 | 30 | 90) =>
+  apiRequest<AnalyticsPoint[]>(`/api/admin/analytics/timeseries?days=${days}`, accessToken);
+
+export const getAdminAnalyticsActivity = (accessToken: string, days: 7 | 30 | 90) =>
+  apiRequest<ActivityResponse>(`/api/admin/analytics/user-activity?days=${days}`, accessToken);

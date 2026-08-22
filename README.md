@@ -103,6 +103,26 @@ Patient generates QR → verified pharmacist scans → authenticated Spring Boot
 → single dispensing record + QR revocation → patient/doctor Dispensed status
 ```
 
+## Final expansion
+
+The administrator portal now includes `/admin/users`, user details with ban/unban history, `/admin/audit-logs`,
+and `/admin/analytics`. User and audit tables are paginated; doctor accounts can be filtered by hospital,
+department, and specialization. Operational views intentionally omit chat text/images, symptoms, clinical notes,
+medicine details, QR material, and authentication secrets.
+
+Patients, doctors, and pharmacists can upload, replace, or remove an optional profile photo. Consultation chat
+supports up to four private JPEG, PNG, or WebP images per message, including image-only messages. Completed
+consultations remain writable for receipt communication; cancelled consultations remain read-only. Images use
+short-lived URLs issued by the API, and the Supabase service-role key is never a frontend variable.
+
+Positive-fee prescriptions display manual external-payment guidance and keep QR generation locked. The patient
+can open the consultation chat and send a receipt; the assigned verified doctor reviews it and confirms receipt.
+Only then does the Generate QR action become available. MediSync does not process payments or store bank details.
+
+The shared authentication lifecycle keeps the current portal rendered during same-user token/profile refreshes.
+The API client enforces a 15-second timeout, caller cancellation, and one controlled session-refresh retry after a
+401. WebSocket reconnects obtain the current Supabase token immediately before connecting.
+
 ## Product roadmap
 
 - Phase 1: authentication, roles, and security (complete)

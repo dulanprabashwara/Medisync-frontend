@@ -6,6 +6,7 @@ import { FormAlert, inputClassName } from "@/components/auth-card";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { ProtectedRoute } from "@/components/protected-route";
+import { ProfileImageEditor } from "@/components/profile-image-editor";
 import {
   getDoctorProfile,
   getReferenceDepartments,
@@ -168,6 +169,8 @@ function DoctorDashboardContent() {
       <p className="mt-3 max-w-2xl leading-7 text-slate-600">
         Complete and submit your professional identity for administrator verification.
       </p>
+
+      <ProfileImageEditor />
 
       <div className="mt-7 space-y-3">
         {error ? <FormAlert message={error} /> : null}

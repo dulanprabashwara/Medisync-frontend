@@ -4,7 +4,8 @@ export type AccountStatus =
   | "ACTIVE"
   | "PENDING_VERIFICATION"
   | "SUSPENDED"
-  | "DISABLED";
+  | "DISABLED"
+  | "BANNED";
 
 export type VerificationStatus = "PENDING" | "VERIFIED" | "REJECTED";
 
@@ -17,6 +18,14 @@ export interface MediSyncProfile {
   phone: string | null;
   role: UserRole;
   status: AccountStatus;
+  profileImageUrl: string | null;
+  profileImageUpdatedAt: string | null;
+}
+
+export interface AccountStatusDetails {
+  status: AccountStatus;
+  restrictionReason: string | null;
+  restrictedAt: string | null;
 }
 
 export interface OnboardingInput {
@@ -84,6 +93,7 @@ export interface AdminHospital {
   active: boolean;
   createdAt: string;
   updatedAt: string;
+  doctorCount: number;
 }
 
 export interface AdminDepartment {
@@ -94,6 +104,7 @@ export interface AdminDepartment {
   active: boolean;
   createdAt: string;
   updatedAt: string;
+  doctorCount: number;
 }
 
 export interface AdminSpecialization {
@@ -103,6 +114,7 @@ export interface AdminSpecialization {
   active: boolean;
   createdAt: string;
   updatedAt: string;
+  doctorCount: number;
 }
 
 export interface AdminDoctorReview {

@@ -24,6 +24,8 @@ export function ProtectedRoute({
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
     } else if (!profile) {
       router.replace("/onboarding");
+    } else if (profile.status === "BANNED") {
+      router.replace("/account-restricted");
     } else if (!roles.includes(profile.role)) {
       router.replace(dashboardPath(profile.role));
     }
@@ -43,7 +45,7 @@ export function ProtectedRoute({
       </main>
     );
   }
-  if (!session || !profile || !roles.includes(profile.role)) {
+  if (!session || !profile || profile.status === "BANNED" || !roles.includes(profile.role)) {
     return <LoadingPanel label="Taking you to the right place…" />;
   }
   if (profile.status === "SUSPENDED" || profile.status === "DISABLED") {

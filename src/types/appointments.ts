@@ -56,6 +56,7 @@ export interface DoctorSummary {
   qualifications: string;
   yearsOfExperience: number;
   bioSummary: string | null;
+  profileImageUrl: string | null;
   verified: boolean;
 }
 
