@@ -28,6 +28,7 @@ export interface DoctorPrescription {
   issuedAt: string | null; validUntil: string | null; expired: boolean;
   dispensingStatus: DispensingStatus; dispensedAt: string | null; dispensingPharmacy: string | null;
   cancelledAt: string | null; cancellationReason: string | null; createdAt: string; updatedAt: string;
+  cancellationAllowed: boolean; cancellationBlockedReason: string | null;
 }
 
 export interface PatientPrescriptionSummary {

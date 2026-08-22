@@ -52,6 +52,9 @@ function PatientConsultationContent() {
       } : current);
       void reconcile();
     }
+    if (event.eventType === "PAYMENT_STATUS_CHANGED") {
+      void reconcile();
+    }
   }, [reconcile]);
 
   const liveStatus = useConsultationEvents(consultationId, handleEvent, reconcile);
@@ -110,6 +113,18 @@ function PatientConsultationContent() {
               <Detail label="Additional notes" value={consultation.symptoms.additionalNotes} />
             </dl>
           </section>
+
+          {consultation.paymentSummary && consultation.paymentSummary.doctorFeeAmount > 0 ? (
+            <section className={`mt-8 rounded-3xl border p-6 shadow-sm sm:p-8 ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" ? "border-emerald-200 bg-emerald-50 text-emerald-950" : "border-amber-200 bg-amber-50 text-amber-950"}`}>
+              <p className="text-xs font-bold uppercase tracking-[0.16em]">Consultation Fee</p>
+              <h2 className="mt-2 text-3xl font-semibold">{consultation.paymentSummary.doctorFeeCurrency} {Number(consultation.paymentSummary.doctorFeeAmount).toFixed(2)}</h2>
+              <p className="mt-3 text-sm">
+                {consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED"
+                  ? `Payment confirmed${consultation.paymentSummary.paymentConfirmedAt ? ` ${new Date(consultation.paymentSummary.paymentConfirmedAt).toLocaleString()}` : ""}. You can now access your prescription.`
+                  : "Awaiting doctor's manual confirmation. Your prescription remains locked until the doctor confirms receipt of the fee."}
+              </p>
+            </section>
+          ) : null}
 
           {consultation.status === "CANCELLED" ? (
             <ConsultationCancellationPanel

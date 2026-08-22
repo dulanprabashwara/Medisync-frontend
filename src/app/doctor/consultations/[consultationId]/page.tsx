@@ -12,6 +12,7 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { useConsultationEvents } from "@/hooks/use-consultation-events";
 import {
   completeDoctorConsultation,
+  confirmPrescriptionPayment,
   getDoctorClinicalNote,
   getDoctorConsultation,
   getDoctorConsultationMessages,
@@ -31,7 +32,7 @@ function DoctorConsultationContent() {
   const [noteText, setNoteText] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [busy, setBusy] = useState<"start" | "complete" | "note" | null>(null);
+  const [busy, setBusy] = useState<"start" | "complete" | "note" | "payment" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -59,6 +60,9 @@ function DoctorConsultationContent() {
         status: event.status!,
         chatEnabled: event.status !== "CANCELLED",
       } : current);
+      void reconcile();
+    }
+    if (event.eventType === "PAYMENT_STATUS_CHANGED") {
       void reconcile();
     }
   }, [reconcile]);
@@ -163,6 +167,24 @@ function DoctorConsultationContent() {
     }
   }
 
+  async function confirmPayment() {
+    if (!session || !consultation?.paymentSummary) return;
+    const confirmed = window.confirm("Confirm that you received this consultation fee? This action is recorded in the audit log.");
+    if (!confirmed) return;
+    setBusy("payment");
+    setError(null);
+    setMessage(null);
+    try {
+      await confirmPrescriptionPayment(session.access_token, consultation.paymentSummary.prescriptionId);
+      setMessage("Consultation fee confirmed. The patient can now generate the prescription QR.");
+      await reconcile();
+    } catch (paymentError) {
+      setError(paymentError instanceof Error ? paymentError.message : "Payment could not be confirmed.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   if (loading && !consultation) return <LoadingPanel label="Loading the online consultation..." />;
   const noteReadOnly = consultation?.status === "COMPLETED" || consultation?.status === "CANCELLED";
 
@@ -225,6 +247,24 @@ function DoctorConsultationContent() {
           </div>
 
           {session ? <DoctorConsultationPrescriptions accessToken={session.access_token} consultationId={consultationId} consultationStatus={consultation.status} /> : null}
+
+          {consultation.paymentSummary && consultation.paymentSummary.doctorFeeAmount > 0 ? (
+            <section className={`mt-8 rounded-3xl border p-6 shadow-sm sm:p-8 ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" ? "border-emerald-200 bg-emerald-50 text-emerald-950" : "border-amber-200 bg-amber-50 text-amber-950"}`}>
+              <p className="text-xs font-bold uppercase tracking-[0.16em]">Consultation Fee</p>
+              <h2 className="mt-2 text-3xl font-semibold">{consultation.paymentSummary.doctorFeeCurrency} {Number(consultation.paymentSummary.doctorFeeAmount).toFixed(2)}</h2>
+              <p className="mt-3 text-sm">
+                {consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED"
+                  ? `Payment confirmed${consultation.paymentSummary.paymentConfirmedAt ? ` ${new Date(consultation.paymentSummary.paymentConfirmedAt).toLocaleString()}` : ""}. The patient's prescription QR is unlocked.`
+                  : "Awaiting your manual confirmation. The patient's prescription QR remains locked until payment is confirmed."}
+              </p>
+              {consultation.paymentSummary.doctorPaymentStatus === "AWAITING_CONFIRMATION" && (consultation.status === "IN_PROGRESS" || consultation.status === "COMPLETED") ? (
+                <button type="button" className="mt-5 rounded-xl bg-amber-900 px-6 py-3 text-sm font-semibold text-white hover:bg-amber-950 disabled:opacity-50"
+                  disabled={busy !== null} onClick={() => void confirmPayment()}>
+                  {busy === "payment" ? "Confirming…" : "Confirm Payment Received"}
+                </button>
+              ) : null}
+            </section>
+          ) : null}
 
           <section className="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm sm:p-8" aria-labelledby="clinical-note-heading">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-800">Doctor only</p>

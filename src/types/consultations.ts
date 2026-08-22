@@ -1,8 +1,20 @@
 import type { AppointmentStatus, AppointmentSymptoms, PageResponse } from "@/types/appointments";
+import type { DoctorFeeStatus, DispensingStatus, PrescriptionStatus } from "@/types/prescriptions";
 
 export type ConsultationStatus = "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 export type ConsultationSenderType = "PATIENT" | "DOCTOR";
-export type ConsultationEventType = "NEW_MESSAGE" | "CONSULTATION_STATUS_CHANGED";
+export type ConsultationEventType = "NEW_MESSAGE" | "CONSULTATION_STATUS_CHANGED" | "PAYMENT_STATUS_CHANGED";
+
+export interface ConsultationPaymentSummary {
+  prescriptionId: string;
+  prescriptionStatus: PrescriptionStatus;
+  doctorFeeAmount: number;
+  doctorFeeCurrency: string;
+  doctorPaymentStatus: DoctorFeeStatus;
+  paymentConfirmedAt: string | null;
+  qrGenerationAllowed: boolean;
+  dispensingStatus: DispensingStatus;
+}
 
 export interface ConsultationDetails {
   id: string;
@@ -24,6 +36,7 @@ export interface ConsultationDetails {
   cancelledAt: string | null;
   createdAt: string;
   updatedAt: string;
+  paymentSummary: ConsultationPaymentSummary | null;
 }
 
 export interface ConsultationMessage {
