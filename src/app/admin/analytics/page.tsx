@@ -24,13 +24,31 @@ function AnalyticsContent() {
     if (!session) return;
     setLoading(true); setError(null);
     try {
-      const [nextSummary, nextPoints, nextActivity] = await Promise.all([
+      const results = await Promise.allSettled([
         getAdminAnalyticsSummary(session.access_token),
         getAdminAnalyticsTimeseries(session.access_token, range),
         getAdminAnalyticsActivity(session.access_token, range),
       ]);
-      setSummary(nextSummary); setPoints(nextPoints); setActivity(nextActivity);
-    } catch (loadError) { setError(loadError instanceof Error ? loadError.message : "Analytics could not be loaded."); }
+
+      const [summaryResult, pointsResult, activityResult] = results;
+
+      if (summaryResult.status === "fulfilled") setSummary(summaryResult.value);
+      else setSummary(null);
+
+      if (pointsResult.status === "fulfilled") setPoints(pointsResult.value);
+      else setPoints([]);
+
+      if (activityResult.status === "fulfilled") setActivity(activityResult.value);
+      else setActivity(null);
+
+      if (results.every(r => r.status === "rejected")) {
+        setError(summaryResult.status === "rejected" && summaryResult.reason instanceof Error 
+          ? summaryResult.reason.message 
+          : "Analytics could not be loaded.");
+      }
+    } catch (loadError) { 
+      setError(loadError instanceof Error ? loadError.message : "Analytics could not be loaded."); 
+    }
     finally { setLoading(false); }
   }, [range, session]);
   useEffect(() => { const timer = window.setTimeout(() => void load(), 0); return () => window.clearTimeout(timer); }, [load]);
