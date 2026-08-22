@@ -5,7 +5,8 @@ export type AccountStatus =
   | "PENDING_VERIFICATION"
   | "SUSPENDED"
   | "DISABLED"
-  | "BANNED";
+  | "BANNED"
+  | "DELETED";
 
 export type VerificationStatus = "PENDING" | "VERIFIED" | "REJECTED";
 

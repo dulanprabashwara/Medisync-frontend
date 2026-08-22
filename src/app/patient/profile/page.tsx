@@ -4,6 +4,7 @@ import { PortalHeading } from "@/components/portal-ui";
 import { ProfileImageEditor } from "@/components/profile-image-editor";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/components/auth-provider";
+import { AccountSettingsDangerZone } from "@/components/account-settings-danger-zone";
 
 function PatientProfileContent() {
   const { profile } = useAuth();
@@ -19,6 +20,7 @@ function PatientProfileContent() {
           <div><dt className="text-sm text-slate-500">Email</dt><dd className="mt-1 font-semibold text-slate-950">{profile?.email}</dd></div>
         </dl>
       </section>
+      <AccountSettingsDangerZone />
     </main>
   );
 }

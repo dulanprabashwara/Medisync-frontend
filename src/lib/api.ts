@@ -597,6 +597,12 @@ export const banAdminUser = (accessToken: string, userId: string, reason: string
 export const unbanAdminUser = (accessToken: string, userId: string) =>
   apiRequest<AdminUserDetail>(`/api/admin/users/${userId}/unban`, accessToken, { method: "POST" });
 
+export const deleteAdminUser = (accessToken: string, userId: string, reason: string) =>
+  apiRequest<AdminUserDetail>(`/api/admin/users/${userId}`, accessToken, {
+    method: "DELETE",
+    body: JSON.stringify({ reason }),
+  });
+
 export interface AuditFilters {
   action?: string;
   actorUserId?: string;

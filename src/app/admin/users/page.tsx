@@ -104,7 +104,7 @@ function UsersContent() {
           className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-2" />
         <FilterSelect value={filters.role ?? ""} label="All roles" values={["PATIENT", "DOCTOR", "PHARMACIST", "ADMIN"]}
           onChange={(value) => setFilters((current) => ({ ...current, role: (value || undefined) as UserRole | undefined, verificationStatus: value === "DOCTOR" || value === "PHARMACIST" ? current.verificationStatus : undefined, hospitalId: value === "DOCTOR" ? current.hospitalId : undefined, departmentId: value === "DOCTOR" ? current.departmentId : undefined, specializationId: value === "DOCTOR" ? current.specializationId : undefined, page: 0 }))} />
-        <FilterSelect value={filters.status ?? ""} label="All account statuses" values={["ACTIVE", "PENDING_VERIFICATION", "SUSPENDED", "DISABLED", "BANNED"]}
+        <FilterSelect value={filters.status ?? ""} label="All account statuses" values={["ACTIVE", "PENDING_VERIFICATION", "SUSPENDED", "DISABLED", "BANNED", "DELETED"]}
           onChange={(value) => setFilters((current) => ({ ...current, status: (value || undefined) as AccountStatus | undefined, page: 0 }))} />
         <button className="rounded-xl bg-teal-700 px-5 py-3 font-semibold text-white">Search</button>
         {filters.role === "DOCTOR" || filters.role === "PHARMACIST" ? <FilterSelect value={filters.verificationStatus ?? ""} label="All professional verification" values={["PENDING", "VERIFIED", "REJECTED"]}
@@ -166,7 +166,7 @@ function Avatar({ user }: { user: AdminUserSummary }) {
 }
 
 function Status({ value }: { value: AccountStatus }) {
-  return <span className={`rounded-full px-3 py-1 text-xs font-bold ${value === "ACTIVE" ? "bg-emerald-100 text-emerald-800" : value === "BANNED" ? "bg-rose-100 text-rose-800" : "bg-amber-100 text-amber-900"}`}>{value}</span>;
+  return <span className={`rounded-full px-3 py-1 text-xs font-bold ${value === "ACTIVE" ? "bg-emerald-100 text-emerald-800" : (value === "BANNED" || value === "DELETED") ? "bg-rose-100 text-rose-800" : "bg-amber-100 text-amber-900"}`}>{value}</span>;
 }
 
 export default function AdminUsersPage() { return <ProtectedRoute roles={["ADMIN"]}><UsersContent /></ProtectedRoute>; }

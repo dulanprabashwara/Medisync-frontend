@@ -7,6 +7,7 @@ import { LoadingPanel } from "@/components/loading-panel";
 import { PortalHeading } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
 import { ProfileImageEditor } from "@/components/profile-image-editor";
+import { AccountSettingsDangerZone } from "@/components/account-settings-danger-zone";
 import {
   getPharmacistProfessionalProfile,
   submitPharmacistVerification,
@@ -188,6 +189,7 @@ function Content() {
       <ProfileField label="Qualifications" maxLength={500} disabled={!value?.editable} value={form.qualifications} onChange={(text) => updateField("qualifications", text)} />
       {value?.editable ? <div className="flex flex-wrap gap-3"><button className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold disabled:opacity-50" disabled={busy !== null} type="submit">{busy === "save" ? "Saving..." : "Save profile"}</button><button className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white disabled:opacity-50" disabled={busy !== null} type="button" onClick={() => void submit()}>{busy === "submit" ? "Submitting..." : "Save and submit for verification"}</button></div> : null}
     </form>
+    <AccountSettingsDangerZone />
   </main>;
 }
 

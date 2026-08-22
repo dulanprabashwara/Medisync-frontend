@@ -7,6 +7,7 @@ import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { ProtectedRoute } from "@/components/protected-route";
 import { ProfileImageEditor } from "@/components/profile-image-editor";
+import { AccountSettingsDangerZone } from "@/components/account-settings-danger-zone";
 import {
   getDoctorProfile,
   getReferenceDepartments,
@@ -286,6 +287,8 @@ function DoctorDashboardContent() {
           );
         })}
       </section>
+      
+      <AccountSettingsDangerZone />
     </main>
   );
 }

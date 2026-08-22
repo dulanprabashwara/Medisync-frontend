@@ -36,6 +36,7 @@ export interface AdminUserDetail {
   operationalCounts: Record<string, number>;
   banHistory: AdminBanHistory[];
   recentActivity: AuditEvent[];
+  deletionMetadata?: Record<string, string> | null;
 }
 
 export interface AuditEvent {
