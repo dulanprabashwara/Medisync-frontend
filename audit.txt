@@ -1,0 +1,433 @@
+ROUTE: /
+HEADERS: More room for care, wherever patients are. | One trusted identity. Scheduled online care. | {title}
+BUTTONS: 
+LINKS: Create your account (/register) | Sign in securely (/login)
+COMPONENTS: Link
+
+ROUTE: /login
+HEADERS: 
+BUTTONS: {busy ? "Signing in…" : "Sign in"}
+LINKS: Forgot password? (/forgot-password)
+COMPONENTS: HTMLFormElement, AuthCard, FormAlert, Link
+
+ROUTE: /register
+HEADERS: 
+BUTTONS: {busy ? "Creating account…" : "Create account"}
+LINKS: 
+COMPONENTS: HTMLFormElement, AuthCard, FormAlert
+
+ROUTE: /forgot-password
+HEADERS: 
+BUTTONS: {busy ? "Sending link…" : "Send reset link"}
+LINKS: 
+COMPONENTS: HTMLFormElement, AuthCard, FormAlert
+
+ROUTE: /update-password
+HEADERS: 
+BUTTONS: {busy ? "Updating…" : "Update password"}
+LINKS: 
+COMPONENTS: HTMLFormElement, AuthCard, FormAlert
+
+ROUTE: /onboarding
+HEADERS: Create your MediSync profile
+BUTTONS: {busy ? "Creating profile…" : "Complete onboarding"}
+LINKS: 
+COMPONENTS: OnboardingInput, Record, HTMLFormElement, LoadingPanel, FormAlert
+
+ROUTE: /account-deleted
+HEADERS: 
+BUTTONS: 
+LINKS: Return to login (/login)
+COMPONENTS: AuthCard, Link
+
+ROUTE: /account-restricted
+HEADERS: Your MediSync access has been restricted
+BUTTONS: void signOut().then(() => router.replace("/login"))}
+          className="mt-6 rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white"
+        >
+          Sign out
+LINKS: 
+COMPONENTS: AccountStatusDetails, LoadingPanel
+
+ROUTE: /admin/analytics
+HEADERS: {([7, 30, 90] as Range[]).map((days) =>  setRange(days)} className={`rounded-xl px-4 py-2 text-sm font-semibold ${range === days ? "bg-teal-700 text-white" : "border bg-white"}`}>{days} days)}
+    {loading && !summary ?  : summary ? <>
+      
+      Daily platform activity | {title} | {title} | Operational analytics
+BUTTONS: setRange(days)} className={`rounded-xl px-4 py-2 text-sm font-semibold ${range === days ? "bg-teal-700 text-white" : "border bg-white"}`}>{days} days
+LINKS: 
+COMPONENTS: Range, AnalyticsSummary, AnalyticsPoint, ActivityResponse, PortalHeading, AdminNavigation, InlineError, LoadingPanel, Metric, TrendChart, Breakdown, Ranking, ProtectedRoute, AnalyticsContent
+
+ROUTE: /admin/audit
+HEADERS: setDraft({ ...draft, action: event.target.value || undefined })} className="rounded-xl border px-4 py-3" /> setDraft({ ...draft, actorRole: (event.target.value || undefined) as AuditFilters["actorRole"] })} className="rounded-xl border px-4 py-3">All actor rolesPATIENTDOCTORPHARMACISTADMIN setDraft({ ...draft, actorUserId: event.target.value || undefined })} className="rounded-xl border px-4 py-3" /> setDraft({ ...draft, targetUserId: event.target.value || undefined })} className="rounded-xl border px-4 py-3" /> setDraft({ ...draft, targetType: event.target.value || undefined })} className="rounded-xl border px-4 py-3" />From setDraft({ ...draft, from: event.target.value || undefined })} className="mt-1 w-full rounded-xl border px-4 py-3 text-slate-950" />To setDraft({ ...draft, to: event.target.value || undefined })} className="mt-1 w-full rounded-xl border px-4 py-3 text-slate-950" />Filter events
+    {loading ?  : {total} matching events{events.map((event) => {event.action} | Audit log
+BUTTONS: Filter events | setFilters((current) => ({ ...current, page: Math.max(0, (current.page ?? 0) - 1) }))}>Previous | = totalPages} onClick={() => setFilters((current) => ({ ...current, page: (current.page ?? 0) + 1 }))}>Next
+LINKS: 
+COMPONENTS: AuditEvent, AuditFilters, PortalHeading, AdminNavigation, InlineError, LoadingPanel, ProtectedRoute, AuditContent
+
+ROUTE: /admin/audit-logs
+HEADERS: 
+BUTTONS: 
+LINKS: 
+COMPONENTS: 
+
+ROUTE: /admin/dashboard
+HEADERS: Welcome, {profile?.firstName ?? "Administrator"} | Dr. {doctor.firstName} {doctor.lastName} | {pharmacist.firstName} {pharmacist.lastName} | Dr. {selectedDoctor.firstName} {selectedDoctor.lastName} | {selectedPharmacist.firstName} {selectedPharmacist.lastName} | {title} | {title} | {value.id ? "Edit hospital" : "Add hospital"} | {value.id ? "Edit department" : "Add department"} | {value.id ? "Edit specialization" : "Add specialization"}
+BUTTONS: { setSelectedDoctor(doctor); setRejectionReason(""); }}>
+                    Review profile | { setSelectedPharmacist(pharmacist); setRejectionReason(""); }}>Review profile | setSelectedDoctor(null)}>Close | void approveDoctor(selectedDoctor)}>{busy ? "Processing..." : "Approve doctor"} | void rejectSelectedDoctor()}>{busy ? "Processing..." : "Reject with reason"} | setSelectedPharmacist(null)}>Close | void approvePharmacist(selectedPharmacist)}>{busy ? "Processing..." : "Approve pharmacist"} | void rejectSelectedPharmacist()}>{busy ? "Processing..." : "Reject with reason"} | {children} | Edit | {busy ? "Saving..." : active ? "Deactivate" : "Activate"} | {busy ? "Saving..." : editing ? "Update" : "Create"} | Cancel
+LINKS: Doctors: {doctorCount} · View doctors (doctorsHref)
+COMPONENTS: AdminTab, AdminHospital, AdminDepartment, AdminSpecialization, AdminDoctorReview, AdminPharmacistReview, LoadingPanel, AdminNavigation, FormAlert, TabButton, SectionHeading, EmptyState, ReviewDetail, MasterSection, HospitalForm, MasterRow, DepartmentForm, SpecializationForm, Link, ActiveCheckbox, FormButtons, ProtectedRoute, AdminDashboardContent
+
+ROUTE: /admin/profile
+HEADERS: 
+BUTTONS: 
+LINKS: 
+COMPONENTS: AdminNavigation, PortalHeading, ProfileImageEditor, AdminProfileEditor, ProtectedRoute, AdminProfileContent
+
+ROUTE: /admin/users
+HEADERS: User management
+BUTTONS: Search | setFilters((current) => ({ ...current, page: Math.max(0, (current.page ?? 0) - 1) }))}>Previous | = totalPages} onClick={() => setFilters((current) => ({ ...current, page: (current.page ?? 0) + 1 }))}>Next
+LINKS: 
+COMPONENTS: AdminUserSummary, AdminUserFilters, AdminHospital, AdminDepartment, AdminSpecialization, PortalHeading, AdminNavigation, FilterSelect, NamedFilter, InlineError, LoadingPanel, Avatar, Status, Professional, Link, ProtectedRoute, UsersContent
+
+ROUTE: /admin/users/[userId]
+HEADERS: {detail && user ? <>
+      
+        {user.profileImageUrl ?  : user.firstName.charAt(0)}{user.email} | Operational counts | Account access | Ban history | Recent safe activity | Delete Account | Deletion Information
+BUTTONS: void unban()} className="mt-4 rounded-xl bg-emerald-800 px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">{busy ? "Restoring…" : "Unban account"} | void ban()} className="mt-4 rounded-xl bg-rose-800 px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">{busy ? "Restricting…" : "Ban account"} | void deleteAccount()} className="mt-4 rounded-xl bg-rose-700 px-5 py-3 text-sm font-semibold text-white disabled:opacity-50 hover:bg-rose-800">
+            {deleteBusy ? "Deleting…" : "Delete account"}
+LINKS: 
+COMPONENTS: AdminUserDetail, LoadingPanel, PortalHeading, AdminNavigation, InlineError, Data, ProtectedRoute, UserDetailContent
+
+ROUTE: /doctor/appointments
+HEADERS: {message ? {message} : null}
+      
+
+      {loading ?  : appointments.length === 0 ? (
+        No consultation requests are currently waiting for review.
+      ) : (
+        
+          
+          
+          
+        
+      )}
+    
+  );
+}
+
+interface SectionProps {
+  title: string;
+  empty: string;
+  appointments: Appointment[];
+  expandedId: string | null;
+  setExpandedId: (id: string | null) => void;
+  reasonAction: ReasonAction;
+  reason: string;
+  setReason: (reason: string) => void;
+  busy: string | null;
+  now: number;
+  onAccept: (id: string) => Promise;
+  onOpenReason: (id: string, kind: "reject" | "cancel") => void;
+  onSubmitReason: () => Promise;
+}
+
+function DoctorAppointmentSection(props: SectionProps) {
+  return (
+    
+      {props.title} | {appointment.patientName} | Online Consultations
+BUTTONS: props.setExpandedId(expanded ? null : appointment.id)}>{expanded ? "Hide details" : "View details"} | void props.onAccept(appointment.id)}>{props.busy === appointment.id ? "Processing..." : "Accept"} | props.onOpenReason(appointment.id, "reject")}>Decline | props.onOpenReason(appointment.id, "cancel")}>Cancel consultation | void props.onSubmitReason()}>
+                      {props.busy === appointment.id ? "Processing..." : props.reasonAction?.kind === "reject" ? "Confirm decline" : "Confirm cancellation"}
+LINKS: 
+COMPONENTS: Appointment, ReasonAction, PortalHeading, InlineError, LoadingPanel, DoctorAppointmentSection, StateBadge, ConsultationStatusBadge, Link, Detail, ProtectedRoute, DoctorAppointmentsContent
+
+ROUTE: /doctor/availability
+HEADERS: {message ? {message} : null}
+      
+
+      
+        Create consultation availability | Your consultation availability | {formatAppointmentTime(availability.startsAt)} | Consultation Availability
+BUTTONS: {busy === "create" ? "Creating..." : "Create availability"} | void deactivate(availability.id)}>
+                      {busy === availability.id ? "Deactivating..." : "Deactivate"} | void toggleSlot(slot.id, slot.status === "AVAILABLE")}>
+                          {busy === slot.id ? "Updating..." : slot.status === "AVAILABLE" ? "Block" : "Unblock"}
+LINKS: 
+COMPONENTS: AvailabilityWindow, PortalHeading, InlineError, LoadingPanel, StateBadge, ProtectedRoute, DoctorAvailabilityContent
+
+ROUTE: /doctor/consultations/[consultationId]
+HEADERS: {message ? {message} : null}
+      
+
+      {consultation ? (
+        <>
+          
+            
+              
+                Scheduled {formatAppointmentTime(consultation.scheduledStart)}
+                {consultation.specializationName} · {consultation.departmentName}
+              
+              
+            
+            
+              
+              
+              
+              
+            
+            
+              {consultation.status === "SCHEDULED" ? (
+                 void start()}>
+                  {busy === "start" ? "Starting..." : "Start Consultation"}
+                
+              ) : null}
+              {consultation.status === "IN_PROGRESS" ? (
+                 void complete()}>
+                  {busy === "complete" ? "Completing..." : "Complete Consultation"}
+                
+              ) : null}
+              {consultation.status === "COMPLETED" ? Consultation completed : null}
+              {consultation.status === "CANCELLED" ? Consultation cancelled : null}
+            
+          
+
+          {consultation.status === "CANCELLED" ? (
+            
+          ) : null}
+
+          
+            
+          
+
+          {session ?  : null}
+
+          {consultation.paymentSummaries.map((summary) => (
+            
+              
+                
+                  Prescription Issued | Private Clinical Note
+BUTTONS: void start()}>
+                  {busy === "start" ? "Starting..." : "Start Consultation"} | void complete()}>
+                  {busy === "complete" ? "Completing..." : "Complete Consultation"} | void confirmPayment(summary.prescriptionId)}>
+                        {busy === "payment-" + summary.prescriptionId ? "Confirming…" : "Confirm Payment Received"} | void saveNote()}>
+                  {busy === "note" ? "Saving..." : "Save Note"}
+LINKS: 
+COMPONENTS: ConsultationDetails, ConsultationMessage, ClinicalNote, LoadingPanel, PortalHeading, InlineError, ConsultationStatusBadge, Detail, ConsultationCancellationPanel, ConsultationChat, DoctorConsultationPrescriptions, ProtectedRoute, DoctorConsultationContent
+
+ROUTE: /doctor/dashboard
+HEADERS: Welcome, Dr. {user?.lastName ?? "Doctor"} | Professional verification complete | Your professional profile has been submitted | Complete your professional profile | Professional profile | {module.title}
+BUTTONS: void load()}>
+          Try again | {busy === "save" ? "Saving..." : "Save profile"} | void submit()} type="button">
+                  {busy === "submit" ? "Submitting..." : rejected ? "Resubmit for verification" : "Submit for verification"}
+LINKS: {content} (module.href)
+COMPONENTS: DoctorProfessionalProfile, HospitalReference, DepartmentReference, SpecializationReference, DoctorProfileInput, LoadingPanel, FormAlert, ProfileImageEditor, Field, Link, AccountSettingsDangerZone, ProtectedRoute, DoctorDashboardContent
+
+ROUTE: /doctor/prescriptions
+HEADERS: {items.length === 0 ? No prescriptions yet. Open a consultation to create one. : items.map((item) => {item.patientName} | Prescriptions
+BUTTONS: 
+LINKS: 
+COMPONENTS: DoctorPrescription, LoadingPanel, PortalHeading, InlineError, Link, PrescriptionStatusBadge, ProtectedRoute, Content
+
+ROUTE: /doctor/prescriptions/[prescriptionId]
+HEADERS: {notice ? {notice} : null}{value ? <>
+      
+      {value.status === "ISSUED" && value.doctorFeeAmount > 0 ? Consultation fee{value.doctorFeeCurrency} {Number(value.doctorFeeAmount).toFixed(2)} | Dispensing status: Dispensed | Medicines ({form.items.length}/20) | Legacy draft is read-only | Prescription cancelled
+BUTTONS: = 20 || busy !== null} onClick={() => { setDirty(true); setForm((current) => ({ ...current, items: [...current.items, emptyItem()] })); }}>Add medicine | { setDirty(true); setValidationErrors({}); setForm((current) => ({ ...current, items: current.items.filter((_, i) => i !== index) })); }}>Remove | void save()}>{busy === "save" ? "Saving..." : "Save draft"} | void issue()}>{busy === "issue" ? "Issuing..." : "Issue prescription"} | void discard()}>{busy === "discard" ? "Discarding..." : "Discard draft"} | void discard()}>{busy === "discard" ? "Discarding..." : "Discard draft"} | void cancel()}>{busy === "cancel" ? "Cancelling..." : "Cancel prescription"}
+LINKS: 
+COMPONENTS: Record, DoctorPrescription, PrescriptionDraftInput, LoadingPanel, PortalHeading, InlineError, PrescriptionStatusBadge, PrescriptionItemsView, ProtectedRoute, Content
+
+ROUTE: /patient/appointments
+HEADERS: {message ? {message} : null}
+      
+
+      {loading ?  : appointments.length === 0 ? (
+        You have no online consultation requests yet.
+      ) : (
+        
+          
+          
+          
+        
+      )}
+    
+  );
+}
+
+interface SectionProps {
+  title: string;
+  empty: string;
+  appointments: Appointment[];
+  expandedId: string | null;
+  setExpandedId: (id: string | null) => void;
+  cancelId: string | null;
+  setCancelId: (id: string | null) => void;
+  cancelReason: string;
+  setCancelReason: (reason: string) => void;
+  busy: string | null;
+  now: number;
+  onCancel: (id: string) => Promise;
+}
+
+function AppointmentSection(props: SectionProps) {
+  return (
+    
+      {props.title} | {appointment.doctorName} | My Online Consultations
+BUTTONS: props.setExpandedId(expanded ? null : appointment.id)}>
+                    {expanded ? "Hide details" : "View details"} | props.setCancelId(props.cancelId === appointment.id ? null : appointment.id)}>Cancel consultation | void props.onCancel(appointment.id)}>
+                      {props.busy === appointment.id ? "Cancelling..." : "Confirm cancellation"}
+LINKS: 
+COMPONENTS: Appointment, PortalHeading, InlineError, LoadingPanel, AppointmentSection, StateBadge, ConsultationStatusBadge, Link, Detail, ProtectedRoute, PatientAppointmentsContent
+
+ROUTE: /patient/consultations/[consultationId]
+HEADERS: {consultation ? (
+        <>
+          
+            
+              
+                {consultation.specializationName}
+                Affiliated hospital: {consultation.hospitalName}
+              
+              
+            
+            
+              
+              
+              
+              
+              
+              
+            
+          
+
+          {consultation.paymentSummaries.map((summary) => (
+            
+              
+                
+                  Prescription Issued
+BUTTONS: 
+LINKS: 
+COMPONENTS: ConsultationDetails, ConsultationMessage, LoadingPanel, PortalHeading, InlineError, ConsultationStatusBadge, Detail, ConsultationCancellationPanel, ConsultationChat, ProtectedRoute, PatientConsultationContent
+
+ROUTE: /patient/dashboard
+HEADERS: 
+BUTTONS: 
+LINKS: 
+COMPONENTS: DashboardShell, ProtectedRoute, PatientDashboardContent
+
+ROUTE: /patient/doctors
+HEADERS: Doctor name
+             setQ(event.target.value)} />
+          
+          Affiliated hospital
+             void chooseHospital(event.target.value)}>
+              All hospitals
+              {hospitals.map((hospital) => {hospital.name})}
+            
+          
+          Department
+             setDepartmentId(event.target.value)}>
+              {departmentsLoading ? "Loading..." : "All departments"}
+              {departments.map((department) => {department.name})}
+            
+          
+          Specialization
+             setSpecializationId(event.target.value)}>
+              All specializations
+              {specializations.map((specialization) => {specialization.name})}
+            
+          
+          
+            
+              {loading ? "Searching..." : "Search doctors"}
+            
+             void clearFilters()}>
+              Clear filters
+            
+          
+        
+      
+
+      
+      {loading && !results ?  : results?.content.length === 0 ? (
+        No doctors match your current filters.
+      ) : (
+        
+          {results?.content.map((doctor) => (
+            
+              
+                
+                  {doctor.profileImageUrl ?  : doctor.displayName.replace("Dr. ", "").charAt(0)}
+                  
+                  {doctor.displayName} | Find a doctor
+BUTTONS: {loading ? "Searching..." : "Search doctors"} | void clearFilters()}>
+              Clear filters | void search(results.page - 1)}>Previous | void search(results.page + 1)}>Next
+LINKS: 
+COMPONENTS: HospitalReference, DepartmentReference, SpecializationReference, PageResponse, DoctorSummary, PortalHeading, InlineError, LoadingPanel, Link, ProtectedRoute, PatientDoctorSearchContent
+
+ROUTE: /patient/doctors/[doctorId]
+HEADERS: {doctor ? (
+        
+          
+            {doctor.profileImageUrl ?  : doctor.displayName.replace("Dr. ", "").charAt(0)}
+            
+              Affiliated hospital{doctor.hospitalName}
+              Department{doctor.departmentName}
+              Specialization{doctor.specializationName}
+              Qualifications{doctor.qualifications}
+              Experience{doctor.yearsOfExperience} years
+            
+            ADMIN VERIFIED
+          
+          {doctor.bio ? About | Available Online Consultation Times | Request {formatAppointmentTime(selectedSlot.startsAt)}
+BUTTONS: void loadSlots()}>
+              {slotsLoading ? "Loading..." : "Update dates"} | setSelectedSlot(slot)}>
+                {formatAppointmentTime(slot.startsAt)}
+                Ends {new Date(slot.endsAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} | {submitting ? "Requesting online consultation..." : "Request online consultation"}
+LINKS: 
+COMPONENTS: CreateAppointmentInput, DoctorDetails, AppointmentSlot, LoadingPanel, PortalHeading, InlineError, ProtectedRoute, PatientDoctorDetailsContent
+
+ROUTE: /patient/prescriptions
+HEADERS: {items.length === 0 ? You do not have any issued prescriptions yet. : items.map((item) => {item.doctorName} | Digital prescriptions
+BUTTONS: 
+LINKS: 
+COMPONENTS: PatientPrescriptionSummary, LoadingPanel, PortalHeading, InlineError, Link, PrescriptionStatusBadge, ProtectedRoute, Content
+
+ROUTE: /patient/prescriptions/[prescriptionId]
+HEADERS: {value ? <>
+      
+        {value.doctorName} | Prescription dispensed | Prescription cancelled | Medicines | General instructions | Secure Prescription QR | Prescription details
+BUTTONS: void generateQr()}>{qrBusy ? "Generating..." : "Generate a new QR"} | void generateQr()}>{qrBusy ? "Generating..." : "Generate QR"} | window.print()}>Print prescription
+LINKS: 
+COMPONENTS: PatientPrescriptionDetail, LoadingPanel, PortalHeading, InlineError, PrescriptionStatusBadge, PrescriptionItemsView, PrescriptionQr, ProtectedRoute, Content
+
+ROUTE: /patient/profile
+HEADERS: 
+BUTTONS: 
+LINKS: 
+COMPONENTS: PortalHeading, ProfileImageEditor, AccountSettingsDangerZone, ProtectedRoute, PatientProfileContent
+
+ROUTE: /pharmacist/dashboard
+HEADERS: 
+BUTTONS: 
+LINKS: 
+COMPONENTS: PharmacistProfessionalProfile, LoadingPanel, DashboardShell, ProtectedRoute, PharmacistDashboardContent
+
+ROUTE: /pharmacist/dispensing-history
+HEADERS: {items.length === 0 ? No prescriptions have been dispensed through this account. : items.map((item) =>  void open(item)}>{item.patientName} | {selected.patientName} | Medicines dispensed | {item.medicineName}{item.strength ? ` · ${item.strength}` : ""} | Dispensing note | Dispensing history
+BUTTONS: void open(item)}>{item.patientName}{item.doctorName} · {item.medicineCount} medicine{item.medicineCount === 1 ? "" : "s"}{formatAppointmentTime(item.dispensedAt)}{item.pharmacyName} | setSelected(null)}>Close
+LINKS: 
+COMPONENTS: DispensationHistorySummary, DispensationHistoryDetail, LoadingPanel, PortalHeading, InlineError, HistoryDetail, ProtectedRoute, Content
+
+ROUTE: /pharmacist/profile
+HEADERS: {error ?  : null}{message ?  : null}
+    {value?.verificationStatus === "REJECTED" ? Verification rejected | Awaiting administrator review | Verified pharmacist | Professional profile
+BUTTONS: void refreshProfile()}>Refresh account access | {busy === "save" ? "Saving..." : "Save profile"} | void submit()}>{busy === "submit" ? "Submitting..." : "Save and submit for verification"}
+LINKS: 
+COMPONENTS: Record, PharmacistProfessionalProfile, PharmacistProfileInput, LoadingPanel, PortalHeading, ProfileImageEditor, FormAlert, ProfileField, AccountSettingsDangerZone, ProtectedRoute, Content
+
+ROUTE: /pharmacist/scan
+HEADERS: {error ?  : null}
+
+    {success ? Dispensing completePrescription Dispensed Successfully | Camera scanner | Manual QR entry | Confirm Dispensing | {titles[value.status]} | Medicines | {item.medicineName}{item.strength ? ` · ${item.strength}` : ""} | General instructions | Scan prescription
+BUTTONS: setSuccess(null)}>Scan another prescription | void startCamera()}>{cameraActive ? "Camera active" : "Start camera"} | void stopCamera()}>Stop camera | {busy === "verify" ? "Verifying..." : "Verify prescription"} | setConfirming(false)}>Cancel | void dispense()}>{busy === "dispense" ? "Dispensing..." : "Confirm Dispense"} | Dispense Prescription
+LINKS: 
+COMPONENTS: Html5Qrcode, PharmacyPrescriptionVerification, DispensePrescriptionResult, PortalHeading, FormAlert, VerificationResult, Detail, ProtectedRoute, Content
+
