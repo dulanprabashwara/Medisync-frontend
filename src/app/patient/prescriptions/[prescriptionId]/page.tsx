@@ -13,6 +13,7 @@ import { SectionCard } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { generatePatientPrescriptionQr, getPatientPrescription } from "@/lib/api";
+import { formatDoctorName } from "@/lib/formatters";
 import type { PatientPrescriptionDetail } from "@/types/prescriptions";
 
 export default function PatientPrescriptionDetailPage() {
@@ -97,7 +98,7 @@ export default function PatientPrescriptionDetailPage() {
               <SectionCard>
                 <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-6">
                   <div>
-                    <h2 className="text-xl font-semibold text-slate-950">Dr. {value.doctorName}</h2>
+                    <h2 className="text-xl font-semibold text-slate-950">{formatDoctorName(value.doctorName)}</h2>
                     <p className="text-sm font-medium text-teal-700 mt-1">{value.specializationName}</p>
                     <p className="text-sm text-slate-600">{value.medicalRegistrationNumber}</p>
                   </div>

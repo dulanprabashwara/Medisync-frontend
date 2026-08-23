@@ -7,11 +7,12 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/components/auth-provider";
 import { PortalHeading, formatAppointmentTime } from "@/components/portal-ui";
 import { getPatientAppointments, getPatientPrescriptions } from "@/lib/api";
+import { formatDoctorName } from "@/lib/formatters";
 import { LoadingPanel } from "@/components/loading-panel";
 import { SectionCard, StatCard } from "@/components/ui/card";
-import { StatusBadge, type StatusTone } from "@/components/ui/status-badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import type { Appointment } from "@/types/appointments";
 import type { PatientPrescriptionSummary } from "@/types/prescriptions";
 
@@ -24,7 +25,7 @@ function PatientDashboardContent() {
   const [now, setNow] = useState(0);
 
   useEffect(() => {
-    setNow(Date.now());
+    const timer = setTimeout(() => setNow(Date.now()), 0);
     async function loadData() {
       if (!session) return;
       try {
@@ -66,15 +67,15 @@ function PatientDashboardContent() {
     type: "payment",
     title: "Prescription issued",
     message: "Your doctor has issued a prescription. Payment is awaiting confirmation.",
-    action: "Open Consultation",
+    actionLabel: "Open Consultation",
     href: `/patient/consultations/${pendingPayments[0].consultationId}`,
     icon: AlertCircle,
     tone: "border-amber-200 bg-amber-50 text-amber-900"
   } : pendingRequests[0] ? {
     type: "request",
     title: "Consultation request awaiting response",
-    message: `Your request to Dr. ${pendingRequests[0].doctorName} is pending.`,
-    action: "View Request",
+    message: `Your request to ${formatDoctorName(pendingRequests[0].doctorName)} is pending.`,
+    actionLabel: "View Request",
     href: "/patient/appointments",
     icon: Calendar,
     tone: "border-sky-200 bg-sky-50 text-sky-900"
@@ -92,12 +93,10 @@ function PatientDashboardContent() {
         description={isNewPatient ? "Welcome to MediSync. Find a verified doctor and request your first online consultation." : "Here’s what’s happening with your care."}
         backHref=""
         action={
-          <Button asChild>
-            <Link href="/patient/doctors">
-              <Search className="size-4 mr-2" />
-              Find a Doctor
-            </Link>
-          </Button>
+          <Link href="/patient/doctors" className={buttonVariants()}>
+            <Search className="size-4 mr-2" />
+            Find a Doctor
+          </Link>
         }
       />
 
@@ -107,9 +106,7 @@ function PatientDashboardContent() {
           title="You don’t have any consultations yet"
           description="Find a verified doctor and request your first online consultation."
           action={
-            <Button asChild>
-              <Link href="/patient/doctors">Find a Doctor</Link>
-            </Button>
+            <Link href="/patient/doctors" className={buttonVariants()}>Find a Doctor</Link>
           }
         />
       ) : (
@@ -123,9 +120,9 @@ function PatientDashboardContent() {
                     <div className="flex-1">
                       <h3 className="font-semibold">{attentionItem.title}</h3>
                       <p className="mt-1 text-sm">{attentionItem.message}</p>
-                      <Button asChild variant="secondary" className="mt-4 border-none bg-white/60 hover:bg-white shadow-sm">
-                        <Link href={attentionItem.href}>{attentionItem.action}</Link>
-                      </Button>
+                      <Link href={attentionItem.href} className={`${buttonVariants("secondary")} mt-4 border-none bg-white/60 hover:bg-white shadow-sm`}>
+                        {attentionItem.actionLabel}
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -135,7 +132,7 @@ function PatientDashboardContent() {
                 <SectionCard title="Next Consultation">
                   <div className="flex flex-col sm:flex-row gap-6">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-slate-950">{nextConsultation.doctorName}</h3>
+                      <h3 className="text-lg font-semibold text-slate-950">{formatDoctorName(nextConsultation.doctorName)}</h3>
                       <p className="text-sm font-medium text-teal-700">{nextConsultation.specializationName}</p>
                       <div className="mt-4 space-y-1">
                         <p className="text-sm text-slate-600">{formatAppointmentTime(nextConsultation.scheduledStart)}</p>
@@ -147,11 +144,9 @@ function PatientDashboardContent() {
                         {nextConsultation.consultationStatus === "IN_PROGRESS" ? "In Progress" : "Scheduled"}
                       </StatusBadge>
                       {nextConsultation.consultationId && (
-                        <Button asChild variant="secondary">
-                          <Link href={`/patient/consultations/${nextConsultation.consultationId}`}>
-                            View Consultation
-                          </Link>
-                        </Button>
+                        <Link href={`/patient/consultations/${nextConsultation.consultationId}`} className={buttonVariants("secondary")}>
+                          View Consultation
+                        </Link>
                       )}
                     </div>
                   </div>
@@ -163,9 +158,9 @@ function PatientDashboardContent() {
                     title="No upcoming consultations"
                     description="Find a verified doctor and request an online consultation."
                     action={
-                      <Button asChild variant="secondary">
-                        <Link href="/patient/doctors">Find a Doctor</Link>
-                      </Button>
+                      <Link href="/patient/doctors" className={buttonVariants("secondary")}>
+                        Find a Doctor
+                      </Link>
                     }
                   />
                 </SectionCard>
@@ -185,7 +180,7 @@ function PatientDashboardContent() {
                 {history.slice(0, 3).map(appt => (
                   <div key={appt.id} className="py-4 flex items-center justify-between gap-4 first:pt-0 last:pb-0">
                     <div>
-                      <p className="font-semibold text-slate-950">{appt.doctorName}</p>
+                      <p className="font-semibold text-slate-950">{formatDoctorName(appt.doctorName)}</p>
                       <p className="text-sm text-slate-500">Completed · {new Date(appt.scheduledStart).toLocaleDateString()}</p>
                     </div>
                     {appt.consultationId && (

@@ -8,7 +8,7 @@ import { LoadingPanel } from "@/components/loading-panel";
 import { PortalHeading, formatAppointmentTime } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
 import { SectionCard } from "@/components/ui/card";
-import { Input, Textarea, Label, FieldError } from "@/components/ui/forms";
+import { Input, Textarea, Label } from "@/components/ui/forms";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";

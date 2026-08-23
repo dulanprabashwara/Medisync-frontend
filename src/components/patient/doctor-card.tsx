@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { User, CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CheckCircle2 } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { formatDoctorName } from "@/lib/formatters";
 import type { DoctorSummary } from "@/types/appointments";
 
 export function DoctorCard({ doctor, viewMode = "summary" }: { doctor: DoctorSummary, viewMode?: "summary" | "detail" }) {
@@ -11,13 +12,13 @@ export function DoctorCard({ doctor, viewMode = "summary" }: { doctor: DoctorSum
           <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-teal-100 text-teal-900 font-bold uppercase">
             {doctor.profileImageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={doctor.profileImageUrl} alt={`Dr. ${doctor.displayName}`} className="size-full object-cover" />
+              <img src={doctor.profileImageUrl} alt={formatDoctorName(doctor.displayName)} className="size-full object-cover" />
             ) : (
               doctor.displayName.replace("Dr. ", "").charAt(0)
             )}
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-slate-950 line-clamp-1">{doctor.displayName}</h2>
+            <h2 className="text-lg font-semibold text-slate-950 line-clamp-1">{formatDoctorName(doctor.displayName)}</h2>
             <p className="font-medium text-teal-700 text-sm line-clamp-1">{doctor.specializationName}</p>
           </div>
         </div>
@@ -53,11 +54,9 @@ export function DoctorCard({ doctor, viewMode = "summary" }: { doctor: DoctorSum
       </div>
 
       <div className="mt-6 pt-5 border-t border-slate-100">
-        <Button asChild variant="secondary" className="w-full">
-          <Link href={`/patient/doctors/${doctor.doctorProfileId}`}>
-            View Profile
-          </Link>
-        </Button>
+        <Link href={`/patient/doctors/${doctor.doctorProfileId}`} className={`${buttonVariants("secondary")} w-full`}>
+          View Profile
+        </Link>
       </div>
     </article>
   );

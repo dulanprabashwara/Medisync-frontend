@@ -13,6 +13,7 @@ import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { getPatientPrescriptions } from "@/lib/api";
+import { formatDoctorName } from "@/lib/formatters";
 import type { PatientPrescriptionSummary } from "@/types/prescriptions";
 
 type FilterType = "ALL" | "ACTIVE" | "DISPENSED" | "CANCELLED";
@@ -105,7 +106,7 @@ export default function PatientPrescriptionsPage() {
               <SectionCard key={item.id} className="flex flex-col h-full hover:border-teal-300 transition-colors">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div>
-                    <h2 className="text-lg font-semibold text-slate-950">Dr. {item.doctorName}</h2>
+                    <h2 className="text-lg font-semibold text-slate-950">{formatDoctorName(item.doctorName)}</h2>
                     <p className="text-sm text-slate-600">{formatAppointmentTime(item.issuedAt)}</p>
                   </div>
                   <StatusBadge tone={

@@ -153,6 +153,13 @@ async function apiRequest<T>(
 export const getMyProfile = (accessToken: string) =>
   apiRequest<MediSyncProfile>("/api/users/me", accessToken);
 
+export function updatePatientProfile(accessToken: string, data: { firstName: string; lastName: string; phone?: string | null }) {
+  return apiRequest<MediSyncProfile>("/api/users/me", accessToken, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
 export const getMyAccountStatus = (accessToken: string) =>
   apiRequest<AccountStatusDetails>("/api/users/me/account-status", accessToken);
 

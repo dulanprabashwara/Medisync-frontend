@@ -11,9 +11,10 @@ import { cancelPatientAppointment, getPatientAppointments } from "@/lib/api";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SectionCard } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/forms";
 import { Alert } from "@/components/ui/alert";
+import { formatDoctorName } from "@/lib/formatters";
 import type { Appointment } from "@/types/appointments";
 
 type Tab = "upcoming" | "requests" | "history";
@@ -118,9 +119,9 @@ export default function PatientAppointmentsPage() {
           title={emptyTitle}
           description={emptyDesc}
           action={
-            <Button asChild variant="secondary">
-              <Link href="/patient/doctors">Find a Doctor</Link>
-            </Button>
+            <Link href="/patient/doctors" className={buttonVariants("secondary")}>
+              Find a Doctor
+            </Link>
           }
         />
       );
@@ -138,7 +139,7 @@ export default function PatientAppointmentsPage() {
             <SectionCard key={appointment.id}>
               <div className="flex flex-col sm:flex-row gap-6 items-start justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-950">{appointment.doctorName}</h3>
+                  <h3 className="text-lg font-semibold text-slate-950">{formatDoctorName(appointment.doctorName)}</h3>
                   <p className="font-medium text-teal-700 text-sm mb-3">{appointment.specializationName}</p>
                   <p className="text-sm text-slate-600 mb-1">{formatAppointmentTime(appointment.scheduledStart)}</p>
                   <p className="text-sm text-slate-600">{appointment.hospitalName}</p>
@@ -146,11 +147,9 @@ export default function PatientAppointmentsPage() {
                 <div className="flex flex-col items-start sm:items-end gap-3 shrink-0">
                   {getStatusBadge(appointment)}
                   {appointment.consultationId && (
-                    <Button asChild>
-                      <Link href={`/patient/consultations/${appointment.consultationId}`}>
-                        Open Consultation
-                      </Link>
-                    </Button>
+                    <Link href={`/patient/consultations/${appointment.consultationId}`} className={buttonVariants("primary")}>
+                      Open Consultation
+                    </Link>
                   )}
                 </div>
               </div>

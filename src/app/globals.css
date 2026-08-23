@@ -34,3 +34,12 @@ select {
   outline: 3px solid rgba(13, 148, 136, 0.3);
   outline-offset: 2px;
 }
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

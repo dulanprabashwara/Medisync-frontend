@@ -136,7 +136,7 @@ export function ConsultationChat({
 
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30"
+        className="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-6 bg-slate-50/30"
         aria-live="polite"
       >
         {messages.length === 0 ? (
