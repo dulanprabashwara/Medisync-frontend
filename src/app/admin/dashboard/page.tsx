@@ -7,8 +7,7 @@ import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { ProtectedRoute } from "@/components/protected-route";
 import { AdminNavigation } from "@/components/admin-navigation";
-import { ProfileImageEditor } from "@/components/profile-image-editor";
-import { AdminProfileEditor } from "@/components/admin-profile-editor";
+
 import {
   createAdminDepartment,
   createAdminHospital,
@@ -251,8 +250,6 @@ function AdminDashboardContent() {
       </p>
 
       <AdminNavigation />
-      <ProfileImageEditor />
-      <AdminProfileEditor />
 
       <div className="mt-7 space-y-3">
         {error ? <FormAlert message={error} /> : null}

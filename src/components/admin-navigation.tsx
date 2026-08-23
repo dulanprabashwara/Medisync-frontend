@@ -8,6 +8,7 @@ const links = [
   ["/admin/users", "Users"],
   ["/admin/audit-logs", "Audit log"],
   ["/admin/analytics", "Analytics"],
+  ["/admin/profile", "Profile"],
 ] as const;
 
 export function AdminNavigation() {

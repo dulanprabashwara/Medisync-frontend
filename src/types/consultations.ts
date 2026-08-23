@@ -14,6 +14,10 @@ export interface ConsultationPaymentSummary {
   paymentConfirmedAt: string | null;
   qrGenerationAllowed: boolean;
   dispensingStatus: DispensingStatus;
+  doctorBankAccountHolder: string | null;
+  doctorBankName: string | null;
+  doctorBankBranch: string | null;
+  doctorBankAccountNumber: string | null;
 }
 
 export interface ConsultationDetails {

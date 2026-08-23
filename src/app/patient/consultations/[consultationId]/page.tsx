@@ -114,15 +114,33 @@ function PatientConsultationContent() {
             </dl>
           </section>
 
-          {consultation.paymentSummary && consultation.paymentSummary.doctorFeeAmount > 0 ? (
-            <section className={`mt-8 rounded-3xl border p-6 shadow-sm sm:p-8 ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" ? "border-emerald-200 bg-emerald-50 text-emerald-950" : "border-amber-200 bg-amber-50 text-amber-950"}`}>
-              <p className="text-xs font-bold uppercase tracking-[0.16em]">Consultation Fee</p>
-              <h2 className="mt-2 text-3xl font-semibold">{consultation.paymentSummary.doctorFeeCurrency} {Number(consultation.paymentSummary.doctorFeeAmount).toFixed(2)}</h2>
-              <p className="mt-3 text-sm">
-                {consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED"
-                  ? `Payment confirmed${consultation.paymentSummary.paymentConfirmedAt ? ` ${new Date(consultation.paymentSummary.paymentConfirmedAt).toLocaleString()}` : ""}. You can now access your prescription.`
-                  : "Awaiting doctor's manual confirmation. Your prescription remains locked until the doctor confirms receipt of the fee."}
+          {consultation.paymentSummary ? (
+            <section className={`mt-8 rounded-3xl border p-6 shadow-sm sm:p-8 ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" || consultation.paymentSummary.doctorFeeAmount === 0 ? "border-emerald-200 bg-emerald-50 text-emerald-950" : "border-amber-200 bg-amber-50 text-amber-950"}`}>
+              <p className="text-xs font-bold uppercase tracking-[0.16em]">
+                {consultation.paymentSummary.doctorFeeAmount > 0 ? "Doctor issued prescription / Consultation Fee" : "Doctor issued prescription"}
               </p>
+              
+              {consultation.paymentSummary.doctorFeeAmount > 0 ? (
+                <>
+                  <h2 className="mt-2 text-3xl font-semibold">{consultation.paymentSummary.doctorFeeCurrency} {Number(consultation.paymentSummary.doctorFeeAmount).toFixed(2)}</h2>
+                  <p className="mt-3 text-sm">
+                    {consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED"
+                      ? `Payment confirmed${consultation.paymentSummary.paymentConfirmedAt ? ` ${new Date(consultation.paymentSummary.paymentConfirmedAt).toLocaleString()}` : ""}. You can now access your prescription.`
+                      : "Awaiting doctor's manual confirmation. Your prescription remains locked until the doctor confirms receipt of the fee."}
+                  </p>
+                  {consultation.paymentSummary.doctorPaymentStatus !== "CONFIRMED" ? (
+                    <div className="mt-4 border-t border-amber-200/50 pt-4 text-sm">
+                      <p className="font-semibold">Doctor payment details:</p>
+                      <p className="mt-1">Account Holder: {consultation.paymentSummary.doctorBankAccountHolder || "N/A"}</p>
+                      <p>Bank: {consultation.paymentSummary.doctorBankName || "N/A"}</p>
+                      <p>Branch: {consultation.paymentSummary.doctorBankBranch || "N/A"}</p>
+                      <p>Account Number: {consultation.paymentSummary.doctorBankAccountNumber || "N/A"}</p>
+                    </div>
+                  ) : null}
+                </>
+              ) : (
+                <p className="mt-3 text-sm">Your doctor has issued a prescription with no consultation fee required. You can now access your prescription.</p>
+              )}
             </section>
           ) : null}
 
