@@ -73,6 +73,10 @@ export interface DoctorProfessionalProfile {
   profileComplete: boolean;
   submitted: boolean;
   editable: boolean;
+  bankAccountHolder: string | null;
+  bankName: string | null;
+  bankBranch: string | null;
+  bankAccountNumber: string | null;
 }
 
 export interface DoctorProfileInput {
@@ -83,6 +87,10 @@ export interface DoctorProfileInput {
   qualifications: string;
   yearsOfExperience: number | null;
   bio: string;
+  bankAccountHolder: string;
+  bankName: string;
+  bankBranch: string;
+  bankAccountNumber: string;
 }
 
 export interface AdminHospital {

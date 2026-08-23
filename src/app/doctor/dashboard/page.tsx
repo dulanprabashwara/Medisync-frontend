@@ -32,6 +32,10 @@ const emptyForm: DoctorProfileInput = {
   qualifications: "",
   yearsOfExperience: null,
   bio: "",
+  bankAccountHolder: "",
+  bankName: "",
+  bankBranch: "",
+  bankAccountNumber: "",
 };
 
 const futureModules = [
@@ -64,6 +68,10 @@ function DoctorDashboardContent() {
       qualifications: value.qualifications ?? "",
       yearsOfExperience: value.yearsOfExperience,
       bio: value.bio ?? "",
+      bankAccountHolder: value.bankAccountHolder ?? "",
+      bankName: value.bankName ?? "",
+      bankBranch: value.bankBranch ?? "",
+      bankAccountNumber: value.bankAccountNumber ?? "",
     });
   }, []);
 
@@ -179,21 +187,13 @@ function DoctorDashboardContent() {
       </div>
 
       {verified ? (
-        <section className="mt-8 rounded-3xl border border-emerald-200 bg-emerald-50 p-7">
+        <section className="mt-8 rounded-3xl border border-emerald-200 bg-emerald-50 p-7 mb-7">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">Verified doctor</p>
           <h2 className="mt-2 text-2xl font-semibold text-emerald-950">Professional verification complete</h2>
           <p className="mt-2 text-emerald-900">Your MediSync doctor account is active. Sensitive identity fields are now locked.</p>
-          <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
-            <ProfileDetail label="Registration" value={doctor.medicalRegistrationNumber} />
-            <ProfileDetail label="Affiliated Hospital" value={doctor.hospitalName} />
-            <ProfileDetail label="Department" value={doctor.departmentName} />
-            <ProfileDetail label="Specialization" value={doctor.specializationName} />
-            <ProfileDetail label="Qualifications" value={doctor.qualifications} />
-            <ProfileDetail label="Experience" value={`${doctor.yearsOfExperience ?? 0} years`} />
-          </dl>
         </section>
       ) : doctor.submitted ? (
-        <section className="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-7">
+        <section className="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-7 mb-7">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-700">Verification pending</p>
           <h2 className="mt-2 text-2xl font-semibold text-amber-950">Your professional profile has been submitted</h2>
           <p className="mt-2 text-amber-900">An active MediSync administrator must review it before clinical features become available.</p>
@@ -201,7 +201,8 @@ function DoctorDashboardContent() {
             <p className="mt-4 text-sm text-amber-800">Submitted {new Date(doctor.submittedForVerificationAt).toLocaleString()}</p>
           ) : null}
         </section>
-      ) : (
+      ) : null}
+
         <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           {rejected ? (
             <div className="mb-7 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-950">
@@ -209,14 +210,19 @@ function DoctorDashboardContent() {
               <p className="mt-2 text-sm leading-6"><span className="font-semibold">Reason:</span> {doctor.verificationRejectionReason}</p>
               <p className="mt-2 text-sm">Update the profile and resubmit it when ready.</p>
             </div>
-          ) : (
+          ) : !verified && !doctor.submitted ? (
             <div className="mb-7">
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">Professional profile incomplete</p>
               <h2 className="mt-2 text-2xl font-semibold text-slate-950">Complete your professional profile</h2>
             </div>
+          ) : (
+            <div className="mb-7">
+              <h2 className="text-xl font-semibold text-slate-950">Professional profile</h2>
+              <p className="text-sm text-slate-600 mt-1">You can update your bio and payment information at any time.</p>
+            </div>
           )}
 
-          {hospitals.length === 0 || specializations.length === 0 ? (
+          {!verified && !doctor.submitted && (hospitals.length === 0 || specializations.length === 0) ? (
             <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
               An administrator must add an active hospital, department, and specialization before this profile can be submitted.
             </div>
@@ -225,37 +231,55 @@ function DoctorDashboardContent() {
           <form className="space-y-6" onSubmit={save}>
             <div className="grid gap-5 md:grid-cols-2">
               <Field label="Medical registration number" required>
-                <input className={inputClassName} maxLength={100} value={form.medicalRegistrationNumber}
+                <input className={inputClassName} maxLength={100} value={form.medicalRegistrationNumber} disabled={verified || doctor.submitted}
                   onChange={(event) => setForm({ ...form, medicalRegistrationNumber: event.target.value })} />
               </Field>
               <Field label="Years of experience" required>
-                <input className={inputClassName} type="number" min={0} value={form.yearsOfExperience ?? ""}
+                <input className={inputClassName} type="number" min={0} value={form.yearsOfExperience ?? ""} disabled={verified || doctor.submitted}
                   onChange={(event) => setForm({ ...form, yearsOfExperience: event.target.value === "" ? null : Number(event.target.value) })} />
               </Field>
               <Field label="Affiliated hospital" required>
-                <select className={inputClassName} value={form.hospitalId ?? ""} onChange={(event) => void chooseHospital(event.target.value)}>
+                <select className={inputClassName} value={form.hospitalId ?? ""} onChange={(event) => void chooseHospital(event.target.value)} disabled={verified || doctor.submitted}>
                   <option value="">Select affiliated hospital</option>
                   {hospitals.map((hospital) => <option key={hospital.id} value={hospital.id}>{hospital.name}{hospital.city ? ` - ${hospital.city}` : ""}</option>)}
                 </select>
               </Field>
               <Field label="Department" required>
-                <select className={inputClassName} disabled={!form.hospitalId || departmentsLoading} value={form.departmentId ?? ""}
+                <select className={inputClassName} disabled={verified || doctor.submitted || !form.hospitalId || departmentsLoading} value={form.departmentId ?? ""}
                   onChange={(event) => setForm({ ...form, departmentId: event.target.value || null })}>
                   <option value="">{departmentsLoading ? "Loading departments..." : "Select department"}</option>
                   {departments.map((department) => <option key={department.id} value={department.id}>{department.name}</option>)}
                 </select>
-                {form.hospitalId && !departmentsLoading && departments.length === 0 ? <span className="mt-1 block text-xs text-amber-700">No active departments are configured for this hospital.</span> : null}
+                {!verified && !doctor.submitted && form.hospitalId && !departmentsLoading && departments.length === 0 ? <span className="mt-1 block text-xs text-amber-700">No active departments are configured for this hospital.</span> : null}
               </Field>
               <Field label="Specialization" required>
-                <select className={inputClassName} value={form.specializationId ?? ""}
+                <select className={inputClassName} value={form.specializationId ?? ""} disabled={verified || doctor.submitted}
                   onChange={(event) => setForm({ ...form, specializationId: event.target.value || null })}>
                   <option value="">Select specialization</option>
                   {specializations.map((specialization) => <option key={specialization.id} value={specialization.id}>{specialization.name}</option>)}
                 </select>
               </Field>
               <Field label="Qualifications" required>
-                <input className={inputClassName} maxLength={500} placeholder="MBBS, MD"
+                <input className={inputClassName} maxLength={500} placeholder="MBBS, MD" disabled={verified || doctor.submitted}
                   value={form.qualifications} onChange={(event) => setForm({ ...form, qualifications: event.target.value })} />
+              </Field>
+            </div>
+            <div className="grid gap-5 md:grid-cols-2">
+              <Field label="Bank account holder">
+                <input className={inputClassName} maxLength={200} value={form.bankAccountHolder}
+                  onChange={(event) => setForm({ ...form, bankAccountHolder: event.target.value })} />
+              </Field>
+              <Field label="Bank name">
+                <input className={inputClassName} maxLength={100} value={form.bankName}
+                  onChange={(event) => setForm({ ...form, bankName: event.target.value })} />
+              </Field>
+              <Field label="Bank branch">
+                <input className={inputClassName} maxLength={100} value={form.bankBranch}
+                  onChange={(event) => setForm({ ...form, bankBranch: event.target.value })} />
+              </Field>
+              <Field label="Bank account number">
+                <input className={inputClassName} maxLength={50} value={form.bankAccountNumber}
+                  onChange={(event) => setForm({ ...form, bankAccountNumber: event.target.value })} />
               </Field>
             </div>
             <Field label="Professional bio">
@@ -267,15 +291,16 @@ function DoctorDashboardContent() {
                 disabled={busy !== null} type="submit">
                 {busy === "save" ? "Saving..." : "Save profile"}
               </button>
-              <button className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60"
-                disabled={busy !== null || hospitals.length === 0 || specializations.length === 0}
-                onClick={() => void submit()} type="button">
-                {busy === "submit" ? "Submitting..." : rejected ? "Resubmit for verification" : "Submit for verification"}
-              </button>
+              {!verified && (
+                <button className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60"
+                  disabled={busy !== null || hospitals.length === 0 || specializations.length === 0}
+                  onClick={() => void submit()} type="button">
+                  {busy === "submit" ? "Submitting..." : rejected ? "Resubmit for verification" : "Submit for verification"}
+                </button>
+              )}
             </div>
           </form>
         </section>
-      )}
 
       <section className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Future doctor modules">
         {futureModules.map((module) => {

@@ -634,3 +634,7 @@ export const getAdminAnalyticsTimeseries = (accessToken: string, days: 7 | 30 | 
 
 export const getAdminAnalyticsActivity = (accessToken: string, days: 7 | 30 | 90) =>
   apiRequest<ActivityResponse>(`/api/admin/analytics/user-activity?days=${days}`, accessToken);
+
+export const updateAdminProfile = (accessToken: string, data: { firstName: string; lastName: string; phone?: string }) =>
+  apiRequest<MediSyncProfile>("/api/admin/profile", accessToken, { method: "PATCH", body: JSON.stringify(data) });
+

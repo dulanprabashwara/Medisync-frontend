@@ -24,7 +24,10 @@ export interface DoctorPrescription {
   departmentName: string; specializationName: string; consultationScheduledStart: string;
   validityDays: number; generalInstructions: string | null;
   doctorFeeAmount: number; doctorFeeCurrency: string; doctorFeeStatus: DoctorFeeStatus;
-  doctorFeeConfirmedAt: string | null; items: PrescriptionItem[];
+  doctorFeeConfirmedAt: string | null;
+  doctorBankAccountHolder: string | null; doctorBankName: string | null;
+  doctorBankBranch: string | null; doctorBankAccountNumber: string | null;
+  items: PrescriptionItem[];
   issuedAt: string | null; validUntil: string | null; expired: boolean;
   dispensingStatus: DispensingStatus; dispensedAt: string | null; dispensingPharmacy: string | null;
   cancelledAt: string | null; cancellationReason: string | null; createdAt: string; updatedAt: string;
