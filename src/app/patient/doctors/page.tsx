@@ -1,13 +1,19 @@
 "use client";
-/* eslint-disable @next/next/no-img-element -- private signed URLs are short-lived and cannot use a stable Next image host. */
 
-import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
-import { inputClassName } from "@/components/auth-card";
+import { Filter, Search } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
-import { InlineError, PortalHeading } from "@/components/portal-ui";
+import { PortalHeading } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
+import { DoctorCard } from "@/components/patient/doctor-card";
+import { SearchInput } from "@/components/ui/search-input";
+import { Select, Label } from "@/components/ui/forms";
+import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
+import { Pagination } from "@/components/ui/pagination";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Alert } from "@/components/ui/alert";
 import {
   getReferenceDepartments,
   getReferenceHospitals,
@@ -22,25 +28,27 @@ function PatientDoctorSearchContent() {
   const [hospitals, setHospitals] = useState<HospitalReference[]>([]);
   const [departments, setDepartments] = useState<DepartmentReference[]>([]);
   const [specializations, setSpecializations] = useState<SpecializationReference[]>([]);
+  
   const [q, setQ] = useState("");
   const [hospitalId, setHospitalId] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [specializationId, setSpecializationId] = useState("");
+  
   const [results, setResults] = useState<PageResponse<DoctorSummary> | null>(null);
   const [loading, setLoading] = useState(true);
   const [departmentsLoading, setDepartmentsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   useEffect(() => {
     if (!session) return;
     const token = session.access_token;
-    const timer = window.setTimeout(async () => {
-      setLoading(true);
+    async function init() {
       try {
         const [hospitalValues, specializationValues, doctorValues] = await Promise.all([
           getReferenceHospitals(token),
           getReferenceSpecializations(token),
-          searchPatientDoctors(token, { page: 0, size: 10 }),
+          searchPatientDoctors(token, { page: 0, size: 12 }),
         ]);
         setHospitals(hospitalValues);
         setSpecializations(specializationValues);
@@ -50,8 +58,8 @@ function PatientDoctorSearchContent() {
       } finally {
         setLoading(false);
       }
-    }, 0);
-    return () => window.clearTimeout(timer);
+    }
+    init();
   }, [session]);
 
   async function chooseHospital(nextHospitalId: string) {
@@ -60,11 +68,10 @@ function PatientDoctorSearchContent() {
     setDepartments([]);
     if (!session || !nextHospitalId) return;
     setDepartmentsLoading(true);
-    setError(null);
     try {
       setDepartments(await getReferenceDepartments(session.access_token, nextHospitalId));
-    } catch (departmentError) {
-      setError(departmentError instanceof Error ? departmentError.message : "Departments could not be loaded.");
+    } catch (err) {
+      console.error(err);
     } finally {
       setDepartmentsLoading(false);
     }
@@ -81,8 +88,9 @@ function PatientDoctorSearchContent() {
         departmentId: departmentId || undefined,
         specializationId: specializationId || undefined,
         page,
-        size: 10,
+        size: 12,
       }));
+      setMobileFiltersOpen(false);
     } catch (searchError) {
       setError(searchError instanceof Error ? searchError.message : "The doctor search could not be completed.");
     } finally {
@@ -105,7 +113,8 @@ function PatientDoctorSearchContent() {
     setLoading(true);
     setError(null);
     try {
-      setResults(await searchPatientDoctors(session.access_token, { page: 0, size: 10 }));
+      setResults(await searchPatientDoctors(session.access_token, { page: 0, size: 12 }));
+      setMobileFiltersOpen(false);
     } catch (searchError) {
       setError(searchError instanceof Error ? searchError.message : "The doctor search could not be completed.");
     } finally {
@@ -113,86 +122,137 @@ function PatientDoctorSearchContent() {
     }
   }
 
+  const activeFilterCount = (hospitalId ? 1 : 0) + (departmentId ? 1 : 0) + (specializationId ? 1 : 0);
+
+  const filterFields = (
+    <>
+      <div className="space-y-1">
+        <Label htmlFor="hospitalId">Hospital</Label>
+        <Select id="hospitalId" value={hospitalId} onChange={(e) => chooseHospital(e.target.value)}>
+          <option value="">All hospitals</option>
+          {hospitals.map((h) => <option key={h.id} value={h.id}>{h.name}</option>)}
+        </Select>
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="departmentId">Department</Label>
+        <Select id="departmentId" disabled={!hospitalId || departmentsLoading} value={departmentId} onChange={(e) => setDepartmentId(e.target.value)}>
+          <option value="">{departmentsLoading ? "Loading..." : "All departments"}</option>
+          {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+        </Select>
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="specializationId">Specialization</Label>
+        <Select id="specializationId" value={specializationId} onChange={(e) => setSpecializationId(e.target.value)}>
+          <option value="">All specializations</option>
+          {specializations.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </Select>
+      </div>
+    </>
+  );
+
   return (
-    <main className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
-      <PortalHeading eyebrow="Patient care" title="Find a doctor" backHref="/patient/dashboard"
-        description="Search MediSync's active, administrator-verified doctors and choose an available online consultation time." />
+    <div>
+      <PortalHeading 
+        eyebrow="Patient Care" 
+        title="Find a Doctor" 
+        backHref="/patient/dashboard"
+        description="Search verified doctors and request an online consultation." 
+      />
 
-      <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <form className="grid gap-4 md:grid-cols-2 lg:grid-cols-5" onSubmit={submit}>
-          <label className="text-sm font-medium text-slate-700 lg:col-span-2">Doctor name
-            <input className={inputClassName} placeholder="Search by name" value={q} onChange={(event) => setQ(event.target.value)} />
-          </label>
-          <label className="text-sm font-medium text-slate-700">Affiliated hospital
-            <select className={inputClassName} value={hospitalId} onChange={(event) => void chooseHospital(event.target.value)}>
-              <option value="">All hospitals</option>
-              {hospitals.map((hospital) => <option key={hospital.id} value={hospital.id}>{hospital.name}</option>)}
-            </select>
-          </label>
-          <label className="text-sm font-medium text-slate-700">Department
-            <select className={inputClassName} disabled={!hospitalId || departmentsLoading} value={departmentId} onChange={(event) => setDepartmentId(event.target.value)}>
-              <option value="">{departmentsLoading ? "Loading..." : "All departments"}</option>
-              {departments.map((department) => <option key={department.id} value={department.id}>{department.name}</option>)}
-            </select>
-          </label>
-          <label className="text-sm font-medium text-slate-700">Specialization
-            <select className={inputClassName} value={specializationId} onChange={(event) => setSpecializationId(event.target.value)}>
-              <option value="">All specializations</option>
-              {specializations.map((specialization) => <option key={specialization.id} value={specialization.id}>{specialization.name}</option>)}
-            </select>
-          </label>
-          <div className="flex flex-wrap gap-3 md:col-span-2 lg:col-span-5">
-            <button className="rounded-xl bg-teal-700 px-6 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60" disabled={loading} type="submit">
-              {loading ? "Searching..." : "Search doctors"}
-            </button>
-            <button className="rounded-xl border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60" disabled={loading} type="button"
-              onClick={() => void clearFilters()}>
-              Clear filters
-            </button>
+      <div className="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm p-4 sm:p-5">
+        <form onSubmit={submit} className="flex flex-col gap-4">
+          <div className="flex gap-3">
+            <SearchInput
+              value={q}
+              onChange={setQ}
+              onClear={() => {
+                setQ("");
+                if (!activeFilterCount) search(0);
+              }}
+              placeholder="Search by doctor name..."
+              className="flex-1"
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              className="lg:hidden shrink-0"
+              onClick={() => setMobileFiltersOpen(true)}
+            >
+              <Filter className="size-4" />
+              {activeFilterCount > 0 && <span className="ml-1 rounded-full bg-teal-100 px-2 py-0.5 text-xs text-teal-800">{activeFilterCount}</span>}
+            </Button>
+            <Button type="submit" loading={loading} className="hidden lg:flex shrink-0 w-32">
+              Search
+            </Button>
           </div>
+
+          <div className="hidden lg:grid grid-cols-3 gap-4 pt-4 border-t border-slate-100">
+            {filterFields}
+          </div>
+          
+          {activeFilterCount > 0 && (
+            <div className="hidden lg:flex justify-end gap-3 pt-2">
+              <Button type="button" variant="ghost" onClick={clearFilters} disabled={loading}>
+                Clear filters
+              </Button>
+            </div>
+          )}
         </form>
-      </section>
+      </div>
 
-      <div className="mt-7"><InlineError message={error} /></div>
-      {loading && !results ? <LoadingPanel label="Finding verified doctors..." /> : results?.content.length === 0 ? (
-        <div className="mt-7 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600">No doctors match your current filters.</div>
-      ) : (
-        <section className="mt-7 grid gap-5 md:grid-cols-2" aria-label="Doctor search results">
-          {results?.content.map((doctor) => (
-            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" key={doctor.doctorProfileId}>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-teal-100 font-bold text-teal-900">{doctor.profileImageUrl ? <img src={doctor.profileImageUrl} alt="" className="h-full w-full object-cover" /> : doctor.displayName.replace("Dr. ", "").charAt(0)}</div>
-                  <div>
-                  <h2 className="text-xl font-semibold text-slate-950">{doctor.displayName}</h2>
-                  <p className="mt-1 font-medium text-teal-700">{doctor.specializationName}</p>
-                  </div>
-                </div>
-                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">VERIFIED</span>
-              </div>
-              <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
-                <div><dt className="text-slate-500">Affiliated hospital</dt><dd className="mt-1 font-medium text-slate-900">{doctor.hospitalName}</dd></div>
-                <div><dt className="text-slate-500">Department</dt><dd className="mt-1 font-medium text-slate-900">{doctor.departmentName}</dd></div>
-                <div><dt className="text-slate-500">Qualifications</dt><dd className="mt-1 font-medium text-slate-900">{doctor.qualifications}</dd></div>
-                <div><dt className="text-slate-500">Experience</dt><dd className="mt-1 font-medium text-slate-900">{doctor.yearsOfExperience} years</dd></div>
-              </dl>
-              {doctor.bioSummary ? <p className="mt-5 text-sm leading-6 text-slate-600">{doctor.bioSummary}</p> : null}
-              <Link className="mt-6 inline-flex rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-800" href={`/patient/doctors/${doctor.doctorProfileId}`}>
-                View profile and consultation times
-              </Link>
-            </article>
-          ))}
-        </section>
-      )}
+      <Dialog open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
+        <div className="space-y-5 mt-2">
+          {filterFields}
+          <div className="flex gap-3 pt-4 border-t border-slate-100">
+            <Button type="button" variant="ghost" className="flex-1" onClick={clearFilters}>
+              Clear
+            </Button>
+            <Button type="button" variant="primary" className="flex-1" onClick={() => search(0)}>
+              Apply Filters
+            </Button>
+          </div>
+        </div>
+      </Dialog>
 
-      {results && results.totalPages > 1 ? (
-        <nav className="mt-8 flex items-center justify-center gap-4" aria-label="Doctor search pages">
-          <button className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold disabled:opacity-40" disabled={results.first || loading} onClick={() => void search(results.page - 1)}>Previous</button>
-          <span className="text-sm text-slate-600">Page {results.page + 1} of {results.totalPages}</span>
-          <button className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold disabled:opacity-40" disabled={results.last || loading} onClick={() => void search(results.page + 1)}>Next</button>
-        </nav>
-      ) : null}
-    </main>
+      <div className="mt-8">
+        {error && <Alert tone="error" className="mb-6">{error}</Alert>}
+        
+        {!loading && results && (
+          <div className="mb-4 text-sm text-slate-500 font-medium">
+            {results.totalElements === 0 ? "No doctors found" : `${results.totalElements} doctor${results.totalElements === 1 ? '' : 's'} found`}
+          </div>
+        )}
+
+        {loading && !results ? (
+          <LoadingPanel label="Finding verified doctors..." />
+        ) : results?.content.length === 0 ? (
+          <EmptyState
+            icon={Search}
+            title="No doctors match your filters"
+            description="Try changing your search criteria or clearing filters."
+            action={
+              <Button onClick={clearFilters} variant="secondary">Clear Filters</Button>
+            }
+          />
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {results?.content.map((doctor) => (
+              <DoctorCard key={doctor.doctorProfileId} doctor={doctor} viewMode="detail" />
+            ))}
+          </div>
+        )}
+
+        {results && results.totalPages > 1 && (
+          <div className="mt-8">
+            <Pagination
+              page={results.page}
+              totalPages={results.totalPages}
+              onPageChange={search}
+            />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

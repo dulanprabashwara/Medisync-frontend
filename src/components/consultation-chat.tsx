@@ -2,7 +2,10 @@
 /* eslint-disable @next/next/no-img-element -- private signed URLs and local previews are intentionally rendered directly. */
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
-import { InlineError } from "@/components/portal-ui";
+import { Send, Image as ImageIcon, X } from "lucide-react";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/forms";
 import type { LiveConnectionStatus } from "@/hooks/use-consultation-events";
 import type {
   ConsultationMessage,
@@ -41,16 +44,24 @@ export function ConsultationChat({
   const [error, setError] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const imagesRef = useRef<SelectedImage[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  
   const readOnly = consultationStatus === "CANCELLED";
 
   useEffect(() => { imagesRef.current = images; }, [images]);
   useEffect(() => () => imagesRef.current.forEach((image) => URL.revokeObjectURL(image.previewUrl)), []);
 
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   async function submit(event?: FormEvent) {
     event?.preventDefault();
     const message = content.trim();
     if (!message && images.length === 0) {
-      setError("Enter a message or attach an image before sending.");
       return;
     }
     if (message.length > MAX_MESSAGE_LENGTH) {
@@ -112,171 +123,159 @@ export function ConsultationChat({
   }
 
   return (
-    <section
-      className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
-      aria-labelledby="consultation-chat-heading"
-    >
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">
-            Authenticated care relationship
-          </p>
-          <h2
-            className="mt-2 text-2xl font-semibold text-slate-950"
-            id="consultation-chat-heading"
-          >
-            Secure Consultation Chat
-          </h2>
-          <p className="mt-2 text-sm text-slate-600">
-            Messages and images are stored privately with this online consultation.
-          </p>
+    <div className="flex flex-col h-full bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex-1 min-h-[500px]">
+      <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <h2 className="font-semibold text-slate-900">Consultation Chat</h2>
+        <div className="flex items-center gap-2">
+          <div className={`size-2 rounded-full ${liveStatus === "connected" ? "bg-emerald-500" : "bg-amber-500 animate-pulse"}`} />
+          <span className="text-xs font-medium text-slate-600">
+            {liveStatus === "connected" ? "Connected" : "Reconnecting..."}
+          </span>
         </div>
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-semibold ${liveStatus === "connected" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900"}`}
-          role="status"
-        >
-          {liveStatus === "connected"
-            ? "Live updates connected"
-            : "Live updates disconnected · reconnecting"}
-        </span>
       </div>
 
-      {consultationStatus === "CANCELLED" ? (
-        <div className="mt-5 rounded-2xl bg-slate-100 p-4 text-sm text-slate-700">
-          This consultation has been cancelled. Message history is available,
-          but new messages cannot be sent.
-        </div>
-      ) : consultationStatus === "COMPLETED" ? (
-        <div className="mt-5 rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-900">
-          This consultation is complete. You may continue this conversation for
-          related questions.
-        </div>
-      ) : null}
-
-      <div
-        className="mt-6 max-h-[32rem] space-y-4 overflow-y-auto rounded-2xl bg-slate-50 p-4"
+      <div 
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30"
         aria-live="polite"
       >
         {messages.length === 0 ? (
-          <p className="py-8 text-center text-sm text-slate-500">
-            No messages yet. Start the consultation conversation when you are
-            ready.
-          </p>
+          <div className="flex flex-col items-center justify-center h-full text-center text-slate-500 space-y-3 opacity-80 py-10">
+            <div className="size-12 rounded-full bg-slate-100 flex items-center justify-center">
+              <svg className="size-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            <p className="max-w-xs text-sm">No messages yet. You can start the conversation when you&apos;re ready.</p>
+          </div>
         ) : (
           messages.map((message) => {
             const mine = message.senderType === currentSender;
+            const formattedTime = new Date(message.sentAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            
             return (
-              <article
-                className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}
+              <div
                 key={message.messageId}
+                className={`flex gap-3 max-w-[85%] sm:max-w-[75%] ${mine ? "ml-auto flex-row-reverse" : "mr-auto"}`}
               >
-                {!mine ? (
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-200 text-xs font-bold text-slate-700">
+                {!mine && (
+                  <div className="size-8 shrink-0 rounded-full bg-slate-200 text-[10px] font-bold text-slate-700 flex items-center justify-center overflow-hidden">
                     {message.senderProfileImageUrl
-                      ? <img src={message.senderProfileImageUrl} alt="" className="h-full w-full object-cover" />
+                      ? <img src={message.senderProfileImageUrl} alt="" className="size-full object-cover" />
                       : message.senderDisplayName.charAt(0)}
                   </div>
-                ) : null}
-                <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 sm:max-w-[70%] ${mine ? "bg-teal-700 text-white" : "border border-slate-200 bg-white text-slate-900"}`}
-                >
-                  <div
-                    className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-xs ${mine ? "text-teal-100" : "text-slate-500"}`}
-                  >
-                    <span className="font-semibold">
-                      {mine ? "You" : message.senderDisplayName}
-                    </span>
-                    <time dateTime={message.sentAt}>
-                      {new Date(message.sentAt).toLocaleString()}
-                    </time>
+                )}
+                
+                <div className={`flex flex-col ${mine ? "items-end" : "items-start"}`}>
+                  <div className="flex items-center gap-2 mb-1 px-1">
+                    <span className="text-xs font-medium text-slate-500">{mine ? "You" : message.senderDisplayName}</span>
+                    <span className="text-[10px] text-slate-400">{formattedTime}</span>
                   </div>
-                  {message.content ? (
-                    <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6">{message.content}</p>
-                  ) : null}
-                  {message.attachments?.length ? (
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      {message.attachments.map((attachment) => attachment.signedUrl ? (
-                        <button key={attachment.id} type="button" onClick={() => setOpenImage(attachment.signedUrl)}
-                          className="overflow-hidden rounded-xl border border-white/30 bg-slate-100">
-                          <img src={attachment.signedUrl} alt={attachment.originalFilename || "Consultation attachment"}
-                            className="h-32 w-full object-cover" />
-                        </button>
-                      ) : (
-                        <div key={attachment.id} className="rounded-xl bg-slate-200 p-4 text-xs text-slate-600">Image link unavailable</div>
-                      ))}
-                    </div>
-                  ) : null}
+                  
+                  <div className={`rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap break-words
+                    ${mine 
+                      ? "bg-teal-600 text-white rounded-tr-sm" 
+                      : "bg-slate-100 text-slate-900 rounded-tl-sm border border-slate-200"
+                    }`}
+                  >
+                    {message.content}
+                    
+                    {message.attachments?.length ? (
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        {message.attachments.map((attachment) => attachment.signedUrl ? (
+                          <button key={attachment.id} type="button" onClick={() => setOpenImage(attachment.signedUrl)}
+                            className="overflow-hidden rounded-lg border border-black/10 relative group bg-black/5 aspect-square">
+                            <img src={attachment.signedUrl} alt={attachment.originalFilename || "Attachment"}
+                              className="size-full object-cover" />
+                          </button>
+                        ) : (
+                          <div key={attachment.id} className="rounded-lg bg-black/5 p-4 text-[10px] text-slate-500 flex items-center justify-center text-center">Unavailable</div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
-              </article>
+              </div>
             );
           })
         )}
       </div>
 
-      <form className="mt-5" onSubmit={submit}>
-        <InlineError message={error} />
-        <label
-          className="mt-4 block text-sm font-medium text-slate-700"
-          htmlFor="consultation-message"
-        >
-          Message
-        </label>
-        <textarea
-          className="mt-2 min-h-24 w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10 disabled:bg-slate-100"
-          disabled={readOnly || sending}
-          id="consultation-message"
-          maxLength={MAX_MESSAGE_LENGTH}
-          onChange={(event) => setContent(event.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={
-            readOnly
-              ? "Messaging is disabled for this cancelled consultation."
-              : "Write a plain-text message. Enter sends; Shift+Enter adds a new line."
-          }
-          value={content}
-        />
-        {images.length ? (
-          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {images.map((image, index) => (
-              <div key={`${image.file.name}-${index}`} className="relative overflow-hidden rounded-xl border border-slate-200">
-                <img src={image.previewUrl} alt="Selected attachment preview" className="h-24 w-full object-cover" />
-                <button type="button" onClick={() => removeImage(index)} aria-label="Remove image"
-                  className="absolute right-1 top-1 rounded-full bg-slate-950/80 px-2 py-1 text-xs font-bold text-white">×</button>
+      <div className="p-4 border-t border-slate-100 bg-white">
+        {error && <Alert tone="error" className="mb-4">{error}</Alert>}
+        
+        {readOnly ? (
+          <div className="py-3 px-4 rounded-xl bg-slate-50 border border-slate-100 text-sm text-slate-500 text-center">
+            This consultation has been cancelled. Messaging is no longer available.
+          </div>
+        ) : (
+          <form onSubmit={submit} className="flex flex-col gap-3">
+            {images.length > 0 && (
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {images.map((image, index) => (
+                  <div key={`${image.file.name}-${index}`} className="relative size-16 shrink-0 rounded-lg overflow-hidden border border-slate-200 group">
+                    <img src={image.previewUrl} alt="Preview" className="size-full object-cover" />
+                    <button type="button" onClick={() => removeImage(index)} aria-label="Remove image"
+                      className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <X className="size-4 text-white" />
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        ) : null}
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-          <span className="text-xs text-slate-500">
-            {content.length}/{MAX_MESSAGE_LENGTH}
-          </span>
-          <div className="flex flex-wrap gap-2">
-            <input ref={imageInputRef} type="file" multiple accept="image/jpeg,image/png,image/webp"
-              className="hidden" onChange={chooseImages} />
-            <button type="button" disabled={readOnly || sending || images.length >= MAX_IMAGES}
-              onClick={() => imageInputRef.current?.click()}
-              className="rounded-xl border border-teal-700 px-4 py-3 text-sm font-semibold text-teal-800 disabled:opacity-50">
-              Add images ({images.length}/{MAX_IMAGES})
-            </button>
-            <button
-              className="rounded-xl bg-teal-700 px-6 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60"
-              disabled={readOnly || sending || (!content.trim() && images.length === 0)}
-              type="submit"
-            >
-              {sending ? "Sending..." : "Send message"}
-            </button>
-          </div>
-        </div>
-      </form>
-      {openImage ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-6" role="dialog" aria-modal="true"
+            )}
+            
+            <div className="flex gap-2 items-end">
+              <input ref={imageInputRef} type="file" multiple accept="image/jpeg,image/png,image/webp"
+                className="hidden" onChange={chooseImages} />
+              
+              <Button 
+                type="button" 
+                variant="secondary" 
+                className="shrink-0 size-11 p-0 rounded-full"
+                disabled={sending || images.length >= MAX_IMAGES}
+                onClick={() => imageInputRef.current?.click()}
+                aria-label="Add image"
+              >
+                <ImageIcon className="size-5 text-slate-500" />
+              </Button>
+              
+              <div className="flex-1 relative">
+                <Textarea
+                  className="min-h-11 max-h-32 resize-none py-3 pr-12 rounded-2xl bg-slate-50"
+                  disabled={sending}
+                  maxLength={MAX_MESSAGE_LENGTH}
+                  onChange={(event) => setContent(event.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type a message..."
+                  value={content}
+                  rows={1}
+                />
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="shrink-0 size-11 p-0 rounded-full bg-teal-600 hover:bg-teal-700 text-white"
+                disabled={sending || (!content.trim() && images.length === 0)}
+                aria-label="Send message"
+              >
+                <Send className="size-5 ml-0.5" />
+              </Button>
+            </div>
+          </form>
+        )}
+      </div>
+
+      {openImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 p-4 sm:p-8" role="dialog" aria-modal="true"
           onClick={() => setOpenImage(null)}>
-          <button type="button" className="absolute right-6 top-6 rounded-full bg-white px-4 py-2 font-bold text-slate-950"
-            onClick={() => setOpenImage(null)}>Close</button>
-          <img src={openImage} alt="Consultation attachment preview" className="max-h-full max-w-full rounded-2xl object-contain"
+          <button type="button" className="absolute right-4 top-4 rounded-full bg-white/10 hover:bg-white/20 p-2 text-white transition-colors"
+            onClick={() => setOpenImage(null)}>
+            <X className="size-6" />
+          </button>
+          <img src={openImage} alt="Preview" className="max-h-full max-w-full rounded-lg object-contain shadow-2xl"
             onClick={(event) => event.stopPropagation()} />
         </div>
-      ) : null}
-    </section>
+      )}
+    </div>
   );
 }

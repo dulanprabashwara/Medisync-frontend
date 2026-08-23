@@ -1,16 +1,18 @@
 import type { ReactNode } from "react";
-import { AlertCircle, CheckCircle2, Info, AlertTriangle } from "lucide-react";
+import { AlertCircle, CheckCircle2, Info, AlertTriangle, type LucideIcon } from "lucide-react";
 
-export type AlertTone = "info" | "success" | "warning" | "error";
+export type AlertTone = "info" | "success" | "warning" | "error" | "neutral";
 
 export function Alert({
   tone = "info",
   title,
+  icon,
   children,
   className = "",
 }: {
   tone?: AlertTone;
   title?: string;
+  icon?: LucideIcon;
   children: ReactNode;
   className?: string;
 }) {
@@ -19,16 +21,18 @@ export function Alert({
     success: "border-emerald-200 bg-emerald-50 text-emerald-900",
     warning: "border-amber-200 bg-amber-50 text-amber-900",
     error: "border-rose-200 bg-rose-50 text-rose-800",
+    neutral: "border-slate-200 bg-slate-50 text-slate-800",
   };
 
-  const icons = {
+  const defaultIcons = {
     info: Info,
     success: CheckCircle2,
     warning: AlertTriangle,
     error: AlertCircle,
+    neutral: Info,
   };
 
-  const Icon = icons[tone];
+  const Icon = icon || defaultIcons[tone];
 
   return (
     <div
