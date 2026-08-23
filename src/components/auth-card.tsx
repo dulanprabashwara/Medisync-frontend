@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { Alert } from "@/components/ui/alert";
 
 export function AuthCard({
   eyebrow,
@@ -42,8 +43,8 @@ export const primaryButtonClassName =
 
 export function FormAlert({ message, success = false }: { message: string; success?: boolean }) {
   return (
-    <div className={`mb-5 rounded-xl border px-4 py-3 text-sm leading-6 ${success ? "border-teal-200 bg-teal-50 text-teal-900" : "border-rose-200 bg-rose-50 text-rose-800"}`} role={success ? "status" : "alert"}>
-      {message}
+    <div className="mb-5">
+      <Alert tone={success ? "success" : "error"}>{message}</Alert>
     </div>
   );
 }

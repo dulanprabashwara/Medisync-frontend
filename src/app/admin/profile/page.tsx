@@ -6,7 +6,6 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/components/auth-provider";
 import { AdminProfileEditor } from "@/components/admin-profile-editor";
 import { AdminNavigation } from "@/components/admin-navigation";
-import { AccountSettingsDangerZone } from "@/components/account-settings-danger-zone";
 
 function AdminProfileContent() {
   const { profile } = useAuth();

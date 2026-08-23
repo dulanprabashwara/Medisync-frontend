@@ -26,7 +26,7 @@ export function DashboardShell({
   noticeTitle?: string;
 }) {
   return (
-    <main className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
+    <div className="py-2">
       <div>
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">{portalName}</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">{welcome}</h1>
@@ -53,12 +53,12 @@ export function DashboardShell({
             </>
           );
           return module.href ? (
-            <Link className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:border-teal-300 hover:shadow-md" href={module.href} key={module.title}>{content}</Link>
+            <Link className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:border-teal-300 hover:shadow-md transition-colors" href={module.href} key={module.title}>{content}</Link>
           ) : (
             <article className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" key={module.title}>{content}</article>
           );
         })}
       </section>
-    </main>
+    </div>
   );
 }

@@ -1,6 +1,10 @@
 import Link from "next/link";
 import type { AppointmentStatus, SlotStatus } from "@/types/appointments";
 import type { ConsultationStatus } from "@/types/consultations";
+import { StatusBadge, type StatusTone } from "@/components/ui/status-badge";
+import { Alert } from "@/components/ui/alert";
+
+import { ChevronLeft } from "lucide-react";
 
 export function PortalHeading({
   eyebrow,
@@ -8,21 +12,31 @@ export function PortalHeading({
   description,
   backHref,
   backLabel = "Back to dashboard",
+  action,
 }: {
   eyebrow: string;
   title: string;
   description: string;
   backHref: string;
   backLabel?: string;
+  action?: React.ReactNode;
 }) {
   return (
-    <div>
-      <Link className="text-sm font-semibold text-teal-700 hover:text-teal-800" href={backHref}>
-        ← {backLabel}
-      </Link>
-      <p className="mt-7 text-xs font-bold uppercase tracking-[0.16em] text-teal-700">{eyebrow}</p>
-      <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">{title}</h1>
-      <p className="mt-3 max-w-2xl leading-7 text-slate-600">{description}</p>
+    <div className="mb-8">
+      {backHref && (
+        <Link className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors mb-4" href={backHref}>
+          <ChevronLeft className="size-4" />
+          {backLabel}
+        </Link>
+      )}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          {eyebrow && <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700 mb-2">{eyebrow}</p>}
+          <h1 className="text-[28px] font-semibold tracking-tight text-slate-950">{title}</h1>
+          {description && <p className="mt-2 max-w-2xl text-sm md:text-[15px] leading-relaxed text-slate-600">{description}</p>}
+        </div>
+        {action && <div className="shrink-0">{action}</div>}
+      </div>
     </div>
   );
 }
@@ -39,17 +53,15 @@ export function StateBadge({ status }: { status: AppointmentStatus | SlotStatus 
     CANCELLED_BY_PATIENT: "Cancelled by patient",
     CANCELLED_BY_DOCTOR: "Cancelled by doctor",
   };
-  const tone = status === "AVAILABLE" || status === "CONFIRMED"
-    ? "bg-emerald-100 text-emerald-800"
+  const tone: StatusTone = status === "AVAILABLE" || status === "CONFIRMED"
+    ? "success"
     : status === "REQUESTED" || status === "RESERVED"
-      ? "bg-amber-100 text-amber-900"
+      ? "warning"
       : status === "BOOKED"
-        ? "bg-teal-100 text-teal-800"
-        : "bg-slate-100 text-slate-700";
+        ? "info"
+        : "neutral";
   return (
-    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold tracking-wide ${tone}`}>
-      {labels[status]}
-    </span>
+    <StatusBadge tone={tone}>{labels[status]}</StatusBadge>
   );
 }
 
@@ -67,24 +79,22 @@ export function ConsultationStatusBadge({ status }: { status: ConsultationStatus
     COMPLETED: "Completed",
     CANCELLED: "Cancelled",
   };
-  const tones: Record<ConsultationStatus, string> = {
-    SCHEDULED: "bg-sky-100 text-sky-800",
-    IN_PROGRESS: "bg-amber-100 text-amber-900",
-    COMPLETED: "bg-emerald-100 text-emerald-800",
-    CANCELLED: "bg-slate-200 text-slate-700",
+  const tones: Record<ConsultationStatus, StatusTone> = {
+    SCHEDULED: "warning",
+    IN_PROGRESS: "info",
+    COMPLETED: "success",
+    CANCELLED: "neutral",
   };
   return (
-    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold tracking-wide ${tones[status]}`}>
-      {labels[status]}
-    </span>
+    <StatusBadge tone={tones[status]}>{labels[status]}</StatusBadge>
   );
 }
 
 export function InlineError({ message }: { message: string | null }) {
   if (!message) return null;
   return (
-    <div className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800" role="alert">
-      {message}
+    <div className="mb-4">
+      <Alert tone="error">{message}</Alert>
     </div>
   );
 }

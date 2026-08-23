@@ -327,8 +327,24 @@ function Field({ label, required, children }: { label: string; required?: boolea
   );
 }
 
-function ProfileDetail({ label, value }: { label: string; value: string | null }) {
-  return <div><dt className="font-medium text-emerald-700">{label}</dt><dd className="mt-1 text-emerald-950">{value || "Not provided"}</dd></div>;
+function RegistrationStatus({ profile }: { profile: DoctorProfessionalProfile | null }) {
+  if (!profile) return null;
+  const tones = {
+    VERIFIED: "border-emerald-200 bg-emerald-50 text-emerald-900",
+    PENDING: "border-amber-200 bg-amber-50 text-amber-900",
+    REJECTED: "border-rose-200 bg-rose-50 text-rose-800",
+  };
+  const labels = {
+    VERIFIED: "Verified Medical Professional",
+    PENDING: "Verification Pending",
+    REJECTED: "Verification Rejected",
+  };
+  return (
+    <div className={`mt-6 rounded-2xl border px-5 py-4 text-sm ${tones[profile.verificationStatus]}`} role="status">
+      <p className="font-semibold">{labels[profile.verificationStatus]}</p>
+      {profile.verificationRejectionReason ? <p className="mt-1 font-medium">{profile.verificationRejectionReason}</p> : null}
+    </div>
+  );
 }
 
 export default function DoctorDashboardPage() {

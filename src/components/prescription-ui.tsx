@@ -1,11 +1,12 @@
 import { QRCodeSVG } from "qrcode.react";
 import type { DispensingStatus, PrescriptionItem, PrescriptionStatus } from "@/types/prescriptions";
+import { StatusBadge, type StatusTone } from "@/components/ui/status-badge";
 
 export function PrescriptionStatusBadge({ status, expired = false, dispensingStatus = "NOT_DISPENSED" }: { status: PrescriptionStatus; expired?: boolean; dispensingStatus?: DispensingStatus }) {
   const dispensed = status === "ISSUED" && dispensingStatus === "DISPENSED";
   const label = status === "CANCELLED" ? "Cancelled" : dispensed ? "Dispensed" : expired ? "Expired" : status === "ISSUED" ? "Active" : "Draft";
-  const tone = status === "CANCELLED" ? "bg-rose-100 text-rose-800" : dispensed ? "bg-sky-100 text-sky-800" : expired ? "bg-amber-100 text-amber-900" : status === "ISSUED" ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-700";
-  return <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${tone}`}>{label}</span>;
+  const tone: StatusTone = status === "CANCELLED" ? "error" : dispensed ? "success" : expired ? "warning" : status === "ISSUED" ? "info" : "neutral";
+  return <StatusBadge tone={tone}>{label}</StatusBadge>;
 }
 
 export function PrescriptionItemsView({ items }: { items: PrescriptionItem[] }) {
