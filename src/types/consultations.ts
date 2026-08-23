@@ -40,7 +40,7 @@ export interface ConsultationDetails {
   cancelledAt: string | null;
   createdAt: string;
   updatedAt: string;
-  paymentSummary: ConsultationPaymentSummary | null;
+  paymentSummaries: ConsultationPaymentSummary[];
 }
 
 export interface ConsultationMessage {

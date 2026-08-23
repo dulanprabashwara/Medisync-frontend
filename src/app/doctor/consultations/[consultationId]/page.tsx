@@ -32,7 +32,7 @@ function DoctorConsultationContent() {
   const [noteText, setNoteText] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [busy, setBusy] = useState<"start" | "complete" | "note" | "payment" | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -167,15 +167,15 @@ function DoctorConsultationContent() {
     }
   }
 
-  async function confirmPayment() {
-    if (!session || !consultation?.paymentSummary) return;
+  async function confirmPayment(prescriptionId: string) {
+    if (!session || !consultation?.paymentSummaries) return;
     const confirmed = window.confirm("Confirm that you received this consultation fee? This action is recorded in the audit log.");
     if (!confirmed) return;
-    setBusy("payment");
+    setBusy("payment-" + prescriptionId);
     setError(null);
     setMessage(null);
     try {
-      await confirmPrescriptionPayment(session.access_token, consultation.paymentSummary.prescriptionId);
+      await confirmPrescriptionPayment(session.access_token, prescriptionId);
       setMessage("Consultation fee confirmed. The patient can now generate the prescription QR.");
       await reconcile();
     } catch (paymentError) {
@@ -248,36 +248,36 @@ function DoctorConsultationContent() {
 
           {session ? <DoctorConsultationPrescriptions accessToken={session.access_token} consultationId={consultationId} consultationStatus={consultation.status} /> : null}
 
-          {consultation.paymentSummary ? (
-            <div className={`mt-8 overflow-hidden rounded-2xl border shadow-sm ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" || consultation.paymentSummary.doctorFeeAmount === 0 ? "border-emerald-200 bg-white" : "border-slate-200 bg-white"}`}>
-              <div className={`border-b px-6 py-4 ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" || consultation.paymentSummary.doctorFeeAmount === 0 ? "border-emerald-100 bg-emerald-50" : "border-slate-100 bg-slate-50"}`}>
+          {consultation.paymentSummaries.map((summary) => (
+            <div key={summary.prescriptionId} className={`mt-8 overflow-hidden rounded-2xl border shadow-sm ${summary.doctorPaymentStatus === "CONFIRMED" || summary.doctorFeeAmount === 0 ? "border-emerald-200 bg-white" : "border-slate-200 bg-white"}`}>
+              <div className={`border-b px-6 py-4 ${summary.doctorPaymentStatus === "CONFIRMED" || summary.doctorFeeAmount === 0 ? "border-emerald-100 bg-emerald-50" : "border-slate-100 bg-slate-50"}`}>
                 <h3 className="font-semibold text-slate-900">
                   Prescription Issued
                 </h3>
               </div>
               <div className="p-6">
-                {consultation.paymentSummary.doctorFeeAmount > 0 ? (
+                {summary.doctorFeeAmount > 0 ? (
                   <div className="space-y-6">
                     <div>
                       <p className="text-sm text-slate-500">Consultation Fee</p>
-                      <p className="mt-1 text-xl font-semibold text-slate-900">{consultation.paymentSummary.doctorFeeCurrency} {Number(consultation.paymentSummary.doctorFeeAmount).toFixed(2)}</p>
+                      <p className="mt-1 text-xl font-semibold text-slate-900">{summary.doctorFeeCurrency} {Number(summary.doctorFeeAmount).toFixed(2)}</p>
                     </div>
 
                     <div>
-                      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
-                        Status: {consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" ? "Payment Confirmed" : "Awaiting Your Confirmation"}
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${summary.doctorPaymentStatus === "CONFIRMED" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
+                        Status: {summary.doctorPaymentStatus === "CONFIRMED" ? "Payment Confirmed" : "Awaiting Your Confirmation"}
                       </span>
                       <p className="mt-2 text-sm text-slate-600">
-                        {consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED"
-                          ? `Payment confirmed${consultation.paymentSummary.paymentConfirmedAt ? ` ${new Date(consultation.paymentSummary.paymentConfirmedAt).toLocaleString()}` : ""}. The patient's prescription QR is unlocked.`
+                        {summary.doctorPaymentStatus === "CONFIRMED"
+                          ? `Payment confirmed${summary.paymentConfirmedAt ? ` ${new Date(summary.paymentConfirmedAt).toLocaleString()}` : ""}. The patient's prescription QR is unlocked.`
                           : "Awaiting your manual confirmation. The patient's prescription QR remains locked until payment is confirmed."}
                       </p>
                     </div>
 
-                    {consultation.paymentSummary.doctorPaymentStatus === "AWAITING_CONFIRMATION" && (consultation.status === "IN_PROGRESS" || consultation.status === "COMPLETED") ? (
+                    {summary.doctorPaymentStatus === "AWAITING_CONFIRMATION" && (consultation.status === "IN_PROGRESS" || consultation.status === "COMPLETED") ? (
                       <button type="button" className="rounded-xl bg-amber-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-950 disabled:opacity-50"
-                        disabled={busy !== null} onClick={() => void confirmPayment()}>
-                        {busy === "payment" ? "Confirming…" : "Confirm Payment Received"}
+                        disabled={busy !== null} onClick={() => void confirmPayment(summary.prescriptionId)}>
+                        {busy === "payment-" + summary.prescriptionId ? "Confirming…" : "Confirm Payment Received"}
                       </button>
                     ) : null}
                   </div>
@@ -286,7 +286,7 @@ function DoctorConsultationContent() {
                 )}
               </div>
             </div>
-          ) : null}
+          ))}
 
           <section className="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm sm:p-8" aria-labelledby="clinical-note-heading">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-800">Doctor only</p>

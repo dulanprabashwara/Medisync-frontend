@@ -114,38 +114,38 @@ function PatientConsultationContent() {
             </dl>
           </section>
 
-          {consultation.paymentSummary ? (
-            <div className={`mt-8 overflow-hidden rounded-2xl border shadow-sm ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" || consultation.paymentSummary.doctorFeeAmount === 0 ? "border-emerald-200 bg-white" : "border-slate-200 bg-white"}`}>
-              <div className={`border-b px-6 py-4 ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" || consultation.paymentSummary.doctorFeeAmount === 0 ? "border-emerald-100 bg-emerald-50" : "border-slate-100 bg-slate-50"}`}>
+          {consultation.paymentSummaries.map((summary) => (
+            <div key={summary.prescriptionId} className={`mt-8 overflow-hidden rounded-2xl border shadow-sm ${summary.doctorPaymentStatus === "CONFIRMED" || summary.doctorFeeAmount === 0 ? "border-emerald-200 bg-white" : "border-slate-200 bg-white"}`}>
+              <div className={`border-b px-6 py-4 ${summary.doctorPaymentStatus === "CONFIRMED" || summary.doctorFeeAmount === 0 ? "border-emerald-100 bg-emerald-50" : "border-slate-100 bg-slate-50"}`}>
                 <h3 className="font-semibold text-slate-900">
                   Prescription Issued
                 </h3>
               </div>
               <div className="p-6">
-                {consultation.paymentSummary.doctorFeeAmount > 0 ? (
+                {summary.doctorFeeAmount > 0 ? (
                   <div className="space-y-6">
                     <div>
                       <p className="text-sm text-slate-500">Consultation Fee</p>
-                      <p className="mt-1 text-xl font-semibold text-slate-900">{consultation.paymentSummary.doctorFeeCurrency} {Number(consultation.paymentSummary.doctorFeeAmount).toFixed(2)}</p>
+                      <p className="mt-1 text-xl font-semibold text-slate-900">{summary.doctorFeeCurrency} {Number(summary.doctorFeeAmount).toFixed(2)}</p>
                     </div>
 
-                    {consultation.paymentSummary.doctorPaymentStatus !== "CONFIRMED" ? (
+                    {summary.doctorPaymentStatus !== "CONFIRMED" ? (
                       <div>
                         <p className="font-semibold text-slate-900 mb-2">Payment Details</p>
                         <div className="grid gap-1.5 text-sm text-slate-600">
-                          <div className="grid grid-cols-[130px_1fr]"><span className="font-medium text-slate-500">Account Holder:</span> <span>{consultation.paymentSummary.doctorBankAccountHolder || "N/A"}</span></div>
-                          <div className="grid grid-cols-[130px_1fr]"><span className="font-medium text-slate-500">Bank:</span> <span>{consultation.paymentSummary.doctorBankName || "N/A"}</span></div>
-                          <div className="grid grid-cols-[130px_1fr]"><span className="font-medium text-slate-500">Branch:</span> <span>{consultation.paymentSummary.doctorBankBranch || "N/A"}</span></div>
-                          <div className="grid grid-cols-[130px_1fr]"><span className="font-medium text-slate-500">Account Number:</span> <span>{consultation.paymentSummary.doctorBankAccountNumber || "N/A"}</span></div>
+                          <div className="grid grid-cols-[130px_1fr]"><span className="font-medium text-slate-500">Account Holder:</span> <span>{summary.doctorBankAccountHolder || "N/A"}</span></div>
+                          <div className="grid grid-cols-[130px_1fr]"><span className="font-medium text-slate-500">Bank:</span> <span>{summary.doctorBankName || "N/A"}</span></div>
+                          <div className="grid grid-cols-[130px_1fr]"><span className="font-medium text-slate-500">Branch:</span> <span>{summary.doctorBankBranch || "N/A"}</span></div>
+                          <div className="grid grid-cols-[130px_1fr]"><span className="font-medium text-slate-500">Account Number:</span> <span>{summary.doctorBankAccountNumber || "N/A"}</span></div>
                         </div>
                       </div>
                     ) : null}
 
                     <div>
-                      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
-                        Status: {consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" ? "Payment Confirmed" : "Awaiting Doctor Confirmation"}
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${summary.doctorPaymentStatus === "CONFIRMED" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
+                        Status: {summary.doctorPaymentStatus === "CONFIRMED" ? "Payment Confirmed" : "Awaiting Doctor Confirmation"}
                       </span>
-                      {consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" && (
+                      {summary.doctorPaymentStatus === "CONFIRMED" && (
                         <p className="mt-2 text-sm text-slate-600">You can now access your prescription.</p>
                       )}
                     </div>
@@ -155,7 +155,7 @@ function PatientConsultationContent() {
                 )}
               </div>
             </div>
-          ) : null}
+          ))}
 
           {consultation.status === "CANCELLED" ? (
             <ConsultationCancellationPanel
