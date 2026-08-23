@@ -248,22 +248,44 @@ function DoctorConsultationContent() {
 
           {session ? <DoctorConsultationPrescriptions accessToken={session.access_token} consultationId={consultationId} consultationStatus={consultation.status} /> : null}
 
-          {consultation.paymentSummary && consultation.paymentSummary.doctorFeeAmount > 0 ? (
-            <section className={`mt-8 rounded-3xl border p-6 shadow-sm sm:p-8 ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" ? "border-emerald-200 bg-emerald-50 text-emerald-950" : "border-amber-200 bg-amber-50 text-amber-950"}`}>
-              <p className="text-xs font-bold uppercase tracking-[0.16em]">Consultation Fee</p>
-              <h2 className="mt-2 text-3xl font-semibold">{consultation.paymentSummary.doctorFeeCurrency} {Number(consultation.paymentSummary.doctorFeeAmount).toFixed(2)}</h2>
-              <p className="mt-3 text-sm">
-                {consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED"
-                  ? `Payment confirmed${consultation.paymentSummary.paymentConfirmedAt ? ` ${new Date(consultation.paymentSummary.paymentConfirmedAt).toLocaleString()}` : ""}. The patient's prescription QR is unlocked.`
-                  : "Awaiting your manual confirmation. The patient's prescription QR remains locked until payment is confirmed."}
-              </p>
-              {consultation.paymentSummary.doctorPaymentStatus === "AWAITING_CONFIRMATION" && (consultation.status === "IN_PROGRESS" || consultation.status === "COMPLETED") ? (
-                <button type="button" className="mt-5 rounded-xl bg-amber-900 px-6 py-3 text-sm font-semibold text-white hover:bg-amber-950 disabled:opacity-50"
-                  disabled={busy !== null} onClick={() => void confirmPayment()}>
-                  {busy === "payment" ? "Confirming…" : "Confirm Payment Received"}
-                </button>
-              ) : null}
-            </section>
+          {consultation.paymentSummary ? (
+            <div className={`mt-8 overflow-hidden rounded-2xl border shadow-sm ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" || consultation.paymentSummary.doctorFeeAmount === 0 ? "border-emerald-200 bg-white" : "border-slate-200 bg-white"}`}>
+              <div className={`border-b px-6 py-4 ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" || consultation.paymentSummary.doctorFeeAmount === 0 ? "border-emerald-100 bg-emerald-50" : "border-slate-100 bg-slate-50"}`}>
+                <h3 className="font-semibold text-slate-900">
+                  Prescription Issued
+                </h3>
+              </div>
+              <div className="p-6">
+                {consultation.paymentSummary.doctorFeeAmount > 0 ? (
+                  <div className="space-y-6">
+                    <div>
+                      <p className="text-sm text-slate-500">Consultation Fee</p>
+                      <p className="mt-1 text-xl font-semibold text-slate-900">{consultation.paymentSummary.doctorFeeCurrency} {Number(consultation.paymentSummary.doctorFeeAmount).toFixed(2)}</p>
+                    </div>
+
+                    <div>
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
+                        Status: {consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" ? "Payment Confirmed" : "Awaiting Your Confirmation"}
+                      </span>
+                      <p className="mt-2 text-sm text-slate-600">
+                        {consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED"
+                          ? `Payment confirmed${consultation.paymentSummary.paymentConfirmedAt ? ` ${new Date(consultation.paymentSummary.paymentConfirmedAt).toLocaleString()}` : ""}. The patient's prescription QR is unlocked.`
+                          : "Awaiting your manual confirmation. The patient's prescription QR remains locked until payment is confirmed."}
+                      </p>
+                    </div>
+
+                    {consultation.paymentSummary.doctorPaymentStatus === "AWAITING_CONFIRMATION" && (consultation.status === "IN_PROGRESS" || consultation.status === "COMPLETED") ? (
+                      <button type="button" className="rounded-xl bg-amber-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-950 disabled:opacity-50"
+                        disabled={busy !== null} onClick={() => void confirmPayment()}>
+                        {busy === "payment" ? "Confirming…" : "Confirm Payment Received"}
+                      </button>
+                    ) : null}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-600">You have issued a prescription with no consultation fee required.</p>
+                )}
+              </div>
+            </div>
           ) : null}
 
           <section className="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm sm:p-8" aria-labelledby="clinical-note-heading">

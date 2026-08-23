@@ -115,33 +115,46 @@ function PatientConsultationContent() {
           </section>
 
           {consultation.paymentSummary ? (
-            <section className={`mt-8 rounded-3xl border p-6 shadow-sm sm:p-8 ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" || consultation.paymentSummary.doctorFeeAmount === 0 ? "border-emerald-200 bg-emerald-50 text-emerald-950" : "border-amber-200 bg-amber-50 text-amber-950"}`}>
-              <p className="text-xs font-bold uppercase tracking-[0.16em]">
-                {consultation.paymentSummary.doctorFeeAmount > 0 ? "Doctor issued prescription / Consultation Fee" : "Doctor issued prescription"}
-              </p>
-              
-              {consultation.paymentSummary.doctorFeeAmount > 0 ? (
-                <>
-                  <h2 className="mt-2 text-3xl font-semibold">{consultation.paymentSummary.doctorFeeCurrency} {Number(consultation.paymentSummary.doctorFeeAmount).toFixed(2)}</h2>
-                  <p className="mt-3 text-sm">
-                    {consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED"
-                      ? `Payment confirmed${consultation.paymentSummary.paymentConfirmedAt ? ` ${new Date(consultation.paymentSummary.paymentConfirmedAt).toLocaleString()}` : ""}. You can now access your prescription.`
-                      : "Awaiting doctor's manual confirmation. Your prescription remains locked until the doctor confirms receipt of the fee."}
-                  </p>
-                  {consultation.paymentSummary.doctorPaymentStatus !== "CONFIRMED" ? (
-                    <div className="mt-4 border-t border-amber-200/50 pt-4 text-sm">
-                      <p className="font-semibold">Doctor payment details:</p>
-                      <p className="mt-1">Account Holder: {consultation.paymentSummary.doctorBankAccountHolder || "N/A"}</p>
-                      <p>Bank: {consultation.paymentSummary.doctorBankName || "N/A"}</p>
-                      <p>Branch: {consultation.paymentSummary.doctorBankBranch || "N/A"}</p>
-                      <p>Account Number: {consultation.paymentSummary.doctorBankAccountNumber || "N/A"}</p>
+            <div className={`mt-8 overflow-hidden rounded-2xl border shadow-sm ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" || consultation.paymentSummary.doctorFeeAmount === 0 ? "border-emerald-200 bg-white" : "border-slate-200 bg-white"}`}>
+              <div className={`border-b px-6 py-4 ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" || consultation.paymentSummary.doctorFeeAmount === 0 ? "border-emerald-100 bg-emerald-50" : "border-slate-100 bg-slate-50"}`}>
+                <h3 className="font-semibold text-slate-900">
+                  Prescription Issued
+                </h3>
+              </div>
+              <div className="p-6">
+                {consultation.paymentSummary.doctorFeeAmount > 0 ? (
+                  <div className="space-y-6">
+                    <div>
+                      <p className="text-sm text-slate-500">Consultation Fee</p>
+                      <p className="mt-1 text-xl font-semibold text-slate-900">{consultation.paymentSummary.doctorFeeCurrency} {Number(consultation.paymentSummary.doctorFeeAmount).toFixed(2)}</p>
                     </div>
-                  ) : null}
-                </>
-              ) : (
-                <p className="mt-3 text-sm">Your doctor has issued a prescription with no consultation fee required. You can now access your prescription.</p>
-              )}
-            </section>
+
+                    {consultation.paymentSummary.doctorPaymentStatus !== "CONFIRMED" ? (
+                      <div>
+                        <p className="font-semibold text-slate-900 mb-2">Payment Details</p>
+                        <div className="grid gap-1.5 text-sm text-slate-600">
+                          <div className="grid grid-cols-[130px_1fr]"><span className="font-medium text-slate-500">Account Holder:</span> <span>{consultation.paymentSummary.doctorBankAccountHolder || "N/A"}</span></div>
+                          <div className="grid grid-cols-[130px_1fr]"><span className="font-medium text-slate-500">Bank:</span> <span>{consultation.paymentSummary.doctorBankName || "N/A"}</span></div>
+                          <div className="grid grid-cols-[130px_1fr]"><span className="font-medium text-slate-500">Branch:</span> <span>{consultation.paymentSummary.doctorBankBranch || "N/A"}</span></div>
+                          <div className="grid grid-cols-[130px_1fr]"><span className="font-medium text-slate-500">Account Number:</span> <span>{consultation.paymentSummary.doctorBankAccountNumber || "N/A"}</span></div>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <div>
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
+                        Status: {consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" ? "Payment Confirmed" : "Awaiting Doctor Confirmation"}
+                      </span>
+                      {consultation.paymentSummary.doctorPaymentStatus === "CONFIRMED" && (
+                        <p className="mt-2 text-sm text-slate-600">You can now access your prescription.</p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-600">Your doctor has issued a prescription with no consultation fee required. You can now access your prescription.</p>
+                )}
+              </div>
+            </div>
           ) : null}
 
           {consultation.status === "CANCELLED" ? (
