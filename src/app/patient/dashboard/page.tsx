@@ -133,7 +133,7 @@ function PatientDashboardContent() {
   const isNewPatient = appointments.length === 0 && prescriptions.length === 0;
 
   return (
-    <div>
+    <div className="max-w-6xl mx-auto space-y-8">
       <PortalHeading
         eyebrow="Patient Portal"
         title={`Welcome back, ${profile?.firstName ?? "Patient"}`}
@@ -309,3 +309,4 @@ export default function PatientDashboardPage() {
     </ProtectedRoute>
   );
 }
+

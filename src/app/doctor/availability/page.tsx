@@ -177,7 +177,7 @@ function DoctorAvailabilityContent() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl pb-10">
+    <div className="max-w-5xl mx-auto space-y-8">
       <PortalHeading
         eyebrow="Doctor Portal"
         title="Consultation Availability"
@@ -384,7 +384,7 @@ function DoctorAvailabilityContent() {
           </div>
         </form>
       </Dialog>
-    </main>
+    </div>
   );
 }
 
@@ -395,3 +395,4 @@ export default function DoctorAvailabilityPage() {
     </ProtectedRoute>
   );
 }
+

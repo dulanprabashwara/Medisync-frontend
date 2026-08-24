@@ -84,11 +84,11 @@ function DoctorDashboardContent() {
 
   if (!doctorProfile) {
     return (
-      <main className="mx-auto max-w-xl px-6 py-16">
+      <div className="max-w-6xl mx-auto space-y-8">
         <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-950">
           {error ?? "Your professional profile could not be loaded."}
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -284,3 +284,4 @@ export default function DoctorDashboardPage() {
     </ProtectedRoute>
   );
 }
+

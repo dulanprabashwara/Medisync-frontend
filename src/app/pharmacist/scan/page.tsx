@@ -131,8 +131,9 @@ function Content() {
   }, [stopCamera, verifyPayload]);
 
   useEffect(() => {
-    void startCamera();
+    const timer = window.setTimeout(() => void startCamera(), 0);
     return () => {
+      window.clearTimeout(timer);
       void stopCamera();
     };
   }, [startCamera, stopCamera]);
@@ -181,7 +182,7 @@ function Content() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl">
+    <div className="max-w-5xl mx-auto space-y-8">
       <PortalHeading
         eyebrow=""
         title="Scan Prescription"
@@ -305,7 +306,7 @@ function Content() {
           </div>
         </div>
       </Dialog>
-    </main>
+    </div>
   );
 }
 
@@ -482,3 +483,4 @@ export default function Page() {
     </ProtectedRoute>
   );
 }
+

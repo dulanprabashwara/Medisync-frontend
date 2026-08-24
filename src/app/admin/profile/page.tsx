@@ -160,7 +160,7 @@ function AdminProfileContent() {
   const { profile } = useAuth();
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-10">
+    <div className="max-w-6xl mx-auto space-y-8">
       <PortalHeading
         eyebrow="ACCOUNT"
         title="Admin Profile"
@@ -182,3 +182,4 @@ export default function AdminProfilePage() {
     </ProtectedRoute>
   );
 }
+

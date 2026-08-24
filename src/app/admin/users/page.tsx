@@ -118,7 +118,7 @@ function UsersContent() {
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-6 pb-10 lg:px-8 lg:pb-14">
+    <div className="space-y-8">
       <PortalHeading
         eyebrow="Administration"
         title="User management"
@@ -345,7 +345,7 @@ function UsersContent() {
           </div>
         </section>
       )}
-    </main>
+    </div>
   );
 }
 
@@ -448,3 +448,4 @@ export default function AdminUsersPage() {
     </ProtectedRoute>
   );
 }
+

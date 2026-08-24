@@ -52,7 +52,7 @@ function PharmacistDashboardContent() {
   const rejected = professional?.verificationStatus === "REJECTED";
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8">
+    <div className="max-w-6xl mx-auto space-y-8">
       <PortalHeading
         eyebrow=""
         backHref=""
@@ -186,3 +186,4 @@ export default function PharmacistDashboardPage() {
     </ProtectedRoute>
   );
 }
+

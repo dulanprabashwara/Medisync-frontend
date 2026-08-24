@@ -296,7 +296,7 @@ function Content() {
     value?.consultationStatus === "SCHEDULED" ||
     value?.consultationStatus === "IN_PROGRESS";
   return (
-    <main className="mx-auto max-w-5xl">
+    <div className="max-w-6xl mx-auto space-y-8">
       <PortalHeading
         eyebrow="Doctor prescription"
         title={value ? `Prescription for ${value.patientName}` : "Prescription"}
@@ -658,7 +658,7 @@ function Content() {
           )}
         </>
       ) : null}
-    </main>
+    </div>
   );
 }
 export default function Page() {

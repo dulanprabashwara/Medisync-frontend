@@ -206,7 +206,7 @@ function PatientDoctorSearchContent() {
   );
 
   return (
-    <div>
+    <div className="space-y-8">
       <PortalHeading
         eyebrow="Patient Care"
         title="Find a Doctor"
@@ -357,3 +357,4 @@ export default function PatientDoctorsPage() {
     </ProtectedRoute>
   );
 }
+

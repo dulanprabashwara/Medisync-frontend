@@ -76,7 +76,7 @@ function AnalyticsContent() {
   }, [load]);
 
   return (
-    <main className="mx-auto max-w-7xl px-6 pb-10 lg:px-8 lg:pb-14">
+    <div className="space-y-8">
       <PortalHeading
         eyebrow="Administration"
         title="Operational analytics"
@@ -194,7 +194,7 @@ function AnalyticsContent() {
           ) : null}
         </>
       ) : null}
-    </main>
+    </div>
   );
 }
 
@@ -331,3 +331,5 @@ export default function AdminAnalyticsPage() {
     </ProtectedRoute>
   );
 }
+
+

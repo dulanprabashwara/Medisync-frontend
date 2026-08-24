@@ -219,14 +219,14 @@ function Content() {
   const verified = value?.pharmacyAccessAllowed === true;
 
   return (
-    <main className="mx-auto max-w-4xl">
+    <div className="max-w-5xl mx-auto space-y-8">
       <PortalHeading
         eyebrow=""
         title="Professional Profile"
         description="Administrator verification is required before prescription scanning or dispensing."
         backHref="/pharmacist/dashboard"
       />
-      <div className="space-y-8 mt-8">
+      <div className="space-y-8">
         <PersonalInformationCard />
         <AccountInformationCard />
         
@@ -346,7 +346,7 @@ function Content() {
       
       <AccountSettingsDangerZone />
       </div>
-    </main>
+    </div>
   );
 }
 
@@ -546,3 +546,4 @@ export default function Page() {
     </ProtectedRoute>
   );
 }
+

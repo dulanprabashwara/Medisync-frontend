@@ -161,7 +161,7 @@ function DoctorAppointmentsContent() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl">
+    <div className="space-y-8">
       <PortalHeading
         eyebrow="Doctor Portal"
         title="Consultations Manager"
@@ -281,7 +281,7 @@ function DoctorAppointmentsContent() {
           )}
         </div>
       )}
-    </main>
+    </div>
   );
 }
 
@@ -492,3 +492,4 @@ export default function DoctorAppointmentsPage() {
     </ProtectedRoute>
   );
 }
+

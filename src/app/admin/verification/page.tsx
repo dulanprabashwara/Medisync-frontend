@@ -63,7 +63,8 @@ export default function ProfessionalVerificationPage() {
   }, [session]);
 
   useEffect(() => {
-    void load();
+    const timer = window.setTimeout(() => void load(), 0);
+    return () => window.clearTimeout(timer);
   }, [load]);
 
   async function runAction(key: string, success: string, action: () => Promise<unknown>) {
@@ -128,7 +129,7 @@ export default function ProfessionalVerificationPage() {
   if (loading) return <LoadingPanel label="Loading professional verification queue..." />;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-10">
+    <div className="space-y-8">
       <PortalHeading
         eyebrow="MANAGEMENT"
         title="Professional Verification"
@@ -421,3 +422,4 @@ export default function ProfessionalVerificationPage() {
     </div>
   );
 }
+

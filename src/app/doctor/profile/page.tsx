@@ -196,7 +196,7 @@ function DoctorProfileContent() {
   const rejected = doctor.verificationStatus === "REJECTED";
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-10">
+    <div className="max-w-6xl mx-auto space-y-8">
       <PortalHeading
         eyebrow="DOCTOR ACCOUNT"
         title="Profile"
@@ -535,3 +535,4 @@ export default function DoctorProfilePage() {
     </ProtectedRoute>
   );
 }
+

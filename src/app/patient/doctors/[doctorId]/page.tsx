@@ -162,7 +162,7 @@ function PatientDoctorDetailsContent() {
   if (loading) return <LoadingPanel label="Loading doctor profile..." />;
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-6xl mx-auto space-y-8">
       <PortalHeading
         eyebrow="Verified Doctor"
         title={doctor?.displayName ?? "Doctor Profile"}

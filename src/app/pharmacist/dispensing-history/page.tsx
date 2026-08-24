@@ -83,14 +83,17 @@ function Content() {
     const id = urlParams.get('id');
     if (id && items.length > 0 && !selectedSummary) {
       const item = items.find(i => i.id === id);
-      if (item) void open(item);
+      if (item) {
+        const timer = window.setTimeout(() => void open(item), 0);
+        return () => window.clearTimeout(timer);
+      }
     }
-  }, [items, selectedSummary]);
+  }, [items, selectedSummary, open]);
 
   if (loading) return <LoadingPanel label="Loading dispensing history..." />;
 
   return (
-    <main className="mx-auto max-w-5xl">
+    <div className="space-y-8">
       <PortalHeading
         eyebrow=""
         title="Dispensing History"
@@ -210,7 +213,7 @@ function Content() {
           </div>
         ) : null}
       </Dialog>
-    </main>
+    </div>
   );
 }
 
@@ -232,3 +235,4 @@ export default function Page() {
     </ProtectedRoute>
   );
 }
+

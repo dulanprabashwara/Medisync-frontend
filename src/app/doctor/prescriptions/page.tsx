@@ -70,7 +70,7 @@ function Content() {
   if (loading) return <LoadingPanel label="Loading prescriptions..." />;
 
   return (
-    <main className="mx-auto max-w-5xl">
+    <div className="space-y-8">
       <PortalHeading
         eyebrow="Doctor Portal"
         title="Prescriptions"
@@ -242,7 +242,7 @@ function Content() {
             </div>
           ))}
       </section>
-    </main>
+    </div>
   );
 }
 
@@ -253,3 +253,4 @@ export default function Page() {
     </ProtectedRoute>
   );
 }
+

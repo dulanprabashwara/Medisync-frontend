@@ -93,7 +93,7 @@ export default function PatientPrescriptionDetailPage() {
 
   return (
     <ProtectedRoute roles={["PATIENT"]}>
-      <div className="space-y-8 pb-10">
+      <div className="max-w-6xl mx-auto space-y-8">
         <PortalHeading
           eyebrow="Patient Care"
           title="Prescription Details"

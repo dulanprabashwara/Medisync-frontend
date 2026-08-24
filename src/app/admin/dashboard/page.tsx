@@ -16,11 +16,9 @@ import {
 } from "@/lib/api";
 import type {
   AnalyticsSummary,
-  AdminDoctorReview,
-  AdminPharmacistReview,
   AuditEvent,
 } from "@/types/admin";
-import type { AdminPharmacistReview as PharmacistReviewFromUser, AdminDoctorReview as DoctorReviewFromUser } from "@/types/user";
+import type { AdminDoctorReview, AdminPharmacistReview } from "@/types/user";
 
 export default function AdminDashboardPage() {
   const { session, profile } = useAuth();
@@ -29,8 +27,8 @@ export default function AdminDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
-  const [pendingDoctors, setPendingDoctors] = useState<DoctorReviewFromUser[]>([]);
-  const [pendingPharmacists, setPendingPharmacists] = useState<PharmacistReviewFromUser[]>([]);
+  const [pendingDoctors, setPendingDoctors] = useState<AdminDoctorReview[]>([]);
+  const [pendingPharmacists, setPendingPharmacists] = useState<AdminPharmacistReview[]>([]);
   const [recentAudits, setRecentAudits] = useState<AuditEvent[]>([]);
 
   const loadData = useCallback(async () => {
@@ -71,7 +69,7 @@ export default function AdminDashboardPage() {
   const totalPending = pendingDoctors.length + pendingPharmacists.length;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-10">
+    <div className="max-w-6xl mx-auto space-y-8">
       <PortalHeading
         eyebrow="OVERVIEW"
         title="Admin Dashboard"
@@ -201,3 +199,4 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
