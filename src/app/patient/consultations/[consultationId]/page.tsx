@@ -348,8 +348,8 @@ export default function PatientConsultationPage() {
 
   return (
     <ProtectedRoute roles={["PATIENT"]}>
-      <div className="flex flex-col h-[calc(100vh-88px)] lg:h-[calc(100vh-112px)] -mb-16 lg:-mb-18">
-        <div className="shrink-0 mb-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+      <div className="flex flex-col h-full pt-6 sm:pt-8">
+        <div className="shrink-0 mb-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <PortalHeading
             eyebrow="Online Consultation"
             title={
@@ -395,10 +395,10 @@ export default function PatientConsultationPage() {
         )}
 
         {consultation && (
-          <div className="flex-1 flex gap-6 min-h-0 overflow-hidden relative">
+          <div className="flex-1 flex gap-6 min-h-0 overflow-hidden relative px-4 sm:px-6 lg:px-8 bg-white lg:bg-transparent">
             {/* Main Chat Area */}
             <div
-              className={`flex-1 flex flex-col min-h-0 pb-8 lg:pb-0 transition-all duration-200 overflow-hidden`}
+              className={`flex-1 flex flex-col min-h-0 transition-all duration-200 overflow-hidden`}
             >
               <ConsultationChat
                 messages={messages}

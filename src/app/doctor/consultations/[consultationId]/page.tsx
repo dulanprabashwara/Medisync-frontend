@@ -283,7 +283,7 @@ function DoctorConsultationContent() {
 
   if (!consultation) {
     return (
-      <main className="flex h-[calc(100vh-64px)] items-center justify-center bg-slate-50">
+      <main className="flex h-full items-center justify-center bg-slate-50">
         <div className="max-w-md rounded-2xl bg-white p-6 shadow-sm text-center">
           <InlineError message={error || "Consultation not found."} />
           <button onClick={() => router.push("/doctor/appointments")} className="mt-4 text-teal-700 hover:underline">
@@ -295,7 +295,7 @@ function DoctorConsultationContent() {
   }
 
   return (
-    <main className="flex h-[calc(100vh-88px)] flex-col lg:h-[calc(100vh-64px)] lg:flex-row bg-slate-50 overflow-hidden">
+    <main className="flex h-full flex-col lg:flex-row bg-slate-50 overflow-hidden">
       {/* Left Pane: Chat */}
       <div className="flex h-1/2 w-full flex-col bg-white lg:h-full lg:w-3/5">
         <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-3 shadow-sm z-10 shrink-0">

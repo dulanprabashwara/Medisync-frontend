@@ -161,7 +161,7 @@ function DoctorAppointmentsContent() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-10 lg:px-8 lg:py-14">
+    <main className="mx-auto max-w-5xl">
       <PortalHeading
         eyebrow="Doctor Portal"
         title="Consultations Manager"

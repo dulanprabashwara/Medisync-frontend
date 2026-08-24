@@ -70,7 +70,7 @@ function Content() {
   if (loading) return <LoadingPanel label="Loading prescriptions..." />;
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-10 lg:px-8 lg:py-14">
+    <main className="mx-auto max-w-5xl">
       <PortalHeading
         eyebrow="Doctor Portal"
         title="Prescriptions"

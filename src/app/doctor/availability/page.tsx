@@ -177,7 +177,7 @@ function DoctorAvailabilityContent() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-10 lg:px-8 lg:py-14 pb-20">
+    <main className="mx-auto max-w-5xl pb-10">
       <PortalHeading
         eyebrow="Doctor Portal"
         title="Consultation Availability"
