@@ -985,7 +985,7 @@ export const updateAdminProfile = (
   accessToken: string,
   data: { firstName: string; lastName: string; phone?: string },
 ) =>
-  apiRequest<MediSyncProfile>("/api/admin/profile", accessToken, {
+  apiRequest<MediSyncProfile>("/api/users/me", accessToken, {
     method: "PATCH",
     body: JSON.stringify(data),
   });

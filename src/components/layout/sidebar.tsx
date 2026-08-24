@@ -35,7 +35,7 @@ export function Sidebar() {
         <Brand />
       </div>
 
-      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8">
+      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {groups.map((group) => (
           <div key={group.name}>
             <h3 className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">

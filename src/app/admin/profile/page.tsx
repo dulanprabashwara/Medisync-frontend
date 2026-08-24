@@ -146,7 +146,7 @@ function AdminProfileContent() {
   const { profile } = useAuth();
 
   return (
-    <main className="max-w-4xl mx-auto space-y-8 pb-10">
+    <main className="max-w-6xl mx-auto space-y-8 pb-10">
       <PortalHeading
         eyebrow="ACCOUNT"
         title="Admin Profile"
@@ -154,12 +154,12 @@ function AdminProfileContent() {
       />
       
       <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
+        <div className="space-y-8 lg:col-span-1">
           <ProfileImageEditor />
-        </div>
-        <div className="lg:col-span-2 space-y-8">
-          <PersonalInformationCard />
           <AccountInformationCard />
+        </div>
+        <div className="space-y-8 lg:col-span-2">
+          <PersonalInformationCard />
         </div>
       </div>
     </main>
