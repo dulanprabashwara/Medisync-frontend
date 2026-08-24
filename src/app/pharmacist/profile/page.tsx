@@ -8,6 +8,8 @@ import { PortalHeading } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
 import { ProfileImageEditor } from "@/components/profile-image-editor";
 import { AccountSettingsDangerZone } from "@/components/account-settings-danger-zone";
+import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 import {
   getPharmacistProfessionalProfile,
   submitPharmacistVerification,
@@ -214,10 +216,10 @@ function Content() {
   const verified = value?.pharmacyAccessAllowed === true;
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10 lg:px-8 lg:py-14">
+    <main className="mx-auto max-w-4xl">
       <PortalHeading
-        eyebrow="Pharmacist verification"
-        title="Professional profile"
+        eyebrow=""
+        title="Professional Profile"
         description="Administrator verification is required before prescription scanning or dispensing."
         backHref="/pharmacist/dashboard"
       />
@@ -227,59 +229,48 @@ function Content() {
         {message ? <FormAlert message={message} success /> : null}
       </div>
       {value?.verificationStatus === "REJECTED" ? (
-        <section className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-950">
-          <h2 className="font-semibold">Verification rejected</h2>
-          <p className="mt-2 whitespace-pre-wrap text-sm">
-            {value.verificationRejectionReason}
-          </p>
-          <p className="mt-2 text-sm">
-            Correct the profile and submit it again.
-          </p>
-        </section>
+        <Alert tone="error" title="Verification rejected">
+          <p className="whitespace-pre-wrap">{value.verificationRejectionReason}</p>
+          <p className="mt-1">Correct the profile and submit it again.</p>
+        </Alert>
       ) : null}
       {value?.submitted ? (
-        <section className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
-          <h2 className="font-semibold">Awaiting administrator review</h2>
-          <p className="mt-2 text-sm">
+        <Alert tone="warning" title="Awaiting administrator review">
+          <p>
             Submitted{" "}
             {value.submittedForVerificationAt
               ? new Date(value.submittedForVerificationAt).toLocaleString()
               : "recently"}
             . Professional fields are locked during review.
           </p>
-        </section>
+        </Alert>
       ) : null}
       {verified ? (
-        <section className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-950">
-          <h2 className="font-semibold">Verified pharmacist</h2>
-          <p className="mt-2 text-sm">
-            Your account may securely verify and dispense eligible
-            prescriptions.
-          </p>
-          <button
-            className="mt-4 rounded-xl border border-emerald-700 px-4 py-2 text-sm font-semibold"
-            onClick={() => void refreshProfile()}
-          >
-            Refresh account access
-          </button>
-        </section>
+        <Alert tone="success" title="Verified pharmacist">
+          <p>Your account may securely verify and dispense eligible prescriptions.</p>
+          <div className="mt-3">
+            <Button variant="secondary" onClick={() => void refreshProfile()}>
+              Refresh account access
+            </Button>
+          </div>
+        </Alert>
       ) : null}
       <form
         className="mt-7 space-y-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
         onSubmit={save}
       >
         {loading && draftAvailable ? (
-          <p className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+          <Alert tone="info">
             Your unsaved changes were restored. Checking your current
             verification status...
-          </p>
+          </Alert>
         ) : null}
         {!loading && value?.editable && draftAvailable ? (
-          <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <Alert tone="warning">
             {draftRestored
               ? "Your unsaved changes were restored for this browser tab."
               : "Unsaved changes are being kept while this browser tab remains open."}
-          </p>
+          </Alert>
         ) : null}
         <ProfileField
           label="Professional registration number"
@@ -328,23 +319,22 @@ function Content() {
         />
         {value?.editable ? (
           <div className="flex flex-wrap gap-3">
-            <button
-              className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold disabled:opacity-50"
+            <Button
+              variant="secondary"
               disabled={busy !== null}
               type="submit"
+              loading={busy === "save"}
             >
-              {busy === "save" ? "Saving..." : "Save profile"}
-            </button>
-            <button
-              className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+              Save profile
+            </Button>
+            <Button
               disabled={busy !== null}
               type="button"
               onClick={() => void submit()}
+              loading={busy === "submit"}
             >
-              {busy === "submit"
-                ? "Submitting..."
-                : "Save and submit for verification"}
-            </button>
+              Save and submit for verification
+            </Button>
           </div>
         ) : null}
       </form>
