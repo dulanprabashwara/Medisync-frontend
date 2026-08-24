@@ -19,6 +19,9 @@ import {
   getDoctorAppointments,
   rejectDoctorAppointment,
 } from "@/lib/api";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Calendar } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 import type { Appointment } from "@/types/appointments";
 
 type ReasonAction = { id: string; kind: "reject" | "cancel" } | null;
@@ -34,6 +37,7 @@ function DoctorAppointmentsContent() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [now, setNow] = useState(0);
+  const [activeTab, setActiveTab] = useState<"action_required" | "upcoming" | "past">("action_required");
 
   const load = useCallback(async () => {
     if (!session) return;
@@ -41,7 +45,7 @@ function DoctorAppointmentsContent() {
     setError(null);
     try {
       setAppointments(
-        (await getDoctorAppointments(session.access_token)).content,
+        (await getDoctorAppointments(session.access_token, undefined, 0, 50)).content,
       );
     } catch (loadError) {
       setError(
@@ -69,28 +73,29 @@ function DoctorAppointmentsContent() {
     const descending = (left: Appointment, right: Appointment) =>
       -ascending(left, right);
     return {
-      pending: appointments
+      action_required: appointments
         .filter((value) => value.status === "REQUESTED")
         .sort(ascending),
-      confirmed: appointments
+      upcoming: appointments
         .filter(
           (value) =>
-            value.status === "CONFIRMED" &&
-            new Date(value.scheduledStart).getTime() > now,
+            value.status === "CONFIRMED" ||
+            value.consultationStatus === "IN_PROGRESS" ||
+            value.consultationStatus === "SCHEDULED"
         )
         .sort(ascending),
-      history: appointments
+      past: appointments
         .filter(
           (value) =>
-            value.status !== "REQUESTED" &&
-            !(
-              value.status === "CONFIRMED" &&
-              new Date(value.scheduledStart).getTime() > now
-            ),
+            value.consultationStatus === "COMPLETED" ||
+            value.status === "REJECTED" ||
+            value.status === "CANCELLED_BY_PATIENT" ||
+            value.status === "CANCELLED_BY_DOCTOR" ||
+            (value.status !== "REQUESTED" && value.status !== "CONFIRMED" && value.consultationStatus !== "IN_PROGRESS" && value.consultationStatus !== "SCHEDULED")
         )
         .sort(descending),
     };
-  }, [appointments, now]);
+  }, [appointments]);
 
   async function accept(appointmentId: string) {
     if (!session) return;
@@ -156,13 +161,14 @@ function DoctorAppointmentsContent() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10 lg:px-8 lg:py-14">
+    <main className="mx-auto max-w-5xl px-6 py-10 lg:px-8 lg:py-14">
       <PortalHeading
-        eyebrow="Doctor care requests"
-        title="Online Consultations"
+        eyebrow="Doctor Portal"
+        title="Consultations Manager"
         backHref="/doctor/dashboard"
-        description="Review consultation requests for your published times, including the symptoms each patient submitted."
+        description="Review consultation requests, open active workspaces, and browse patient history."
       />
+
       <div className="mt-7 space-y-3">
         <InlineError message={error} />
         {message ? (
@@ -175,59 +181,102 @@ function DoctorAppointmentsContent() {
         ) : null}
       </div>
 
+      <div className="flex space-x-1 rounded-xl bg-slate-100 p-1 mb-8 max-w-100">
+        <button
+          onClick={() => setActiveTab("action_required")}
+          className={`w-full rounded-lg py-2 text-sm font-medium leading-5 ${
+            activeTab === "action_required"
+              ? "bg-white text-slate-900 shadow-sm"
+              : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900"
+          }`}
+        >
+          Action Required
+          {groups.action_required.length > 0 && (
+            <span className="ml-2 inline-flex items-center justify-center rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-700">
+              {groups.action_required.length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab("upcoming")}
+          className={`w-full rounded-lg py-2 text-sm font-medium leading-5 ${
+            activeTab === "upcoming"
+              ? "bg-white text-slate-900 shadow-sm"
+              : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900"
+          }`}
+        >
+          Upcoming
+        </button>
+        <button
+          onClick={() => setActiveTab("past")}
+          className={`w-full rounded-lg py-2 text-sm font-medium leading-5 ${
+            activeTab === "past"
+              ? "bg-white text-slate-900 shadow-sm"
+              : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900"
+          }`}
+        >
+          Past
+        </button>
+      </div>
+
       {loading ? (
-        <LoadingPanel label="Loading consultation requests..." />
-      ) : appointments.length === 0 ? (
-        <div className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600">
-          No consultation requests are currently waiting for review.
-        </div>
+        <LoadingPanel label="Loading consultations..." />
       ) : (
-        <div className="mt-9 space-y-10">
-          <DoctorAppointmentSection
-            title="Pending Consultation Requests"
-            empty="No consultation requests are currently waiting for review."
-            appointments={groups.pending}
-            expandedId={expandedId}
-            setExpandedId={setExpandedId}
-            reasonAction={reasonAction}
-            reason={reason}
-            setReason={setReason}
-            busy={busy}
-            now={now}
-            onAccept={accept}
-            onOpenReason={openReason}
-            onSubmitReason={submitReasonAction}
-          />
-          <DoctorAppointmentSection
-            title="Upcoming Online Consultations"
-            empty="No upcoming confirmed online consultations."
-            appointments={groups.confirmed}
-            expandedId={expandedId}
-            setExpandedId={setExpandedId}
-            reasonAction={reasonAction}
-            reason={reason}
-            setReason={setReason}
-            busy={busy}
-            now={now}
-            onAccept={accept}
-            onOpenReason={openReason}
-            onSubmitReason={submitReasonAction}
-          />
-          <DoctorAppointmentSection
-            title="Declined, Cancelled, or Previous Consultations"
-            empty="No consultation history yet."
-            appointments={groups.history}
-            expandedId={expandedId}
-            setExpandedId={setExpandedId}
-            reasonAction={reasonAction}
-            reason={reason}
-            setReason={setReason}
-            busy={busy}
-            now={now}
-            onAccept={accept}
-            onOpenReason={openReason}
-            onSubmitReason={submitReasonAction}
-          />
+        <div className="space-y-4">
+          {activeTab === "action_required" && (
+            <DoctorAppointmentSection
+              emptyTitle="No action required"
+              emptyDescription="You have no pending consultation requests waiting for review."
+              appointments={groups.action_required}
+              expandedId={expandedId}
+              setExpandedId={setExpandedId}
+              reasonAction={reasonAction}
+              reason={reason}
+              setReason={setReason}
+              busy={busy}
+              now={now}
+              onAccept={accept}
+              onOpenReason={openReason}
+              onSubmitReason={submitReasonAction}
+              tab="action_required"
+            />
+          )}
+          {activeTab === "upcoming" && (
+            <DoctorAppointmentSection
+              emptyTitle="No upcoming consultations"
+              emptyDescription="You have no confirmed consultations scheduled for the future."
+              appointments={groups.upcoming}
+              expandedId={expandedId}
+              setExpandedId={setExpandedId}
+              reasonAction={reasonAction}
+              reason={reason}
+              setReason={setReason}
+              busy={busy}
+              now={now}
+              onAccept={accept}
+              onOpenReason={openReason}
+              onSubmitReason={submitReasonAction}
+              tab="upcoming"
+            />
+          )}
+          {activeTab === "past" && (
+            <DoctorAppointmentSection
+              emptyTitle="No past consultations"
+              emptyDescription="You have no completed or cancelled consultations."
+              appointments={groups.past}
+              expandedId={expandedId}
+              setExpandedId={setExpandedId}
+              reasonAction={reasonAction}
+              reason={reason}
+              setReason={setReason}
+              busy={busy}
+              now={now}
+              onAccept={accept}
+              onOpenReason={openReason}
+              onSubmitReason={submitReasonAction}
+              tab="past"
+            />
+          )}
         </div>
       )}
     </main>
@@ -235,8 +284,8 @@ function DoctorAppointmentsContent() {
 }
 
 interface SectionProps {
-  title: string;
-  empty: string;
+  emptyTitle: string;
+  emptyDescription: string;
   appointments: Appointment[];
   expandedId: string | null;
   setExpandedId: (id: string | null) => void;
@@ -248,172 +297,178 @@ interface SectionProps {
   onAccept: (id: string) => Promise<void>;
   onOpenReason: (id: string, kind: "reject" | "cancel") => void;
   onSubmitReason: () => Promise<void>;
+  tab: "action_required" | "upcoming" | "past";
 }
 
 function DoctorAppointmentSection(props: SectionProps) {
+  if (props.appointments.length === 0) {
+    return (
+      <EmptyState
+        icon={Calendar}
+        title={props.emptyTitle}
+        description={props.emptyDescription}
+      />
+    );
+  }
+
   return (
-    <section>
-      <h2 className="text-2xl font-semibold text-slate-950">{props.title}</h2>
-      {props.appointments.length === 0 ? (
-        <p className="mt-4 rounded-2xl bg-white p-5 text-sm text-slate-500">
-          {props.empty}
-        </p>
-      ) : (
-        <div className="mt-4 space-y-4">
-          {props.appointments.map((appointment) => {
-            const expanded = props.expandedId === appointment.id;
-            const reasonOpen = props.reasonAction?.id === appointment.id;
-            return (
-              <article
-                className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
-                key={appointment.id}
+    <div className="space-y-4">
+      {props.appointments.map((appointment) => {
+        const expanded = props.expandedId === appointment.id;
+        const reasonOpen = props.reasonAction?.id === appointment.id;
+        return (
+          <article
+            className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm hover:border-teal-100 transition-colors"
+            key={appointment.id}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h3 className="text-lg font-semibold text-slate-950 truncate">
+                    {appointment.patientName}
+                  </h3>
+                  <StateBadge status={appointment.status} />
+                  {appointment.consultationStatus ? (
+                    <ConsultationStatusBadge
+                      status={appointment.consultationStatus}
+                    />
+                  ) : null}
+                </div>
+                <div className="mt-2 space-y-1">
+                  <p className="text-sm font-medium text-slate-700">
+                    {formatAppointmentTime(appointment.scheduledStart)}
+                  </p>
+                  <p className="text-sm text-slate-600 line-clamp-2 mt-1">
+                    <span className="font-medium text-slate-700">Reason:</span>{" "}
+                    {appointment.symptoms.reasonForVisit}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <button
+                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                onClick={() => props.setExpandedId(expanded ? null : appointment.id)}
               >
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-950">
-                      {appointment.patientName}
-                    </h3>
-                    <p className="mt-2 text-sm text-slate-600">
-                      {formatAppointmentTime(appointment.scheduledStart)}
-                    </p>
-                    <p className="mt-3 text-sm text-slate-700">
-                      <span className="font-semibold">Reason:</span>{" "}
-                      {appointment.symptoms.reasonForVisit}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <StateBadge status={appointment.status} />
-                    {appointment.consultationStatus ? (
-                      <ConsultationStatusBadge
-                        status={appointment.consultationStatus}
-                      />
-                    ) : null}
-                  </div>
-                </div>
-                <p className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-700">
-                  <span className="font-semibold">Symptoms:</span>{" "}
-                  {appointment.symptoms.symptoms}
-                </p>
-                <div className="mt-5 flex flex-wrap gap-3">
+                {expanded ? "Hide details" : "View details"}
+              </button>
+
+              {props.tab === "action_required" && appointment.status === "REQUESTED" && (
+                <>
                   <button
-                    className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                    onClick={() =>
-                      props.setExpandedId(expanded ? null : appointment.id)
-                    }
+                    className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60 transition-colors"
+                    disabled={props.busy !== null}
+                    onClick={() => void props.onAccept(appointment.id)}
                   >
-                    {expanded ? "Hide details" : "View details"}
+                    {props.busy === appointment.id ? "Processing..." : "Accept"}
                   </button>
-                  {appointment.consultationId ? (
-                    <Link
-                      className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800"
-                      href={`/doctor/consultations/${appointment.consultationId}`}
-                    >
-                      Open Consultation
-                    </Link>
-                  ) : null}
-                  {appointment.status === "REQUESTED" ? (
-                    <>
-                      <button
-                        className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60"
-                        disabled={props.busy !== null}
-                        onClick={() => void props.onAccept(appointment.id)}
-                      >
-                        {props.busy === appointment.id
-                          ? "Processing..."
-                          : "Accept"}
-                      </button>
-                      <button
-                        className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60"
-                        disabled={props.busy !== null}
-                        onClick={() =>
-                          props.onOpenReason(appointment.id, "reject")
-                        }
-                      >
-                        Decline
-                      </button>
-                    </>
-                  ) : null}
-                  {appointment.status === "CONFIRMED" &&
-                  appointment.consultationStatus === "SCHEDULED" &&
-                  new Date(appointment.scheduledStart).getTime() > props.now ? (
-                    <button
-                      className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60"
-                      disabled={props.busy !== null}
-                      onClick={() =>
-                        props.onOpenReason(appointment.id, "cancel")
-                      }
-                    >
-                      Cancel consultation
-                    </button>
-                  ) : null}
-                </div>
-                {expanded ? (
-                  <dl className="mt-5 grid gap-4 rounded-2xl bg-slate-50 p-5 text-sm sm:grid-cols-2">
+                  <button
+                    className="rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60 transition-colors"
+                    disabled={props.busy !== null}
+                    onClick={() => props.onOpenReason(appointment.id, "reject")}
+                  >
+                    Decline
+                  </button>
+                </>
+              )}
+
+              {props.tab === "upcoming" && appointment.consultationId && (
+                <Link
+                  className={buttonVariants()}
+                  href={`/doctor/consultations/${appointment.consultationId}`}
+                >
+                  Open Workspace
+                </Link>
+              )}
+
+              {props.tab === "upcoming" && appointment.status === "CONFIRMED" && (
+                <button
+                  className="rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60 transition-colors"
+                  disabled={props.busy !== null}
+                  onClick={() => props.onOpenReason(appointment.id, "cancel")}
+                >
+                  Cancel
+                </button>
+              )}
+
+              {props.tab === "past" && appointment.consultationId && (
+                <Link
+                  className={buttonVariants("secondary")}
+                  href={`/doctor/consultations/${appointment.consultationId}`}
+                >
+                  View Record
+                </Link>
+              )}
+            </div>
+
+            {expanded && (
+              <div className="mt-5 rounded-2xl bg-slate-50 p-5 text-sm">
+                <dl className="grid gap-4 sm:grid-cols-2">
+                  <Detail
+                    label="Symptoms"
+                    value={appointment.symptoms.symptoms}
+                  />
+                  <Detail
+                    label="Symptom duration"
+                    value={appointment.symptoms.symptomDuration}
+                  />
+                  <Detail
+                    label="Additional notes"
+                    value={appointment.symptoms.additionalNotes}
+                  />
+                  <Detail
+                    label="Requested at"
+                    value={formatAppointmentTime(appointment.createdAt)}
+                  />
+                  {appointment.doctorRejectionReason && (
                     <Detail
-                      label="Requested at"
-                      value={formatAppointmentTime(appointment.createdAt)}
+                      label="Decline reason"
+                      value={appointment.doctorRejectionReason}
                     />
+                  )}
+                  {appointment.cancellationReason && (
                     <Detail
-                      label="Symptom duration"
-                      value={appointment.symptoms.symptomDuration}
+                      label="Cancellation reason"
+                      value={appointment.cancellationReason}
                     />
-                    <Detail
-                      label="Additional notes"
-                      value={appointment.symptoms.additionalNotes}
-                    />
-                    {appointment.doctorRejectionReason ? (
-                      <Detail
-                        label="Decline reason"
-                        value={appointment.doctorRejectionReason}
-                      />
-                    ) : null}
-                    {appointment.cancellationReason ? (
-                      <Detail
-                        label="Cancellation reason"
-                        value={appointment.cancellationReason}
-                      />
-                    ) : null}
-                  </dl>
-                ) : null}
-                {reasonOpen ? (
-                  <div className="mt-5 rounded-2xl border border-rose-100 bg-rose-50 p-5">
-                    <label className="text-sm font-medium text-rose-900">
-                      {props.reasonAction?.kind === "reject"
-                        ? "Decline"
-                        : "Cancellation"}{" "}
-                      reason <span className="text-rose-700">*</span>
-                      <textarea
-                        className={`${inputClassName} min-h-24 resize-y`}
-                        maxLength={1000}
-                        minLength={3}
-                        required
-                        value={props.reason}
-                        onChange={(event) =>
-                          props.setReason(event.target.value)
-                        }
-                      />
-                    </label>
-                    <button
-                      className="mt-4 rounded-xl bg-rose-700 px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
-                      disabled={
-                        props.busy !== null || props.reason.trim().length < 3
-                      }
-                      onClick={() => void props.onSubmitReason()}
-                    >
-                      {props.busy === appointment.id
-                        ? "Processing..."
-                        : props.reasonAction?.kind === "reject"
-                          ? "Confirm decline"
-                          : "Confirm cancellation"}
-                    </button>
-                  </div>
-                ) : null}
-              </article>
-            );
-          })}
-        </div>
-      )}
-    </section>
+                  )}
+                </dl>
+              </div>
+            )}
+
+            {reasonOpen && (
+              <div className="mt-5 rounded-2xl border border-rose-100 bg-rose-50 p-5">
+                <label className="block text-sm font-medium text-rose-900 mb-2">
+                  {props.reasonAction?.kind === "reject" ? "Decline" : "Cancellation"}{" "}
+                  reason <span className="text-rose-700">*</span>
+                </label>
+                <textarea
+                  className={`${inputClassName} min-h-24 resize-y bg-white`}
+                  maxLength={1000}
+                  minLength={3}
+                  required
+                  value={props.reason}
+                  onChange={(event) => props.setReason(event.target.value)}
+                  placeholder="Please provide a reason..."
+                />
+                <button
+                  className="mt-4 rounded-xl bg-rose-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-rose-800 disabled:opacity-60 transition-colors"
+                  disabled={props.busy !== null || props.reason.trim().length < 3}
+                  onClick={() => void props.onSubmitReason()}
+                >
+                  {props.busy === appointment.id
+                    ? "Processing..."
+                    : props.reasonAction?.kind === "reject"
+                      ? "Confirm decline"
+                      : "Confirm cancellation"}
+                </button>
+              </div>
+            )}
+          </article>
+        );
+      })}
+    </div>
   );
 }
 
@@ -421,7 +476,7 @@ function Detail({ label, value }: { label: string; value: string | null }) {
   return (
     <div>
       <dt className="font-medium text-slate-500">{label}</dt>
-      <dd className="mt-1 whitespace-pre-wrap text-slate-900">
+      <dd className="mt-1 whitespace-pre-wrap text-slate-900 leading-relaxed">
         {value || "Not provided"}
       </dd>
     </div>

@@ -7,6 +7,7 @@ import { ChevronDown, LogOut, User } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { MobileNavigation } from "./mobile-navigation";
 import { Brand } from "./sidebar";
+import { formatDoctorName } from "@/lib/formatters";
 
 function roleLabel(role: string) {
   switch (role) {
@@ -59,7 +60,7 @@ export function TopBar() {
       case "ADMIN":
         return "/admin/profile";
       case "DOCTOR":
-        return "/doctor/dashboard"; // Doctor profile is on dashboard currently
+        return "/doctor/profile";
       default:
         return null;
     }
@@ -99,7 +100,9 @@ export function TopBar() {
                   className="ml-2 text-sm font-medium leading-6 text-slate-700"
                   aria-hidden="true"
                 >
-                  {profile.firstName}
+                  {profile.role === "DOCTOR"
+                    ? formatDoctorName(profile.firstName || "")
+                    : profile.firstName}
                 </span>
                 <ChevronDown
                   className="ml-2 size-4 text-slate-400"
@@ -112,7 +115,9 @@ export function TopBar() {
               <div className="absolute right-0 z-10 mt-2.5 w-56 origin-top-right rounded-2xl bg-white py-2 shadow-lg ring-1 ring-slate-950/5 focus:outline-none">
                 <div className="px-4 py-3 border-b border-slate-100">
                   <p className="text-sm font-medium text-slate-900 truncate">
-                    {profile.firstName} {profile.lastName}
+                    {profile.role === "DOCTOR"
+                      ? formatDoctorName(`${profile.firstName || ""} ${profile.lastName || ""}`.trim())
+                      : `${profile.firstName} ${profile.lastName}`.trim()}
                   </p>
                   <p className="text-xs text-slate-500 truncate mt-0.5">
                     {roleLabel(profile.role)}

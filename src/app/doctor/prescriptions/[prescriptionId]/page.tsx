@@ -23,6 +23,9 @@ import type {
   PrescriptionDraftInput,
   PrescriptionItemInput,
 } from "@/types/prescriptions";
+import type { DoctorProfessionalProfile } from "@/types/user";
+import { getDoctorProfile } from "@/lib/api";
+import Link from "next/link";
 
 const emptyItem = (): PrescriptionItemInput => ({
   medicineName: "",
@@ -69,6 +72,7 @@ function Content() {
   const { session } = useAuth();
   const router = useRouter();
   const [value, setValue] = useState<DoctorPrescription | null>(null);
+  const [profile, setProfile] = useState<DoctorProfessionalProfile | null>(null);
   const [form, setForm] = useState<PrescriptionDraftInput>({
     validityDays: 30,
     generalInstructions: "",
@@ -109,11 +113,14 @@ function Content() {
     loadedPrescriptionRef.current = prescriptionId;
     const sequence = ++loadSequenceRef.current;
     try {
-      const next = await getDoctorPrescription(
-        session.access_token,
-        prescriptionId,
-      );
-      if (sequence === loadSequenceRef.current) apply(next);
+      const [next, nextProfile] = await Promise.all([
+        getDoctorPrescription(session.access_token, prescriptionId),
+        getDoctorProfile(session.access_token)
+      ]);
+      if (sequence === loadSequenceRef.current) {
+        apply(next);
+        setProfile(nextProfile);
+      }
     } catch (e) {
       if (sequence !== loadSequenceRef.current) return;
       loadedPrescriptionRef.current = null;
@@ -423,6 +430,22 @@ function Content() {
                       fee becomes immutable after issue.
                     </span>
                   )}
+                  {form.doctorFeeAmount > 0 && profile && !profile.bankAccountNumber ? (
+                    <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-4">
+                      <p className="text-sm font-semibold text-rose-900">
+                        Payment information required
+                      </p>
+                      <p className="mt-1 text-sm text-rose-700">
+                        Add your payment information before issuing a prescription with a consultation fee.
+                      </p>
+                      <Link
+                        href="/doctor/profile"
+                        className="mt-3 inline-block rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 shadow-sm border border-rose-200 hover:bg-rose-100"
+                      >
+                        Go to Payment Information
+                      </Link>
+                    </div>
+                  ) : null}
                 </label>
                 <label className="block text-sm font-medium">
                   General instructions

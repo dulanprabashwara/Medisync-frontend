@@ -1,13 +1,16 @@
 "use client";
 
-import Link from "next/link";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { FormAlert, inputClassName } from "@/components/auth-card";
-import { useAuth } from "@/components/auth-provider";
-import { LoadingPanel } from "@/components/loading-panel";
-import { ProtectedRoute } from "@/components/protected-route";
+import { useCallback, useEffect, useState } from "react";
+import { PortalHeading } from "@/components/portal-ui";
 import { ProfileImageEditor } from "@/components/profile-image-editor";
+import { ProtectedRoute } from "@/components/protected-route";
+import { useAuth } from "@/components/auth-provider";
 import { AccountSettingsDangerZone } from "@/components/account-settings-danger-zone";
+import { SectionCard } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input, Label } from "@/components/ui/forms";
+import { Alert } from "@/components/ui/alert";
+import { LoadingPanel } from "@/components/loading-panel";
 import {
   getDoctorProfile,
   getReferenceDepartments,
@@ -15,6 +18,7 @@ import {
   getReferenceSpecializations,
   submitDoctorVerification,
   updateDoctorProfile,
+  updatePatientProfile as updateMyProfile,
 } from "@/lib/api";
 import type {
   DepartmentReference,
@@ -23,50 +27,38 @@ import type {
   HospitalReference,
   SpecializationReference,
 } from "@/types/user";
+import { CheckCircle2, AlertCircle, Clock } from "lucide-react";
 
-const emptyForm: DoctorProfileInput = {
-  medicalRegistrationNumber: "",
-  hospitalId: null,
-  departmentId: null,
-  specializationId: null,
-  qualifications: "",
-  yearsOfExperience: null,
-  bio: "",
-  bankAccountHolder: "",
-  bankName: "",
-  bankBranch: "",
-  bankAccountNumber: "",
-};
+function DoctorProfileContent() {
+  const { profile: user, session, refreshProfile } = useAuth();
 
-const futureModules = [
-  {
-    title: "Consultation Availability",
-    phase: "Available",
-    href: "/doctor/availability",
-  },
-  {
-    title: "Online Consultations",
-    phase: "Available",
-    href: "/doctor/appointments",
-  },
-  { title: "Patient Chat", phase: "Later phase" },
-  { title: "Prescriptions", phase: "Available", href: "/doctor/prescriptions" },
-];
+  // Personal Info State
+  const [isEditingPersonal, setIsEditingPersonal] = useState(false);
+  const [firstName, setFirstName] = useState(user?.firstName ?? "");
+  const [lastName, setLastName] = useState(user?.lastName ?? "");
+  const [phone, setPhone] = useState(user?.phone ?? "");
+  const [isSavingPersonal, setIsSavingPersonal] = useState(false);
+  const [personalError, setPersonalError] = useState<string | null>(null);
+  const [personalSuccess, setPersonalSuccess] = useState(false);
 
-function DoctorDashboardContent() {
-  const { session, profile: user } = useAuth();
+  // Professional Info State
   const [doctor, setDoctor] = useState<DoctorProfessionalProfile | null>(null);
   const [hospitals, setHospitals] = useState<HospitalReference[]>([]);
   const [departments, setDepartments] = useState<DepartmentReference[]>([]);
-  const [specializations, setSpecializations] = useState<
-    SpecializationReference[]
-  >([]);
+  const [specializations, setSpecializations] = useState<SpecializationReference[]>([]);
+  
+  const emptyForm: DoctorProfileInput = {
+    medicalRegistrationNumber: "", hospitalId: null, departmentId: null, specializationId: null,
+    qualifications: "", yearsOfExperience: null, bio: "",
+    bankAccountHolder: "", bankName: "", bankBranch: "", bankAccountNumber: "",
+  };
+  
   const [form, setForm] = useState<DoctorProfileInput>(emptyForm);
   const [loading, setLoading] = useState(true);
   const [departmentsLoading, setDepartmentsLoading] = useState(false);
   const [busy, setBusy] = useState<"save" | "submit" | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [professionalMessage, setProfessionalMessage] = useState<string | null>(null);
+  const [professionalError, setProfessionalError] = useState<string | null>(null);
 
   const applyProfile = useCallback((value: DoctorProfessionalProfile) => {
     setDoctor(value);
@@ -88,31 +80,23 @@ function DoctorDashboardContent() {
   const load = useCallback(async () => {
     if (!session) return;
     setLoading(true);
-    setError(null);
+    setProfessionalError(null);
     try {
-      const [profileValue, hospitalValues, specializationValues] =
-        await Promise.all([
-          getDoctorProfile(session.access_token),
-          getReferenceHospitals(session.access_token),
-          getReferenceSpecializations(session.access_token),
-        ]);
+      const [profileValue, hospitalValues, specializationValues] = await Promise.all([
+        getDoctorProfile(session.access_token),
+        getReferenceHospitals(session.access_token),
+        getReferenceSpecializations(session.access_token),
+      ]);
       applyProfile(profileValue);
       setHospitals(hospitalValues);
       setSpecializations(specializationValues);
       setDepartments(
         profileValue.hospitalId
-          ? await getReferenceDepartments(
-              session.access_token,
-              profileValue.hospitalId,
-            )
-          : [],
+          ? await getReferenceDepartments(session.access_token, profileValue.hospitalId)
+          : []
       );
     } catch (loadError) {
-      setError(
-        loadError instanceof Error
-          ? loadError.message
-          : "The professional profile could not be loaded.",
-      );
+      setProfessionalError(loadError instanceof Error ? loadError.message : "The professional profile could not be loaded.");
     } finally {
       setLoading(false);
     }
@@ -123,497 +107,431 @@ function DoctorDashboardContent() {
     return () => window.clearTimeout(timer);
   }, [load]);
 
+  // Personal Info Handlers
+  async function handleSavePersonal(e: React.FormEvent) {
+    e.preventDefault();
+    if (!session) return;
+    setIsSavingPersonal(true);
+    setPersonalError(null);
+    setPersonalSuccess(false);
+    try {
+      await updateMyProfile(session.access_token, { firstName, lastName, phone: phone || null });
+      await refreshProfile();
+      setPersonalSuccess(true);
+      setIsEditingPersonal(false);
+    } catch (err) {
+      setPersonalError(err instanceof Error ? err.message : "Failed to update profile");
+    } finally {
+      setIsSavingPersonal(false);
+    }
+  }
+
+  function handleCancelPersonal() {
+    setFirstName(user?.firstName ?? "");
+    setLastName(user?.lastName ?? "");
+    setPhone(user?.phone ?? "");
+    setIsEditingPersonal(false);
+    setPersonalError(null);
+    setPersonalSuccess(false);
+  }
+
+  // Professional Info Handlers
   async function chooseHospital(hospitalId: string) {
-    setForm((current) => ({
-      ...current,
-      hospitalId: hospitalId || null,
-      departmentId: null,
-    }));
+    setForm((current) => ({ ...current, hospitalId: hospitalId || null, departmentId: null }));
     setDepartments([]);
     if (!session || !hospitalId) return;
     setDepartmentsLoading(true);
     try {
-      setDepartments(
-        await getReferenceDepartments(session.access_token, hospitalId),
-      );
+      setDepartments(await getReferenceDepartments(session.access_token, hospitalId));
     } catch (departmentError) {
-      setError(
-        departmentError instanceof Error
-          ? departmentError.message
-          : "Departments could not be loaded.",
-      );
+      setProfessionalError(departmentError instanceof Error ? departmentError.message : "Departments could not be loaded.");
     } finally {
       setDepartmentsLoading(false);
     }
   }
 
-  async function save(event?: FormEvent) {
+  async function saveProfessional(event?: React.FormEvent) {
     event?.preventDefault();
     if (!session) return;
     setBusy("save");
-    setError(null);
-    setMessage(null);
+    setProfessionalError(null);
+    setProfessionalMessage(null);
     try {
       applyProfile(await updateDoctorProfile(session.access_token, form));
-      setMessage("Professional profile saved.");
+      setProfessionalMessage("Professional profile saved.");
     } catch (saveError) {
-      setError(
-        saveError instanceof Error
-          ? saveError.message
-          : "The profile could not be saved.",
-      );
+      setProfessionalError(saveError instanceof Error ? saveError.message : "The profile could not be saved.");
     } finally {
       setBusy(null);
     }
   }
 
-  async function submit() {
+  async function submitVerification() {
     if (!session) return;
     if (
-      !form.medicalRegistrationNumber.trim() ||
-      !form.hospitalId ||
-      !form.departmentId ||
-      !form.specializationId ||
-      !form.qualifications.trim() ||
-      form.yearsOfExperience === null
+      !form.medicalRegistrationNumber.trim() || !form.hospitalId || !form.departmentId ||
+      !form.specializationId || !form.qualifications.trim() || form.yearsOfExperience === null
     ) {
-      setError("Complete every required professional field before submitting.");
+      setProfessionalError("Complete every required professional field before submitting.");
       return;
     }
     setBusy("submit");
-    setError(null);
-    setMessage(null);
+    setProfessionalError(null);
+    setProfessionalMessage(null);
     try {
       await updateDoctorProfile(session.access_token, form);
       applyProfile(await submitDoctorVerification(session.access_token));
-      setMessage(
-        "Your professional profile has been submitted for verification.",
-      );
+      setProfessionalMessage("Your professional profile has been submitted for verification.");
     } catch (submitError) {
-      setError(
-        submitError instanceof Error
-          ? submitError.message
-          : "The profile could not be submitted.",
-      );
+      setProfessionalError(submitError instanceof Error ? submitError.message : "The profile could not be submitted.");
     } finally {
       setBusy(null);
     }
   }
 
-  if (loading)
-    return <LoadingPanel label="Loading your professional profile..." />;
-  if (!doctor) {
-    return (
-      <main className="mx-auto max-w-xl px-6 py-16">
-        <FormAlert
-          message={error ?? "Your professional profile could not be loaded."}
-        />
-        <button
-          className="mt-5 rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white"
-          onClick={() => void load()}
-        >
-          Try again
-        </button>
-      </main>
-    );
-  }
+  if (loading || !doctor) return <LoadingPanel label="Loading your professional profile..." />;
 
   const verified = doctor.verificationStatus === "VERIFIED";
+  const pending = doctor.verificationStatus === "PENDING";
   const rejected = doctor.verificationStatus === "REJECTED";
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
-      <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">
-        MediSync Doctor Portal
-      </p>
-      <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-        Welcome, Dr. {user?.lastName ?? "Doctor"}
-      </h1>
-      <p className="mt-3 max-w-2xl leading-7 text-slate-600">
-        Complete and submit your professional identity for administrator
-        verification.
-      </p>
+    <div className="max-w-6xl mx-auto space-y-8 pb-10">
+      <PortalHeading
+        eyebrow="DOCTOR ACCOUNT"
+        title="Profile"
+        description="Manage your personal, professional and payment information."
+        backHref="/doctor/dashboard"
+      />
 
-      <ProfileImageEditor />
-
-      <div className="mt-7 space-y-3">
-        {error ? <FormAlert message={error} /> : null}
-        {message ? <FormAlert message={message} success /> : null}
-      </div>
-
-      {verified ? (
-        <section className="mt-8 rounded-3xl border border-emerald-200 bg-emerald-50 p-7 mb-7">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">
-            Verified doctor
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-emerald-950">
-            Professional verification complete
-          </h2>
-          <p className="mt-2 text-emerald-900">
-            Your MediSync doctor account is active. Sensitive identity fields
-            are now locked.
-          </p>
-        </section>
-      ) : doctor.submitted ? (
-        <section className="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-7 mb-7">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-700">
-            Verification pending
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-amber-950">
-            Your professional profile has been submitted
-          </h2>
-          <p className="mt-2 text-amber-900">
-            An active MediSync administrator must review it before clinical
-            features become available.
-          </p>
-          {doctor.submittedForVerificationAt ? (
-            <p className="mt-4 text-sm text-amber-800">
-              Submitted{" "}
-              {new Date(doctor.submittedForVerificationAt).toLocaleString()}
-            </p>
-          ) : null}
-        </section>
-      ) : null}
-
-      <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        {rejected ? (
-          <div className="mb-7 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-950">
-            <p className="font-semibold">Verification requires changes</p>
-            <p className="mt-2 text-sm leading-6">
-              <span className="font-semibold">Reason:</span>{" "}
-              {doctor.verificationRejectionReason}
-            </p>
-            <p className="mt-2 text-sm">
-              Update the profile and resubmit it when ready.
-            </p>
+      <div className="space-y-8">
+        
+        {/* 1. Personal Information */}
+        <SectionCard title="Personal Information">
+          {personalError && <Alert tone="error" className="mb-6">{personalError}</Alert>}
+          {personalSuccess && <Alert tone="success" className="mb-6">Profile updated successfully.</Alert>}
+          
+          <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
+            <div className="w-full md:w-56 shrink-0">
+              <ProfileImageEditor compact />
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              {isEditingPersonal ? (
+                <form onSubmit={handleSavePersonal} className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number (Optional)</Label>
+                    <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" />
+                  </div>
+                  <div className="col-span-full flex items-center gap-3 pt-4 border-t border-slate-100">
+                    <Button type="button" variant="ghost" onClick={handleCancelPersonal} disabled={isSavingPersonal}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isSavingPersonal}>
+                      {isSavingPersonal ? "Saving..." : "Save Changes"}
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-sm font-medium text-slate-500">First Name</p>
+                      <p className="mt-1 text-slate-900 font-medium">{user?.firstName}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-500">Last Name</p>
+                      <p className="mt-1 text-slate-900 font-medium">{user?.lastName}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-500">Phone</p>
+                      <p className="mt-1 text-slate-900 font-medium">{user?.phone || "Not provided"}</p>
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t border-slate-100 flex justify-end">
+                    <Button variant="secondary" onClick={() => setIsEditingPersonal(true)}>
+                      Edit Personal Information
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        ) : !verified && !doctor.submitted ? (
-          <div className="mb-7">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">
-              Professional profile incomplete
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">
-              Complete your professional profile
-            </h2>
-          </div>
-        ) : (
-          <div className="mb-7">
-            <h2 className="text-xl font-semibold text-slate-950">
-              Professional profile
-            </h2>
-            <p className="text-sm text-slate-600 mt-1">
-              You can update your bio and payment information at any time.
-            </p>
-          </div>
-        )}
+        </SectionCard>
 
-        {!verified &&
-        !doctor.submitted &&
-        (hospitals.length === 0 || specializations.length === 0) ? (
-          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-            An administrator must add an active hospital, department, and
-            specialization before this profile can be submitted.
-          </div>
-        ) : null}
+        {/* 2. Professional Information */}
+        <SectionCard title="Professional Information">
+          {professionalError && <Alert tone="error" className="mb-6">{professionalError}</Alert>}
+          {professionalMessage && <Alert tone="success" className="mb-6">{professionalMessage}</Alert>}
 
-        <form className="space-y-6" onSubmit={save}>
-          <div className="grid gap-5 md:grid-cols-2">
-            <Field label="Medical registration number" required>
-              <input
-                className={inputClassName}
-                maxLength={100}
-                value={form.medicalRegistrationNumber}
-                disabled={verified || doctor.submitted}
-                onChange={(event) =>
-                  setForm({
-                    ...form,
-                    medicalRegistrationNumber: event.target.value,
-                  })
-                }
+          <form onSubmit={saveProfessional} className="space-y-6">
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="medRegNum">Medical Registration Number <span className="text-rose-600">*</span></Label>
+                <Input
+                  id="medRegNum"
+                  maxLength={100}
+                  value={form.medicalRegistrationNumber}
+                  disabled={verified || doctor.submitted}
+                  onChange={(e) => setForm({ ...form, medicalRegistrationNumber: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="yearsExp">Years of Experience <span className="text-rose-600">*</span></Label>
+                <Input
+                  id="yearsExp"
+                  type="number"
+                  min={0}
+                  value={form.yearsOfExperience ?? ""}
+                  disabled={verified || doctor.submitted}
+                  onChange={(e) => setForm({ ...form, yearsOfExperience: e.target.value === "" ? null : Number(e.target.value) })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="hospital">Affiliated Hospital <span className="text-rose-600">*</span></Label>
+                <select
+                  id="hospital"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:bg-slate-50 disabled:text-slate-500"
+                  value={form.hospitalId ?? ""}
+                  onChange={(e) => void chooseHospital(e.target.value)}
+                  disabled={verified || doctor.submitted}
+                  required
+                >
+                  <option value="">Select affiliated hospital</option>
+                  {hospitals.map((hospital) => (
+                    <option key={hospital.id} value={hospital.id}>
+                      {hospital.name}{hospital.city ? ` - ${hospital.city}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="department">Department <span className="text-rose-600">*</span></Label>
+                <select
+                  id="department"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:bg-slate-50 disabled:text-slate-500"
+                  disabled={verified || doctor.submitted || !form.hospitalId || departmentsLoading}
+                  value={form.departmentId ?? ""}
+                  onChange={(e) => setForm({ ...form, departmentId: e.target.value || null })}
+                  required
+                >
+                  <option value="">{departmentsLoading ? "Loading departments..." : "Select department"}</option>
+                  {departments.map((department) => (
+                    <option key={department.id} value={department.id}>{department.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="specialization">Specialization <span className="text-rose-600">*</span></Label>
+                <select
+                  id="specialization"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:bg-slate-50 disabled:text-slate-500"
+                  value={form.specializationId ?? ""}
+                  disabled={verified || doctor.submitted}
+                  onChange={(e) => setForm({ ...form, specializationId: e.target.value || null })}
+                  required
+                >
+                  <option value="">Select specialization</option>
+                  {specializations.map((spec) => (
+                    <option key={spec.id} value={spec.id}>{spec.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="qualifications">Qualifications <span className="text-rose-600">*</span></Label>
+                <Input
+                  id="qualifications"
+                  maxLength={500}
+                  placeholder="MBBS, MD"
+                  disabled={verified || doctor.submitted}
+                  value={form.qualifications}
+                  onChange={(e) => setForm({ ...form, qualifications: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="bio">Professional Bio</Label>
+              <textarea
+                id="bio"
+                className="w-full min-h-24 resize-y rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
+                maxLength={2000}
+                value={form.bio}
+                onChange={(e) => setForm({ ...form, bio: e.target.value })}
               />
-            </Field>
-            <Field label="Years of experience" required>
-              <input
-                className={inputClassName}
-                type="number"
-                min={0}
-                value={form.yearsOfExperience ?? ""}
-                disabled={verified || doctor.submitted}
-                onChange={(event) =>
-                  setForm({
-                    ...form,
-                    yearsOfExperience:
-                      event.target.value === ""
-                        ? null
-                        : Number(event.target.value),
-                  })
-                }
-              />
-            </Field>
-            <Field label="Affiliated hospital" required>
-              <select
-                className={inputClassName}
-                value={form.hospitalId ?? ""}
-                onChange={(event) => void chooseHospital(event.target.value)}
-                disabled={verified || doctor.submitted}
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 flex flex-wrap gap-3">
+              <Button type="submit" disabled={busy !== null}>
+                {busy === "save" ? "Saving..." : "Save Professional Information"}
+              </Button>
+            </div>
+          </form>
+        </SectionCard>
+
+        {/* 3. Verification */}
+        <SectionCard title="Professional Verification">
+          {verified ? (
+            <div className="flex items-start gap-4">
+              <div className="rounded-full bg-emerald-100 p-2 text-emerald-600">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-900">Verified ✓</h3>
+                <p className="mt-1 text-sm text-slate-600">
+                  Your professional profile has been approved. Sensitive identity fields are now locked.
+                </p>
+              </div>
+            </div>
+          ) : rejected ? (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-start gap-4">
+                <div className="rounded-full bg-rose-100 p-2 text-rose-600">
+                  <AlertCircle className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900">Verification Requires Attention</h3>
+                  <p className="mt-1 text-sm text-slate-600">
+                    <span className="font-semibold">Reason:</span> {doctor.verificationRejectionReason}
+                  </p>
+                </div>
+              </div>
+              <Button onClick={submitVerification} disabled={busy !== null} className="w-fit">
+                {busy === "submit" ? "Submitting..." : "Edit & Resubmit"}
+              </Button>
+            </div>
+          ) : pending || doctor.submitted ? (
+            <div className="flex items-start gap-4">
+              <div className="rounded-full bg-amber-100 p-2 text-amber-600">
+                <Clock className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-900">Pending Verification</h3>
+                <p className="mt-1 text-sm text-slate-600">
+                  Your profile has been submitted and is waiting for administrator approval.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-start gap-4">
+                <div className="rounded-full bg-slate-100 p-2 text-slate-600">
+                  <AlertCircle className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900">Not Submitted</h3>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Complete your professional profile and submit it for verification.
+                  </p>
+                </div>
+              </div>
+              <Button 
+                onClick={submitVerification} 
+                disabled={busy !== null || hospitals.length === 0 || specializations.length === 0}
+                className="w-fit"
               >
-                <option value="">Select affiliated hospital</option>
-                {hospitals.map((hospital) => (
-                  <option key={hospital.id} value={hospital.id}>
-                    {hospital.name}
-                    {hospital.city ? ` - ${hospital.city}` : ""}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Department" required>
-              <select
-                className={inputClassName}
-                disabled={
-                  verified ||
-                  doctor.submitted ||
-                  !form.hospitalId ||
-                  departmentsLoading
-                }
-                value={form.departmentId ?? ""}
-                onChange={(event) =>
-                  setForm({ ...form, departmentId: event.target.value || null })
-                }
-              >
-                <option value="">
-                  {departmentsLoading
-                    ? "Loading departments..."
-                    : "Select department"}
-                </option>
-                {departments.map((department) => (
-                  <option key={department.id} value={department.id}>
-                    {department.name}
-                  </option>
-                ))}
-              </select>
-              {!verified &&
-              !doctor.submitted &&
-              form.hospitalId &&
-              !departmentsLoading &&
-              departments.length === 0 ? (
-                <span className="mt-1 block text-xs text-amber-700">
-                  No active departments are configured for this hospital.
-                </span>
-              ) : null}
-            </Field>
-            <Field label="Specialization" required>
-              <select
-                className={inputClassName}
-                value={form.specializationId ?? ""}
-                disabled={verified || doctor.submitted}
-                onChange={(event) =>
-                  setForm({
-                    ...form,
-                    specializationId: event.target.value || null,
-                  })
-                }
-              >
-                <option value="">Select specialization</option>
-                {specializations.map((specialization) => (
-                  <option key={specialization.id} value={specialization.id}>
-                    {specialization.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Qualifications" required>
-              <input
-                className={inputClassName}
-                maxLength={500}
-                placeholder="MBBS, MD"
-                disabled={verified || doctor.submitted}
-                value={form.qualifications}
-                onChange={(event) =>
-                  setForm({ ...form, qualifications: event.target.value })
-                }
-              />
-            </Field>
-          </div>
-          <div className="grid gap-5 md:grid-cols-2">
-            <Field label="Bank account holder">
-              <input
-                className={inputClassName}
+                {busy === "submit" ? "Submitting..." : "Submit for Verification"}
+              </Button>
+            </div>
+          )}
+        </SectionCard>
+
+        {/* 4. Payment Information */}
+        <SectionCard title="Payment Information">
+          {!form.bankAccountNumber && !form.bankName ? (
+            <Alert tone="warning" className="mb-6">
+              <div className="font-semibold text-amber-900">Not configured</div>
+              <p className="text-amber-800">Add payment information before issuing paid prescriptions.</p>
+            </Alert>
+          ) : (
+            <Alert tone="success" className="mb-6">
+              Configured ✓
+            </Alert>
+          )}
+
+          <form onSubmit={saveProfessional} className="grid gap-6 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="bankAccountHolder">Account Holder Name</Label>
+              <Input
+                id="bankAccountHolder"
                 maxLength={200}
                 value={form.bankAccountHolder}
-                onChange={(event) =>
-                  setForm({ ...form, bankAccountHolder: event.target.value })
-                }
+                onChange={(e) => setForm({ ...form, bankAccountHolder: e.target.value })}
               />
-            </Field>
-            <Field label="Bank name">
-              <input
-                className={inputClassName}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bankName">Bank Name</Label>
+              <Input
+                id="bankName"
                 maxLength={100}
                 value={form.bankName}
-                onChange={(event) =>
-                  setForm({ ...form, bankName: event.target.value })
-                }
+                onChange={(e) => setForm({ ...form, bankName: e.target.value })}
               />
-            </Field>
-            <Field label="Bank branch">
-              <input
-                className={inputClassName}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bankBranch">Branch</Label>
+              <Input
+                id="bankBranch"
                 maxLength={100}
                 value={form.bankBranch}
-                onChange={(event) =>
-                  setForm({ ...form, bankBranch: event.target.value })
-                }
+                onChange={(e) => setForm({ ...form, bankBranch: e.target.value })}
               />
-            </Field>
-            <Field label="Bank account number">
-              <input
-                className={inputClassName}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bankAccountNumber">Account Number</Label>
+              <Input
+                id="bankAccountNumber"
                 maxLength={50}
                 value={form.bankAccountNumber}
-                onChange={(event) =>
-                  setForm({ ...form, bankAccountNumber: event.target.value })
-                }
+                onChange={(e) => setForm({ ...form, bankAccountNumber: e.target.value })}
               />
-            </Field>
+            </div>
+            <div className="col-span-full pt-4 border-t border-slate-100 flex justify-end">
+              <Button type="submit" disabled={busy !== null} variant="secondary">
+                {busy === "save" ? "Saving..." : "Save Payment Information"}
+              </Button>
+            </div>
+          </form>
+        </SectionCard>
+
+        {/* 5. Account Information */}
+        <SectionCard title="Account Information">
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <p className="text-sm font-medium text-slate-500">Email</p>
+              <p className="mt-1 text-slate-900 font-medium">{user?.email}</p>
+              <p className="mt-1 text-xs text-slate-400">Read only</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Role</p>
+              <p className="mt-1 text-slate-900 font-medium">Doctor</p>
+              <p className="mt-1 text-xs text-slate-400">Read only</p>
+            </div>
           </div>
-          <Field label="Professional bio">
-            <textarea
-              className={`${inputClassName} min-h-28 resize-y`}
-              maxLength={2000}
-              value={form.bio}
-              onChange={(event) =>
-                setForm({ ...form, bio: event.target.value })
-              }
-            />
-          </Field>
-          <div className="flex flex-wrap gap-3">
-            <button
-              className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 disabled:opacity-60"
-              disabled={busy !== null}
-              type="submit"
-            >
-              {busy === "save" ? "Saving..." : "Save profile"}
-            </button>
-            {!verified && (
-              <button
-                className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60"
-                disabled={
-                  busy !== null ||
-                  hospitals.length === 0 ||
-                  specializations.length === 0
-                }
-                onClick={() => void submit()}
-                type="button"
-              >
-                {busy === "submit"
-                  ? "Submitting..."
-                  : rejected
-                    ? "Resubmit for verification"
-                    : "Submit for verification"}
-              </button>
-            )}
-          </div>
-        </form>
-      </section>
+        </SectionCard>
 
-      <section
-        className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        aria-label="Future doctor modules"
-      >
-        {futureModules.map((module) => {
-          const content = (
-            <>
-              <span
-                className={`text-xs font-bold uppercase tracking-wide ${verified && module.href ? "text-teal-700" : "text-slate-400"}`}
-              >
-                {verified && module.href
-                  ? module.phase
-                  : module.href
-                    ? "Verification required"
-                    : module.phase}
-              </span>
-              <h2 className="mt-4 font-semibold text-slate-900">
-                {module.title}
-              </h2>
-            </>
-          );
-          return verified && module.href ? (
-            <Link
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:border-teal-300 hover:shadow-md"
-              href={module.href}
-              key={module.title}
-            >
-              {content}
-            </Link>
-          ) : (
-            <article
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-              key={module.title}
-            >
-              {content}
-            </article>
-          );
-        })}
-      </section>
-
-      <AccountSettingsDangerZone />
-    </main>
-  );
-}
-
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block text-sm font-medium text-slate-700">
-      {label}
-      {required ? <span className="text-rose-600"> *</span> : null}
-      {children}
-    </label>
-  );
-}
-
-function RegistrationStatus({
-  profile,
-}: {
-  profile: DoctorProfessionalProfile | null;
-}) {
-  if (!profile) return null;
-  const tones = {
-    VERIFIED: "border-emerald-200 bg-emerald-50 text-emerald-900",
-    PENDING: "border-amber-200 bg-amber-50 text-amber-900",
-    REJECTED: "border-rose-200 bg-rose-50 text-rose-800",
-  };
-  const labels = {
-    VERIFIED: "Verified Medical Professional",
-    PENDING: "Verification Pending",
-    REJECTED: "Verification Rejected",
-  };
-  return (
-    <div
-      className={`mt-6 rounded-2xl border px-5 py-4 text-sm ${tones[profile.verificationStatus]}`}
-      role="status"
-    >
-      <p className="font-semibold">{labels[profile.verificationStatus]}</p>
-      {profile.verificationRejectionReason ? (
-        <p className="mt-1 font-medium">
-          {profile.verificationRejectionReason}
-        </p>
-      ) : null}
+        {/* 6. Danger Zone */}
+        <AccountSettingsDangerZone />
+      </div>
     </div>
   );
 }
 
-export default function DoctorDashboardPage() {
+export default function DoctorProfilePage() {
   return (
     <ProtectedRoute roles={["DOCTOR"]}>
-      <DoctorDashboardContent />
+      <DoctorProfileContent />
     </ProtectedRoute>
   );
 }

@@ -1,611 +1,278 @@
 "use client";
 
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { FormAlert, inputClassName } from "@/components/auth-card";
-import { useAuth } from "@/components/auth-provider";
-import { LoadingPanel } from "@/components/loading-panel";
-import { ProtectedRoute } from "@/components/protected-route";
-import { ProfileImageEditor } from "@/components/profile-image-editor";
-import { AccountSettingsDangerZone } from "@/components/account-settings-danger-zone";
 import {
-  getDoctorProfile,
-  getReferenceDepartments,
-  getReferenceHospitals,
-  getReferenceSpecializations,
-  submitDoctorVerification,
-  updateDoctorProfile,
-} from "@/lib/api";
-import type {
-  DepartmentReference,
-  DoctorProfessionalProfile,
-  DoctorProfileInput,
-  HospitalReference,
-  SpecializationReference,
-} from "@/types/user";
-
-const emptyForm: DoctorProfileInput = {
-  medicalRegistrationNumber: "",
-  hospitalId: null,
-  departmentId: null,
-  specializationId: null,
-  qualifications: "",
-  yearsOfExperience: null,
-  bio: "",
-  bankAccountHolder: "",
-  bankName: "",
-  bankBranch: "",
-  bankAccountNumber: "",
-};
-
-const futureModules = [
-  {
-    title: "Consultation Availability",
-    phase: "Available",
-    href: "/doctor/availability",
-  },
-  {
-    title: "Online Consultations",
-    phase: "Available",
-    href: "/doctor/appointments",
-  },
-  { title: "Patient Chat", phase: "Later phase" },
-  { title: "Prescriptions", phase: "Available", href: "/doctor/prescriptions" },
-];
+  Calendar,
+  Clock,
+  Activity,
+  AlertCircle,
+  FileText,
+} from "lucide-react";
+import { ProtectedRoute } from "@/components/protected-route";
+import { useAuth } from "@/components/auth-provider";
+import { PortalHeading, formatAppointmentTime } from "@/components/portal-ui";
+import { formatDoctorName } from "@/lib/formatters";
+import { getDoctorAppointments, getDoctorPrescriptions, getDoctorProfile } from "@/lib/api";
+import { LoadingPanel } from "@/components/loading-panel";
+import { SectionCard, StatCard } from "@/components/ui/card";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { buttonVariants } from "@/components/ui/button";
+import type { Appointment } from "@/types/appointments";
+import type { DoctorPrescription } from "@/types/prescriptions";
+import type { DoctorProfessionalProfile } from "@/types/user";
 
 function DoctorDashboardContent() {
-  const { session, profile: user } = useAuth();
-  const [doctor, setDoctor] = useState<DoctorProfessionalProfile | null>(null);
-  const [hospitals, setHospitals] = useState<HospitalReference[]>([]);
-  const [departments, setDepartments] = useState<DepartmentReference[]>([]);
-  const [specializations, setSpecializations] = useState<
-    SpecializationReference[]
-  >([]);
-  const [form, setForm] = useState<DoctorProfileInput>(emptyForm);
+  const { profile: user, session } = useAuth();
+  const [doctorProfile, setDoctorProfile] = useState<DoctorProfessionalProfile | null>(null);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [prescriptions, setPrescriptions] = useState<DoctorPrescription[]>([]);
   const [loading, setLoading] = useState(true);
-  const [departmentsLoading, setDepartmentsLoading] = useState(false);
-  const [busy, setBusy] = useState<"save" | "submit" | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const applyProfile = useCallback((value: DoctorProfessionalProfile) => {
-    setDoctor(value);
-    setForm({
-      medicalRegistrationNumber: value.medicalRegistrationNumber ?? "",
-      hospitalId: value.hospitalId,
-      departmentId: value.departmentId,
-      specializationId: value.specializationId,
-      qualifications: value.qualifications ?? "",
-      yearsOfExperience: value.yearsOfExperience,
-      bio: value.bio ?? "",
-      bankAccountHolder: value.bankAccountHolder ?? "",
-      bankName: value.bankName ?? "",
-      bankBranch: value.bankBranch ?? "",
-      bankAccountNumber: value.bankAccountNumber ?? "",
-    });
-  }, []);
-
-  const load = useCallback(async () => {
-    if (!session) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const [profileValue, hospitalValues, specializationValues] =
-        await Promise.all([
-          getDoctorProfile(session.access_token),
-          getReferenceHospitals(session.access_token),
-          getReferenceSpecializations(session.access_token),
-        ]);
-      applyProfile(profileValue);
-      setHospitals(hospitalValues);
-      setSpecializations(specializationValues);
-      setDepartments(
-        profileValue.hospitalId
-          ? await getReferenceDepartments(
-              session.access_token,
-              profileValue.hospitalId,
-            )
-          : [],
-      );
-    } catch (loadError) {
-      setError(
-        loadError instanceof Error
-          ? loadError.message
-          : "The professional profile could not be loaded.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [applyProfile, session]);
+  const [now, setNow] = useState(0);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => void load(), 0);
-    return () => window.clearTimeout(timer);
-  }, [load]);
-
-  async function chooseHospital(hospitalId: string) {
-    setForm((current) => ({
-      ...current,
-      hospitalId: hospitalId || null,
-      departmentId: null,
-    }));
-    setDepartments([]);
-    if (!session || !hospitalId) return;
-    setDepartmentsLoading(true);
-    try {
-      setDepartments(
-        await getReferenceDepartments(session.access_token, hospitalId),
-      );
-    } catch (departmentError) {
-      setError(
-        departmentError instanceof Error
-          ? departmentError.message
-          : "Departments could not be loaded.",
-      );
-    } finally {
-      setDepartmentsLoading(false);
+    const timer = setTimeout(() => setNow(Date.now()), 0);
+    async function loadData() {
+      if (!session) return;
+      try {
+        const [profileData, apptsData, presData] = await Promise.all([
+          getDoctorProfile(session.access_token),
+          getDoctorAppointments(session.access_token, undefined, 0, 50),
+          getDoctorPrescriptions(session.access_token, 0, 50)
+        ]);
+        setDoctorProfile(profileData);
+        setAppointments(apptsData.content);
+        setPrescriptions(presData.content);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
     }
-  }
+    loadData();
+    return () => clearTimeout(timer);
+  }, [session]);
 
-  async function save(event?: FormEvent) {
-    event?.preventDefault();
-    if (!session) return;
-    setBusy("save");
-    setError(null);
-    setMessage(null);
-    try {
-      applyProfile(await updateDoctorProfile(session.access_token, form));
-      setMessage("Professional profile saved.");
-    } catch (saveError) {
-      setError(
-        saveError instanceof Error
-          ? saveError.message
-          : "The profile could not be saved.",
-      );
-    } finally {
-      setBusy(null);
-    }
-  }
+  const { upcoming, pendingRequests, scheduledToday, pendingPayments } = useMemo(() => {
+    const asc = (a: Appointment, b: Appointment) =>
+      new Date(a.scheduledStart).getTime() - new Date(b.scheduledStart).getTime();
+      
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-  async function submit() {
-    if (!session) return;
-    if (
-      !form.medicalRegistrationNumber.trim() ||
-      !form.hospitalId ||
-      !form.departmentId ||
-      !form.specializationId ||
-      !form.qualifications.trim() ||
-      form.yearsOfExperience === null
-    ) {
-      setError("Complete every required professional field before submitting.");
-      return;
-    }
-    setBusy("submit");
-    setError(null);
-    setMessage(null);
-    try {
-      await updateDoctorProfile(session.access_token, form);
-      applyProfile(await submitDoctorVerification(session.access_token));
-      setMessage(
-        "Your professional profile has been submitted for verification.",
-      );
-    } catch (submitError) {
-      setError(
-        submitError instanceof Error
-          ? submitError.message
-          : "The profile could not be submitted.",
-      );
-    } finally {
-      setBusy(null);
-    }
-  }
+    const upcomingAppointments = appointments
+      .filter((a) => (a.status === "CONFIRMED" || a.consultationStatus === "IN_PROGRESS" || a.consultationStatus === "SCHEDULED") && (new Date(a.scheduledStart).getTime() > now || a.consultationStatus === "IN_PROGRESS"))
+      .sort(asc);
 
-  if (loading)
-    return <LoadingPanel label="Loading your professional profile..." />;
-  if (!doctor) {
+    return {
+      upcoming: upcomingAppointments,
+      pendingRequests: appointments.filter((a) => a.status === "REQUESTED").sort(asc),
+      scheduledToday: appointments.filter((a) => 
+        (a.status === "CONFIRMED" || a.consultationStatus === "IN_PROGRESS" || a.consultationStatus === "SCHEDULED") && 
+        new Date(a.scheduledStart).getTime() >= today.getTime() && 
+        new Date(a.scheduledStart).getTime() < tomorrow.getTime()
+      ),
+      pendingPayments: prescriptions.filter((p) => p.doctorFeeStatus === "AWAITING_CONFIRMATION" && p.status === "ISSUED")
+    };
+  }, [appointments, prescriptions, now]);
+
+  if (loading) return <LoadingPanel label="Loading doctor dashboard..." />;
+
+  if (!doctorProfile) {
     return (
       <main className="mx-auto max-w-xl px-6 py-16">
-        <FormAlert
-          message={error ?? "Your professional profile could not be loaded."}
-        />
-        <button
-          className="mt-5 rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white"
-          onClick={() => void load()}
-        >
-          Try again
-        </button>
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-950">
+          {error ?? "Your professional profile could not be loaded."}
+        </div>
       </main>
     );
   }
 
-  const verified = doctor.verificationStatus === "VERIFIED";
-  const rejected = doctor.verificationStatus === "REJECTED";
+  const verified = doctorProfile.verificationStatus === "VERIFIED";
+
+  if (!verified) {
+    return (
+      <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
+        <PortalHeading
+          eyebrow="Doctor Portal"
+          title={`Welcome, ${formatDoctorName(`${user?.firstName || ""} ${user?.lastName || ""}`.trim())}`}
+          description="Your professional profile is not yet verified."
+          backHref=""
+        />
+        <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+           <h2 className="text-xl font-semibold text-amber-900">Verification Required</h2>
+           <p className="mt-2 text-amber-800">
+             You need to complete your professional profile and be verified by an administrator before you can use clinical features.
+           </p>
+           <div className="mt-6">
+             <Link href="/doctor/profile" className={buttonVariants()}>
+               Go to Profile
+             </Link>
+           </div>
+        </div>
+      </div>
+    );
+  }
+
+  const nextConsultation = upcoming[0];
+  const attentionItem = pendingPayments[0] ? {
+    title: "Payment Confirmation Required",
+    message: "A prescription payment needs your confirmation.",
+    actionLabel: "Review Prescription",
+    href: `/doctor/prescriptions`,
+    icon: AlertCircle,
+    tone: "border-amber-200 bg-amber-50 text-amber-900",
+  } : pendingRequests[0] ? {
+    title: "Consultation request needs review",
+    message: `You have ${pendingRequests.length} pending consultation request${pendingRequests.length > 1 ? 's' : ''}.`,
+    actionLabel: "Review Requests",
+    href: "/doctor/appointments",
+    icon: Activity,
+    tone: "border-sky-200 bg-sky-50 text-sky-900",
+  } : null;
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
-      <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">
-        MediSync Doctor Portal
-      </p>
-      <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-        Welcome, Dr. {user?.lastName ?? "Doctor"}
-      </h1>
-      <p className="mt-3 max-w-2xl leading-7 text-slate-600">
-        Complete and submit your professional identity for administrator
-        verification.
-      </p>
-
-      <ProfileImageEditor />
-
-      <div className="mt-7 space-y-3">
-        {error ? <FormAlert message={error} /> : null}
-        {message ? <FormAlert message={message} success /> : null}
-      </div>
-
-      {verified ? (
-        <section className="mt-8 rounded-3xl border border-emerald-200 bg-emerald-50 p-7 mb-7">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">
-            Verified doctor
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-emerald-950">
-            Professional verification complete
-          </h2>
-          <p className="mt-2 text-emerald-900">
-            Your MediSync doctor account is active. Sensitive identity fields
-            are now locked.
-          </p>
-        </section>
-      ) : doctor.submitted ? (
-        <section className="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-7 mb-7">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-700">
-            Verification pending
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-amber-950">
-            Your professional profile has been submitted
-          </h2>
-          <p className="mt-2 text-amber-900">
-            An active MediSync administrator must review it before clinical
-            features become available.
-          </p>
-          {doctor.submittedForVerificationAt ? (
-            <p className="mt-4 text-sm text-amber-800">
-              Submitted{" "}
-              {new Date(doctor.submittedForVerificationAt).toLocaleString()}
-            </p>
-          ) : null}
-        </section>
-      ) : null}
-
-      <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        {rejected ? (
-          <div className="mb-7 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-950">
-            <p className="font-semibold">Verification requires changes</p>
-            <p className="mt-2 text-sm leading-6">
-              <span className="font-semibold">Reason:</span>{" "}
-              {doctor.verificationRejectionReason}
-            </p>
-            <p className="mt-2 text-sm">
-              Update the profile and resubmit it when ready.
-            </p>
-          </div>
-        ) : !verified && !doctor.submitted ? (
-          <div className="mb-7">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">
-              Professional profile incomplete
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">
-              Complete your professional profile
-            </h2>
-          </div>
-        ) : (
-          <div className="mb-7">
-            <h2 className="text-xl font-semibold text-slate-950">
-              Professional profile
-            </h2>
-            <p className="text-sm text-slate-600 mt-1">
-              You can update your bio and payment information at any time.
-            </p>
-          </div>
-        )}
-
-        {!verified &&
-        !doctor.submitted &&
-        (hospitals.length === 0 || specializations.length === 0) ? (
-          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-            An administrator must add an active hospital, department, and
-            specialization before this profile can be submitted.
-          </div>
-        ) : null}
-
-        <form className="space-y-6" onSubmit={save}>
-          <div className="grid gap-5 md:grid-cols-2">
-            <Field label="Medical registration number" required>
-              <input
-                className={inputClassName}
-                maxLength={100}
-                value={form.medicalRegistrationNumber}
-                disabled={verified || doctor.submitted}
-                onChange={(event) =>
-                  setForm({
-                    ...form,
-                    medicalRegistrationNumber: event.target.value,
-                  })
-                }
-              />
-            </Field>
-            <Field label="Years of experience" required>
-              <input
-                className={inputClassName}
-                type="number"
-                min={0}
-                value={form.yearsOfExperience ?? ""}
-                disabled={verified || doctor.submitted}
-                onChange={(event) =>
-                  setForm({
-                    ...form,
-                    yearsOfExperience:
-                      event.target.value === ""
-                        ? null
-                        : Number(event.target.value),
-                  })
-                }
-              />
-            </Field>
-            <Field label="Affiliated hospital" required>
-              <select
-                className={inputClassName}
-                value={form.hospitalId ?? ""}
-                onChange={(event) => void chooseHospital(event.target.value)}
-                disabled={verified || doctor.submitted}
-              >
-                <option value="">Select affiliated hospital</option>
-                {hospitals.map((hospital) => (
-                  <option key={hospital.id} value={hospital.id}>
-                    {hospital.name}
-                    {hospital.city ? ` - ${hospital.city}` : ""}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Department" required>
-              <select
-                className={inputClassName}
-                disabled={
-                  verified ||
-                  doctor.submitted ||
-                  !form.hospitalId ||
-                  departmentsLoading
-                }
-                value={form.departmentId ?? ""}
-                onChange={(event) =>
-                  setForm({ ...form, departmentId: event.target.value || null })
-                }
-              >
-                <option value="">
-                  {departmentsLoading
-                    ? "Loading departments..."
-                    : "Select department"}
-                </option>
-                {departments.map((department) => (
-                  <option key={department.id} value={department.id}>
-                    {department.name}
-                  </option>
-                ))}
-              </select>
-              {!verified &&
-              !doctor.submitted &&
-              form.hospitalId &&
-              !departmentsLoading &&
-              departments.length === 0 ? (
-                <span className="mt-1 block text-xs text-amber-700">
-                  No active departments are configured for this hospital.
-                </span>
-              ) : null}
-            </Field>
-            <Field label="Specialization" required>
-              <select
-                className={inputClassName}
-                value={form.specializationId ?? ""}
-                disabled={verified || doctor.submitted}
-                onChange={(event) =>
-                  setForm({
-                    ...form,
-                    specializationId: event.target.value || null,
-                  })
-                }
-              >
-                <option value="">Select specialization</option>
-                {specializations.map((specialization) => (
-                  <option key={specialization.id} value={specialization.id}>
-                    {specialization.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Qualifications" required>
-              <input
-                className={inputClassName}
-                maxLength={500}
-                placeholder="MBBS, MD"
-                disabled={verified || doctor.submitted}
-                value={form.qualifications}
-                onChange={(event) =>
-                  setForm({ ...form, qualifications: event.target.value })
-                }
-              />
-            </Field>
-          </div>
-          <div className="grid gap-5 md:grid-cols-2">
-            <Field label="Bank account holder">
-              <input
-                className={inputClassName}
-                maxLength={200}
-                value={form.bankAccountHolder}
-                onChange={(event) =>
-                  setForm({ ...form, bankAccountHolder: event.target.value })
-                }
-              />
-            </Field>
-            <Field label="Bank name">
-              <input
-                className={inputClassName}
-                maxLength={100}
-                value={form.bankName}
-                onChange={(event) =>
-                  setForm({ ...form, bankName: event.target.value })
-                }
-              />
-            </Field>
-            <Field label="Bank branch">
-              <input
-                className={inputClassName}
-                maxLength={100}
-                value={form.bankBranch}
-                onChange={(event) =>
-                  setForm({ ...form, bankBranch: event.target.value })
-                }
-              />
-            </Field>
-            <Field label="Bank account number">
-              <input
-                className={inputClassName}
-                maxLength={50}
-                value={form.bankAccountNumber}
-                onChange={(event) =>
-                  setForm({ ...form, bankAccountNumber: event.target.value })
-                }
-              />
-            </Field>
-          </div>
-          <Field label="Professional bio">
-            <textarea
-              className={`${inputClassName} min-h-28 resize-y`}
-              maxLength={2000}
-              value={form.bio}
-              onChange={(event) =>
-                setForm({ ...form, bio: event.target.value })
-              }
+    <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
+      <PortalHeading
+        eyebrow="Doctor Portal"
+        title={`Good morning, ${formatDoctorName(`${user?.firstName || ""} ${user?.lastName || ""}`.trim())}`}
+        description="Here's your clinical activity for today."
+        backHref=""
+        action={
+          <Link href="/doctor/availability" className={buttonVariants()}>
+            <Clock className="size-4 mr-2" />
+            Manage Availability
+          </Link>
+        }
+      />
+      
+      <div className="space-y-8">
+        <div className="grid gap-4 sm:grid-cols-3">
+            <StatCard
+              label="Pending Requests"
+              value={pendingRequests.length}
+              helperText="Needs review"
+              icon={Activity}
             />
-          </Field>
-          <div className="flex flex-wrap gap-3">
-            <button
-              className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 disabled:opacity-60"
-              disabled={busy !== null}
-              type="submit"
-            >
-              {busy === "save" ? "Saving..." : "Save profile"}
-            </button>
-            {!verified && (
-              <button
-                className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60"
-                disabled={
-                  busy !== null ||
-                  hospitals.length === 0 ||
-                  specializations.length === 0
-                }
-                onClick={() => void submit()}
-                type="button"
-              >
-                {busy === "submit"
-                  ? "Submitting..."
-                  : rejected
-                    ? "Resubmit for verification"
-                    : "Submit for verification"}
-              </button>
+            <StatCard
+              label="Awaiting Payment"
+              value={pendingPayments.length}
+              helperText="Confirmations needed"
+              icon={FileText}
+            />
+            <StatCard
+              label="Scheduled Today"
+              value={scheduledToday.length}
+              helperText="Confirmed appointments"
+              icon={Calendar}
+            />
+        </div>
+        
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-6">
+            {attentionItem && (
+              <div className={`rounded-2xl border p-5 ${attentionItem.tone}`}>
+                <div className="flex items-start gap-4">
+                  <attentionItem.icon className="size-5 mt-0.5 shrink-0" />
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{attentionItem.title}</h3>
+                    <p className="mt-1 text-sm">{attentionItem.message}</p>
+                    <Link
+                      href={attentionItem.href}
+                      className={`${buttonVariants("secondary")} mt-4 border-none bg-white/60 hover:bg-white shadow-sm`}
+                    >
+                      {attentionItem.actionLabel}
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {nextConsultation ? (
+              <SectionCard title="Next Consultation">
+                  <div className="flex flex-col sm:flex-row gap-6">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-slate-950">
+                        {nextConsultation.patientName}
+                      </h3>
+                      <div className="mt-4 space-y-1">
+                        <p className="text-sm text-slate-600">
+                          {formatAppointmentTime(nextConsultation.scheduledStart)}
+                        </p>
+                      </div>
+                      <div className="mt-6 flex flex-wrap gap-3">
+                        <Link
+                          href={`/doctor/consultations/${nextConsultation.consultationId || nextConsultation.id}`}
+                          className={buttonVariants()}
+                        >
+                          Open Workspace
+                        </Link>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-start sm:items-end gap-3">
+                        <StatusBadge
+                          tone={
+                            nextConsultation.consultationStatus === "IN_PROGRESS"
+                              ? "info"
+                              : "success"
+                          }
+                        >
+                          {nextConsultation.consultationStatus === "IN_PROGRESS"
+                            ? "In Progress"
+                            : "Scheduled"}
+                        </StatusBadge>
+                    </div>
+                  </div>
+              </SectionCard>
+            ) : (
+              <SectionCard title="Next Consultation">
+                <EmptyState
+                  icon={Calendar}
+                  title="No upcoming consultations"
+                  description="You have no confirmed consultations scheduled for the near future."
+                  action={
+                    <Link href="/doctor/availability" className={buttonVariants("secondary")}>
+                      Manage Availability
+                    </Link>
+                  }
+                />
+              </SectionCard>
             )}
           </div>
-        </form>
-      </section>
-
-      <section
-        className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        aria-label="Future doctor modules"
-      >
-        {futureModules.map((module) => {
-          const content = (
-            <>
-              <span
-                className={`text-xs font-bold uppercase tracking-wide ${verified && module.href ? "text-teal-700" : "text-slate-400"}`}
-              >
-                {verified && module.href
-                  ? module.phase
-                  : module.href
-                    ? "Verification required"
-                    : module.phase}
-              </span>
-              <h2 className="mt-4 font-semibold text-slate-900">
-                {module.title}
-              </h2>
-            </>
-          );
-          return verified && module.href ? (
-            <Link
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:border-teal-300 hover:shadow-md"
-              href={module.href}
-              key={module.title}
-            >
-              {content}
-            </Link>
-          ) : (
-            <article
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-              key={module.title}
-            >
-              {content}
-            </article>
-          );
-        })}
-      </section>
-
-      <AccountSettingsDangerZone />
-    </main>
-  );
-}
-
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block text-sm font-medium text-slate-700">
-      {label}
-      {required ? <span className="text-rose-600"> *</span> : null}
-      {children}
-    </label>
-  );
-}
-
-function RegistrationStatus({
-  profile,
-}: {
-  profile: DoctorProfessionalProfile | null;
-}) {
-  if (!profile) return null;
-  const tones = {
-    VERIFIED: "border-emerald-200 bg-emerald-50 text-emerald-900",
-    PENDING: "border-amber-200 bg-amber-50 text-amber-900",
-    REJECTED: "border-rose-200 bg-rose-50 text-rose-800",
-  };
-  const labels = {
-    VERIFIED: "Verified Medical Professional",
-    PENDING: "Verification Pending",
-    REJECTED: "Verification Rejected",
-  };
-  return (
-    <div
-      className={`mt-6 rounded-2xl border px-5 py-4 text-sm ${tones[profile.verificationStatus]}`}
-      role="status"
-    >
-      <p className="font-semibold">{labels[profile.verificationStatus]}</p>
-      {profile.verificationRejectionReason ? (
-        <p className="mt-1 font-medium">
-          {profile.verificationRejectionReason}
-        </p>
-      ) : null}
+          
+          <div className="space-y-6">
+              <SectionCard title="Upcoming Schedule">
+                {upcoming.length > 0 ? (
+                  <div className="space-y-4">
+                    {upcoming.slice(0, 5).map((appt) => (
+                      <div key={appt.id} className="flex flex-col gap-2 rounded-xl border border-slate-100 p-4 hover:border-slate-200 hover:bg-slate-50 transition-colors">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <p className="truncate font-medium text-slate-900">{appt.patientName}</p>
+                            <p className="text-sm text-slate-500 mt-1">
+                              {new Date(appt.scheduledStart).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {upcoming.length > 5 && (
+                      <Link href="/doctor/appointments" className="block text-center text-sm font-medium text-teal-700 hover:text-teal-800 p-2">
+                        View all upcoming
+                      </Link>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 text-center py-4">No appointments scheduled.</p>
+                )}
+              </SectionCard>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
