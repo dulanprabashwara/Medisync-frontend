@@ -248,11 +248,6 @@ function Content() {
       {verified ? (
         <Alert tone="success" title="Verified pharmacist">
           <p>Your account may securely verify and dispense eligible prescriptions.</p>
-          <div className="mt-3">
-            <Button variant="secondary" onClick={() => void refreshProfile()}>
-              Refresh account access
-            </Button>
-          </div>
         </Alert>
       ) : null}
       <form
