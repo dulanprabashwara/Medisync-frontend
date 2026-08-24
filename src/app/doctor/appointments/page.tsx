@@ -169,17 +169,19 @@ function DoctorAppointmentsContent() {
         description="Review consultation requests, open active workspaces, and browse patient history."
       />
 
-      <div className="mt-7 space-y-3">
-        <InlineError message={error} />
-        {message ? (
-          <div
-            className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900"
-            role="status"
-          >
-            {message}
-          </div>
-        ) : null}
-      </div>
+      {(error || message) && (
+        <div className="mt-7 space-y-3">
+          {error && <InlineError message={error} />}
+          {message ? (
+            <div
+              className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900"
+              role="status"
+            >
+              {message}
+            </div>
+          ) : null}
+        </div>
+      )}
 
       <div className="flex space-x-1 rounded-xl bg-slate-100 p-1 mb-8 max-w-100">
         <button

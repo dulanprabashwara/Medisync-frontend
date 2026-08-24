@@ -191,17 +191,19 @@ function DoctorAvailabilityContent() {
         }
       />
 
-      <div className="mt-7 space-y-3">
-        <InlineError message={error} />
-        {message ? (
-          <div
-            className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900"
-            role="status"
-          >
-            {message}
-          </div>
-        ) : null}
-      </div>
+      {(error || message) && (
+        <div className="mt-7 space-y-3">
+          {error && <InlineError message={error} />}
+          {message ? (
+            <div
+              className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900"
+              role="status"
+            >
+              {message}
+            </div>
+          ) : null}
+        </div>
+      )}
 
       <div className="mt-8">
         <h2 className="text-xl font-semibold text-slate-950 mb-5">

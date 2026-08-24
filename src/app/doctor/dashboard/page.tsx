@@ -136,7 +136,7 @@ function DoctorDashboardContent() {
   } : null;
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
+    <div className="mx-auto max-w-7xl">
       <PortalHeading
         eyebrow="Doctor Portal"
         title={`Good morning, ${formatDoctorName(`${user?.firstName || ""} ${user?.lastName || ""}`.trim())}`}

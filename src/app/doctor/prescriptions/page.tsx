@@ -77,9 +77,11 @@ function Content() {
         description="Manage prescription drafts and issued prescriptions."
         backHref="/doctor/dashboard"
       />
-      <div className="mt-7">
-        <InlineError message={error} />
-      </div>
+      {error && (
+        <div className="mt-7">
+          <InlineError message={error} />
+        </div>
+      )}
 
       <div className="flex space-x-1 rounded-xl bg-slate-100 p-1 mb-8 max-w-100">
         <button
