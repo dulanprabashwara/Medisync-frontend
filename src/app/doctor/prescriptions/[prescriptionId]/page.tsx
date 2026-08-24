@@ -296,7 +296,7 @@ function Content() {
     value?.consultationStatus === "SCHEDULED" ||
     value?.consultationStatus === "IN_PROGRESS";
   return (
-    <main className="mx-auto max-w-5xl px-6 py-10 lg:px-8 lg:py-14">
+    <main className="mx-auto max-w-5xl">
       <PortalHeading
         eyebrow="Doctor prescription"
         title={value ? `Prescription for ${value.patientName}` : "Prescription"}
