@@ -83,7 +83,7 @@ function Content() {
         </div>
       )}
 
-      <div className="flex space-x-1 rounded-xl bg-slate-100 p-1 mb-8 max-w-100">
+      <div className="flex space-x-1 rounded-xl bg-slate-100 p-1 mb-8 overflow-x-auto hide-scrollbar w-full sm:max-w-md">
         <button
           onClick={() => setActiveTab("drafts")}
           className={`w-full rounded-lg py-2 text-sm font-medium leading-5 ${

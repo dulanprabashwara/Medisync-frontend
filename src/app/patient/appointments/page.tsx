@@ -367,8 +367,8 @@ export default function PatientAppointmentsPage() {
           </Alert>
         )}
 
-        <div className="mb-8 border-b border-slate-200">
-          <nav className="-mb-px flex gap-6" aria-label="Tabs">
+        <div className="mb-8 border-b border-slate-200 overflow-x-auto hide-scrollbar">
+          <nav className="-mb-px flex gap-6 min-w-max" aria-label="Tabs">
             <button
               onClick={() => setActiveTab("upcoming")}
               className={`

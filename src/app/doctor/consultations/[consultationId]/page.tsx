@@ -32,7 +32,7 @@ import type {
   ConsultationEvent,
   ConsultationMessage,
 } from "@/types/consultations";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Info } from "lucide-react";
 
 type WorkspaceTab = "info" | "note" | "prescription";
 
@@ -52,6 +52,7 @@ function DoctorConsultationContent() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [workspaceTab, setWorkspaceTab] = useState<WorkspaceTab>("info");
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   const reconcile = useCallback(async () => {
     if (!session || !consultationId) return;
@@ -297,7 +298,7 @@ function DoctorConsultationContent() {
   return (
     <main className="flex h-full flex-col lg:flex-row bg-slate-50 overflow-hidden">
       {/* Left Pane: Chat */}
-      <div className="flex h-1/2 w-full flex-col bg-white lg:h-full lg:w-3/5">
+      <div className="flex flex-1 w-full flex-col bg-white lg:h-full lg:w-3/5 min-h-0">
         <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-3 shadow-sm z-10 shrink-0">
           <button
             onClick={() => router.push("/doctor/appointments")}
@@ -314,6 +315,13 @@ function DoctorConsultationContent() {
               {consultation.specializationName} · Scheduled {formatAppointmentTime(consultation.scheduledStart)}
             </p>
           </div>
+          <button
+            onClick={() => setMobileDrawerOpen(true)}
+            className="lg:hidden ml-auto rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+            aria-label="View Workspace"
+          >
+            <Info className="size-5" />
+          </button>
         </div>
         <div className="flex-1 overflow-hidden relative">
           <ConsultationChat
@@ -328,8 +336,23 @@ function DoctorConsultationContent() {
         </div>
       </div>
 
-      {/* Right Pane: Workspace Tools */}
-      <div className="flex h-1/2 w-full flex-col border-t border-slate-200 bg-slate-50 lg:h-full lg:w-2/5 lg:border-l lg:border-t-0 shadow-[-4px_0_12px_rgba(0,0,0,0.02)] z-20">
+      {/* Workspace Tools (Drawer on Mobile, Right Pane on Desktop) */}
+      <div
+        className={`flex-col border-slate-200 bg-slate-50 lg:h-full lg:w-2/5 lg:border-l lg:border-t-0 lg:shadow-[-4px_0_12px_rgba(0,0,0,0.02)] lg:flex lg:relative lg:z-20 ${
+          mobileDrawerOpen ? "fixed inset-0 z-50 flex" : "hidden"
+        }`}
+      >
+        {mobileDrawerOpen && (
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-white shrink-0 lg:hidden">
+            <h2 className="font-semibold text-slate-900">Workspace</h2>
+            <button
+              onClick={() => setMobileDrawerOpen(false)}
+              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 text-sm font-medium"
+            >
+              Close
+            </button>
+          </div>
+        )}
         <div className="flex border-b border-slate-200 bg-white px-2 pt-2 shrink-0 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setWorkspaceTab("info")}
