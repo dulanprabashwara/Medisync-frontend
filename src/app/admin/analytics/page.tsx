@@ -76,7 +76,7 @@ function AnalyticsContent() {
   }, [load]);
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
+    <main className="mx-auto max-w-7xl px-6 pb-10 lg:px-8 lg:pb-14">
       <PortalHeading
         eyebrow="Administration"
         title="Operational analytics"
