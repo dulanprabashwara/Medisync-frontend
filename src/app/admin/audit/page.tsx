@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { AdminNavigation } from "@/components/admin-navigation";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { InlineError, PortalHeading } from "@/components/portal-ui";
@@ -65,7 +64,6 @@ function AuditContent() {
         description="Append-only records for security-sensitive and clinical workflow mutations."
         backHref="/admin/dashboard"
       />
-      <AdminNavigation />
       <form
         onSubmit={search}
         className="mt-7 grid gap-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:grid-cols-4"

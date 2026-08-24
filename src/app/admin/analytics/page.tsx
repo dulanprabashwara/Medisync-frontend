@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AdminNavigation } from "@/components/admin-navigation";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
-import { InlineError, PortalHeading } from "@/components/portal-ui";
+import { PortalHeading } from "@/components/portal-ui";
+import { SectionCard, StatCard } from "@/components/ui/card";
 import { ProtectedRoute } from "@/components/protected-route";
 import {
   getAdminAnalyticsActivity,
@@ -83,7 +83,6 @@ function AnalyticsContent() {
         description="Database-aggregated platform usage and workflow activity. No clinical message content is included."
         backHref="/admin/dashboard"
       />
-      <AdminNavigation />
       <div className="mt-7 flex flex-wrap gap-2">
         {([7, 30, 90] as Range[]).map((days) => (
           <button
@@ -96,81 +95,67 @@ function AnalyticsContent() {
         ))}
       </div>
       <div className="mt-6">
-        <InlineError message={error} />
+        {error ? <p className="text-rose-600 text-sm font-semibold bg-rose-50 p-3 rounded-lg border border-rose-200">{error}</p> : null}
       </div>
       {loading && !summary ? (
         <LoadingPanel label="Aggregating analytics…" />
       ) : summary ? (
         <>
           <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Metric title="Patients" value={summary.usersByRole.PATIENT ?? 0} />
-            <Metric title="Doctors" value={summary.usersByRole.DOCTOR ?? 0} />
-            <Metric
-              title="Pharmacists"
+            <StatCard label="Patients" value={summary.usersByRole.PATIENT ?? 0} />
+            <StatCard label="Doctors" value={summary.usersByRole.DOCTOR ?? 0} />
+            <StatCard
+              label="Pharmacists"
               value={summary.usersByRole.PHARMACIST ?? 0}
             />
-            <Metric
-              title="Active users"
+            <StatCard
+              label="Active users"
               value={summary.usersByStatus.ACTIVE ?? 0}
             />
-            <Metric
-              title="Banned users"
+            <StatCard
+              label="Banned users"
               value={summary.usersByStatus.BANNED ?? 0}
             />
-            <Metric
-              title="Verified doctors"
+            <StatCard
+              label="Verified doctors"
               value={summary.professionalVerification.DOCTOR_VERIFIED ?? 0}
             />
-            <Metric
-              title="Verified pharmacists"
+            <StatCard
+              label="Verified pharmacists"
               value={summary.professionalVerification.PHARMACIST_VERIFIED ?? 0}
             />
-            <Metric
-              title="Pending verification"
+            <StatCard
+              label="Pending verification"
               value={
                 (summary.professionalVerification.DOCTOR_PENDING ?? 0) +
                 (summary.professionalVerification.PHARMACIST_PENDING ?? 0)
               }
             />
-            <Metric
-              title="Consultations requested"
+            <StatCard
+              label="Consultations requested"
               value={summary.appointmentsByStatus.REQUESTED ?? 0}
             />
-            <Metric
-              title="Consultations completed"
+            <StatCard
+              label="Consultations completed"
               value={summary.consultationsByStatus.COMPLETED ?? 0}
             />
-            <Metric
-              title="Prescriptions issued"
+            <StatCard
+              label="Prescriptions issued"
               value={summary.prescriptionsByStatus.ISSUED ?? 0}
             />
-            <Metric
-              title="Prescriptions dispensed"
+            <StatCard
+              label="Prescriptions dispensed"
               value={summary.totalDispensations}
             />
-            <Metric title="Messages sent" value={summary.totalChatMessages} />
-            <Metric
-              title="Private chat images"
+            <StatCard label="Messages sent" value={summary.totalChatMessages} />
+            <StatCard
+              label="Private chat images"
               value={summary.totalChatImages}
             />
           </section>
-          <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h2 className="text-xl font-semibold">
-                  Daily platform activity
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  New users, consultations, prescriptions, dispensations, and
-                  messages over the selected UTC date range.
-                </p>
-              </div>
-              {loading ? (
-                <span className="text-sm text-teal-700">Refreshing…</span>
-              ) : null}
-            </div>
+          <SectionCard title="Daily platform activity" description="New users, consultations, prescriptions, dispensations, and messages over the selected UTC date range." className="mt-6">
             <TrendChart points={points} />
-          </section>
+          </SectionCard>
           <section className="mt-6 grid gap-5 lg:grid-cols-3">
             <Breakdown title="Users by role" values={summary.usersByRole} />
             <Breakdown
@@ -213,16 +198,7 @@ function AnalyticsContent() {
   );
 }
 
-function Metric({ title, value }: { title: string; value: number }) {
-  return (
-    <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-sm text-slate-500">{title}</p>
-      <p className="mt-2 text-3xl font-bold text-slate-950">
-        {value.toLocaleString()}
-      </p>
-    </article>
-  );
-}
+
 function Breakdown({
   title,
   values,
@@ -232,9 +208,8 @@ function Breakdown({
 }) {
   const max = Math.max(...Object.values(values), 1);
   return (
-    <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="font-semibold">{title}</h2>
-      <div className="mt-4 space-y-3">
+    <SectionCard title={title}>
+      <div className="space-y-3">
         {Object.entries(values).map(([key, value]) => (
           <div key={key}>
             <div className="flex justify-between gap-3 text-sm">
@@ -253,7 +228,7 @@ function Breakdown({
           <p className="text-sm text-slate-500">No activity recorded.</p>
         ) : null}
       </div>
-    </article>
+    </SectionCard>
   );
 }
 
@@ -287,7 +262,7 @@ function TrendChart({ points }: { points: AnalyticsPoint[] }) {
     <div className="mt-5 overflow-x-auto">
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        className="min-w-[650px]"
+        className="min-w-162.5"
         role="img"
         aria-label="Daily users, consultations, prescriptions, dispensations, and messages line chart"
       >
@@ -326,9 +301,8 @@ function TrendChart({ points }: { points: AnalyticsPoint[] }) {
 
 function Ranking({ title, rows }: { title: string; rows: ActivityRanking[] }) {
   return (
-    <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="font-semibold">{title}</h2>
-      <ol className="mt-4 space-y-3">
+    <SectionCard title={title}>
+      <ol className="space-y-3">
         {rows.map((row, index) => (
           <li
             key={row.userId}
@@ -347,7 +321,7 @@ function Ranking({ title, rows }: { title: string; rows: ActivityRanking[] }) {
           <li className="text-sm text-slate-500">No activity recorded.</li>
         ) : null}
       </ol>
-    </article>
+    </SectionCard>
   );
 }
 export default function AdminAnalyticsPage() {

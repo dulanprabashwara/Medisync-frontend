@@ -17,7 +17,7 @@ export function PortalHeading({
   eyebrow: string;
   title: string;
   description: string;
-  backHref: string;
+  backHref?: string;
   backLabel?: string;
   action?: React.ReactNode;
 }) {

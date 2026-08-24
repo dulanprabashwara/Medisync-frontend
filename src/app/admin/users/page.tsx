@@ -3,7 +3,6 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { AdminNavigation } from "@/components/admin-navigation";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { InlineError, PortalHeading } from "@/components/portal-ui";
@@ -126,7 +125,6 @@ function UsersContent() {
         description="Search accounts, review operational status, and manage auditable account restrictions."
         backHref="/admin/dashboard"
       />
-      <AdminNavigation />
       <form
         onSubmit={search}
         className="mt-7 grid gap-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:grid-cols-5"
@@ -257,7 +255,7 @@ function UsersContent() {
             {total} account{total === 1 ? "" : "s"}
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[850px] text-left text-sm">
+            <table className="w-full min-w-212.5 text-left text-sm">
               <thead className="bg-slate-50 text-slate-600">
                 <tr>
                   <th className="p-4">User</th>

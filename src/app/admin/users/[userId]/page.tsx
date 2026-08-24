@@ -3,7 +3,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { AdminNavigation } from "@/components/admin-navigation";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { InlineError, PortalHeading } from "@/components/portal-ui";
@@ -133,7 +132,6 @@ function UserDetailContent() {
         description="Operational profile, activity counts, and account restriction history."
         backHref="/admin/users"
       />
-      <AdminNavigation />
       <div className="mt-6">
         <InlineError message={error} />
       </div>

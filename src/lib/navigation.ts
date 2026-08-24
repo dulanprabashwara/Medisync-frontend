@@ -11,6 +11,11 @@ import {
   Users,
   ShieldAlert,
   BarChart3,
+  BadgeCheck,
+  Building2,
+  Network,
+  Stethoscope,
+  ScrollText,
 } from "lucide-react";
 import type { UserRole } from "@/types/user";
 
@@ -108,13 +113,24 @@ const adminNavigation: NavigationGroup[] = [
   },
   {
     name: "Management",
-    items: [{ name: "Users", href: "/admin/users", icon: Users }],
+    items: [
+      { name: "Users", href: "/admin/users", icon: Users },
+      { name: "Professional Verification", href: "/admin/verification", icon: BadgeCheck },
+    ],
   },
   {
-    name: "Monitoring",
+    name: "System Data",
     items: [
-      { name: "Audit Log", href: "/admin/audit", icon: ShieldAlert },
+      { name: "Hospitals", href: "/admin/hospitals", icon: Building2 },
+      { name: "Departments", href: "/admin/departments", icon: Network },
+      { name: "Specializations", href: "/admin/specializations", icon: Stethoscope },
+    ],
+  },
+  {
+    name: "Insights",
+    items: [
       { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+      { name: "Audit Logs", href: "/admin/audit", icon: ScrollText },
     ],
   },
   {
