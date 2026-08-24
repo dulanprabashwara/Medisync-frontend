@@ -4,7 +4,8 @@ import { type ReactNode } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { Sidebar } from "./sidebar";
 import { TopBar } from "./top-bar";
-import { SiteHeader } from "@/components/site-header";
+import { PublicNavbar } from "@/components/public/public-navbar";
+import { PublicFooter } from "@/components/public/public-footer";
 import { usePathname } from "next/navigation";
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -21,8 +22,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     return (
       <div className="flex min-h-screen flex-col">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-4 focus:left-4 focus:rounded-xl focus:bg-white focus:px-4 focus:py-2 focus:text-teal-700 focus:shadow-md font-semibold">Skip to main content</a>
-        <SiteHeader />
+        <PublicNavbar />
         <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
+        <PublicFooter />
       </div>
     );
   }
