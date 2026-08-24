@@ -36,16 +36,26 @@ export function ProtectedRoute({
     return (
       <main className="mx-auto max-w-xl px-6 py-16">
         <div className="rounded-3xl border border-rose-200 bg-white p-8 shadow-sm">
-          <h1 className="text-xl font-semibold text-slate-950">We could not open your portal</h1>
+          <h1 className="text-xl font-semibold text-slate-950">
+            We could not open your portal
+          </h1>
           <p className="mt-3 text-slate-600">{error}</p>
-          <button className="mt-6 rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white" onClick={() => void refreshProfile()}>
+          <button
+            className="mt-6 rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white"
+            onClick={() => void refreshProfile()}
+          >
             Try again
           </button>
         </div>
       </main>
     );
   }
-  if (!session || !profile || profile.status === "BANNED" || !roles.includes(profile.role)) {
+  if (
+    !session ||
+    !profile ||
+    profile.status === "BANNED" ||
+    !roles.includes(profile.role)
+  ) {
     return <LoadingPanel label="Taking you to the right place…" />;
   }
   if (profile.status === "SUSPENDED" || profile.status === "DISABLED") {

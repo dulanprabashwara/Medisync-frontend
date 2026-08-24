@@ -22,7 +22,7 @@ export function MobileNavigation() {
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    
+
     if (open) {
       document.body.style.overflow = "hidden";
       dialog.showModal();
@@ -88,7 +88,9 @@ export function MobileNavigation() {
                     >
                       <item.icon
                         className={`size-5 shrink-0 ${
-                          isActive ? "text-teal-700" : "text-slate-400 group-hover:text-slate-600"
+                          isActive
+                            ? "text-teal-700"
+                            : "text-slate-400 group-hover:text-slate-600"
                         }`}
                         aria-hidden="true"
                       />

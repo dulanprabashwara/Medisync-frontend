@@ -10,11 +10,16 @@ import { Brand } from "./sidebar";
 
 function roleLabel(role: string) {
   switch (role) {
-    case "PATIENT": return "Patient";
-    case "DOCTOR": return "Doctor";
-    case "PHARMACIST": return "Pharmacist";
-    case "ADMIN": return "Administrator";
-    default: return role;
+    case "PATIENT":
+      return "Patient";
+    case "DOCTOR":
+      return "Doctor";
+    case "PHARMACIST":
+      return "Pharmacist";
+    case "ADMIN":
+      return "Administrator";
+    default:
+      return role;
   }
 }
 
@@ -47,11 +52,16 @@ export function TopBar() {
 
   const getProfileLink = () => {
     switch (profile.role) {
-      case "PATIENT": return "/patient/profile";
-      case "PHARMACIST": return "/pharmacist/profile";
-      case "ADMIN": return "/admin/profile";
-      case "DOCTOR": return "/doctor/dashboard"; // Doctor profile is on dashboard currently
-      default: return null;
+      case "PATIENT":
+        return "/patient/profile";
+      case "PHARMACIST":
+        return "/pharmacist/profile";
+      case "ADMIN":
+        return "/admin/profile";
+      case "DOCTOR":
+        return "/doctor/dashboard"; // Doctor profile is on dashboard currently
+      default:
+        return null;
     }
   };
 
@@ -64,7 +74,7 @@ export function TopBar() {
           <MobileNavigation />
           <Brand />
         </div>
-        
+
         <div className="flex flex-1 justify-end items-center gap-x-4 lg:gap-x-6">
           <div className="relative" ref={menuRef}>
             <button
@@ -75,26 +85,40 @@ export function TopBar() {
               <span className="sr-only">Open user menu</span>
               <div className="flex size-9 items-center justify-center rounded-xl bg-teal-100 text-teal-800 font-bold uppercase overflow-hidden">
                 {profile.profileImageUrl ? (
-                  <img src={profile.profileImageUrl} alt="" className="size-full object-cover" />
+                  <img
+                    src={profile.profileImageUrl}
+                    alt=""
+                    className="size-full object-cover"
+                  />
                 ) : (
                   profile.firstName?.charAt(0) || "U"
                 )}
               </div>
               <span className="hidden lg:flex lg:items-center">
-                <span className="ml-2 text-sm font-medium leading-6 text-slate-700" aria-hidden="true">
+                <span
+                  className="ml-2 text-sm font-medium leading-6 text-slate-700"
+                  aria-hidden="true"
+                >
                   {profile.firstName}
                 </span>
-                <ChevronDown className="ml-2 size-4 text-slate-400" aria-hidden="true" />
+                <ChevronDown
+                  className="ml-2 size-4 text-slate-400"
+                  aria-hidden="true"
+                />
               </span>
             </button>
 
             {menuOpen && (
               <div className="absolute right-0 z-10 mt-2.5 w-56 origin-top-right rounded-2xl bg-white py-2 shadow-lg ring-1 ring-slate-950/5 focus:outline-none">
                 <div className="px-4 py-3 border-b border-slate-100">
-                  <p className="text-sm font-medium text-slate-900 truncate">{profile.firstName} {profile.lastName}</p>
-                  <p className="text-xs text-slate-500 truncate mt-0.5">{roleLabel(profile.role)}</p>
+                  <p className="text-sm font-medium text-slate-900 truncate">
+                    {profile.firstName} {profile.lastName}
+                  </p>
+                  <p className="text-xs text-slate-500 truncate mt-0.5">
+                    {roleLabel(profile.role)}
+                  </p>
                 </div>
-                
+
                 <div className="py-1">
                   {profileLink && (
                     <Link

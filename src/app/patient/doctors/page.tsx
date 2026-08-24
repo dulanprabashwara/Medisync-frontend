@@ -21,20 +21,28 @@ import {
   searchPatientDoctors,
 } from "@/lib/api";
 import type { DoctorSummary, PageResponse } from "@/types/appointments";
-import type { DepartmentReference, HospitalReference, SpecializationReference } from "@/types/user";
+import type {
+  DepartmentReference,
+  HospitalReference,
+  SpecializationReference,
+} from "@/types/user";
 
 function PatientDoctorSearchContent() {
   const { session } = useAuth();
   const [hospitals, setHospitals] = useState<HospitalReference[]>([]);
   const [departments, setDepartments] = useState<DepartmentReference[]>([]);
-  const [specializations, setSpecializations] = useState<SpecializationReference[]>([]);
-  
+  const [specializations, setSpecializations] = useState<
+    SpecializationReference[]
+  >([]);
+
   const [q, setQ] = useState("");
   const [hospitalId, setHospitalId] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [specializationId, setSpecializationId] = useState("");
-  
-  const [results, setResults] = useState<PageResponse<DoctorSummary> | null>(null);
+
+  const [results, setResults] = useState<PageResponse<DoctorSummary> | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [departmentsLoading, setDepartmentsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,16 +53,21 @@ function PatientDoctorSearchContent() {
     const token = session.access_token;
     async function init() {
       try {
-        const [hospitalValues, specializationValues, doctorValues] = await Promise.all([
-          getReferenceHospitals(token),
-          getReferenceSpecializations(token),
-          searchPatientDoctors(token, { page: 0, size: 12 }),
-        ]);
+        const [hospitalValues, specializationValues, doctorValues] =
+          await Promise.all([
+            getReferenceHospitals(token),
+            getReferenceSpecializations(token),
+            searchPatientDoctors(token, { page: 0, size: 12 }),
+          ]);
         setHospitals(hospitalValues);
         setSpecializations(specializationValues);
         setResults(doctorValues);
       } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : "Doctors could not be loaded.");
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Doctors could not be loaded.",
+        );
       } finally {
         setLoading(false);
       }
@@ -69,7 +82,9 @@ function PatientDoctorSearchContent() {
     if (!session || !nextHospitalId) return;
     setDepartmentsLoading(true);
     try {
-      setDepartments(await getReferenceDepartments(session.access_token, nextHospitalId));
+      setDepartments(
+        await getReferenceDepartments(session.access_token, nextHospitalId),
+      );
     } catch (err) {
       console.error(err);
     } finally {
@@ -82,17 +97,23 @@ function PatientDoctorSearchContent() {
     setLoading(true);
     setError(null);
     try {
-      setResults(await searchPatientDoctors(session.access_token, {
-        q: q.trim() || undefined,
-        hospitalId: hospitalId || undefined,
-        departmentId: departmentId || undefined,
-        specializationId: specializationId || undefined,
-        page,
-        size: 12,
-      }));
+      setResults(
+        await searchPatientDoctors(session.access_token, {
+          q: q.trim() || undefined,
+          hospitalId: hospitalId || undefined,
+          departmentId: departmentId || undefined,
+          specializationId: specializationId || undefined,
+          page,
+          size: 12,
+        }),
+      );
       setMobileFiltersOpen(false);
     } catch (searchError) {
-      setError(searchError instanceof Error ? searchError.message : "The doctor search could not be completed.");
+      setError(
+        searchError instanceof Error
+          ? searchError.message
+          : "The doctor search could not be completed.",
+      );
     } finally {
       setLoading(false);
     }
@@ -113,38 +134,72 @@ function PatientDoctorSearchContent() {
     setLoading(true);
     setError(null);
     try {
-      setResults(await searchPatientDoctors(session.access_token, { page: 0, size: 12 }));
+      setResults(
+        await searchPatientDoctors(session.access_token, { page: 0, size: 12 }),
+      );
       setMobileFiltersOpen(false);
     } catch (searchError) {
-      setError(searchError instanceof Error ? searchError.message : "The doctor search could not be completed.");
+      setError(
+        searchError instanceof Error
+          ? searchError.message
+          : "The doctor search could not be completed.",
+      );
     } finally {
       setLoading(false);
     }
   }
 
-  const activeFilterCount = (hospitalId ? 1 : 0) + (departmentId ? 1 : 0) + (specializationId ? 1 : 0);
+  const activeFilterCount =
+    (hospitalId ? 1 : 0) + (departmentId ? 1 : 0) + (specializationId ? 1 : 0);
 
   const filterFields = (
     <>
       <div className="space-y-1">
         <Label htmlFor="hospitalId">Hospital</Label>
-        <Select id="hospitalId" value={hospitalId} onChange={(e) => chooseHospital(e.target.value)}>
+        <Select
+          id="hospitalId"
+          value={hospitalId}
+          onChange={(e) => chooseHospital(e.target.value)}
+        >
           <option value="">All hospitals</option>
-          {hospitals.map((h) => <option key={h.id} value={h.id}>{h.name}</option>)}
+          {hospitals.map((h) => (
+            <option key={h.id} value={h.id}>
+              {h.name}
+            </option>
+          ))}
         </Select>
       </div>
       <div className="space-y-1">
         <Label htmlFor="departmentId">Department</Label>
-        <Select id="departmentId" disabled={!hospitalId || departmentsLoading} value={departmentId} onChange={(e) => setDepartmentId(e.target.value)}>
-          <option value="">{departmentsLoading ? "Loading..." : "All departments"}</option>
-          {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+        <Select
+          id="departmentId"
+          disabled={!hospitalId || departmentsLoading}
+          value={departmentId}
+          onChange={(e) => setDepartmentId(e.target.value)}
+        >
+          <option value="">
+            {departmentsLoading ? "Loading..." : "All departments"}
+          </option>
+          {departments.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name}
+            </option>
+          ))}
         </Select>
       </div>
       <div className="space-y-1">
         <Label htmlFor="specializationId">Specialization</Label>
-        <Select id="specializationId" value={specializationId} onChange={(e) => setSpecializationId(e.target.value)}>
+        <Select
+          id="specializationId"
+          value={specializationId}
+          onChange={(e) => setSpecializationId(e.target.value)}
+        >
           <option value="">All specializations</option>
-          {specializations.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          {specializations.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
         </Select>
       </div>
     </>
@@ -152,11 +207,11 @@ function PatientDoctorSearchContent() {
 
   return (
     <div>
-      <PortalHeading 
-        eyebrow="Patient Care" 
-        title="Find a Doctor" 
+      <PortalHeading
+        eyebrow="Patient Care"
+        title="Find a Doctor"
         backHref="/patient/dashboard"
-        description="Search verified doctors and request an online consultation." 
+        description="Search verified doctors and request an online consultation."
       />
 
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm p-4 sm:p-5">
@@ -179,9 +234,17 @@ function PatientDoctorSearchContent() {
               onClick={() => setMobileFiltersOpen(true)}
             >
               <Filter className="size-4" />
-              {activeFilterCount > 0 && <span className="ml-1 rounded-full bg-teal-100 px-2 py-0.5 text-xs text-teal-800">{activeFilterCount}</span>}
+              {activeFilterCount > 0 && (
+                <span className="ml-1 rounded-full bg-teal-100 px-2 py-0.5 text-xs text-teal-800">
+                  {activeFilterCount}
+                </span>
+              )}
             </Button>
-            <Button type="submit" loading={loading} className="hidden lg:flex shrink-0 w-32">
+            <Button
+              type="submit"
+              loading={loading}
+              className="hidden lg:flex shrink-0 w-32"
+            >
               Search
             </Button>
           </div>
@@ -189,10 +252,15 @@ function PatientDoctorSearchContent() {
           <div className="hidden lg:grid grid-cols-3 gap-4 pt-4 border-t border-slate-100">
             {filterFields}
           </div>
-          
+
           {activeFilterCount > 0 && (
             <div className="hidden lg:flex justify-end gap-3 pt-2">
-              <Button type="button" variant="ghost" onClick={clearFilters} disabled={loading}>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={clearFilters}
+                disabled={loading}
+              >
                 Clear filters
               </Button>
             </div>
@@ -200,14 +268,28 @@ function PatientDoctorSearchContent() {
         </form>
       </div>
 
-      <Dialog open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
+      <Dialog
+        open={mobileFiltersOpen}
+        onClose={() => setMobileFiltersOpen(false)}
+        title="Filters"
+      >
         <div className="space-y-5 mt-2">
           {filterFields}
           <div className="flex gap-3 pt-4 border-t border-slate-100">
-            <Button type="button" variant="ghost" className="flex-1" onClick={clearFilters}>
+            <Button
+              type="button"
+              variant="ghost"
+              className="flex-1"
+              onClick={clearFilters}
+            >
               Clear
             </Button>
-            <Button type="button" variant="primary" className="flex-1" onClick={() => search(0)}>
+            <Button
+              type="button"
+              variant="primary"
+              className="flex-1"
+              onClick={() => search(0)}
+            >
               Apply Filters
             </Button>
           </div>
@@ -215,11 +297,17 @@ function PatientDoctorSearchContent() {
       </Dialog>
 
       <div className="mt-8">
-        {error && <Alert tone="error" className="mb-6">{error}</Alert>}
-        
+        {error && (
+          <Alert tone="error" className="mb-6">
+            {error}
+          </Alert>
+        )}
+
         {!loading && results && (
           <div className="mb-4 text-sm text-slate-500 font-medium">
-            {results.totalElements === 0 ? "No doctors found" : `${results.totalElements} doctor${results.totalElements === 1 ? '' : 's'} found`}
+            {results.totalElements === 0
+              ? "No doctors found"
+              : `${results.totalElements} doctor${results.totalElements === 1 ? "" : "s"} found`}
           </div>
         )}
 
@@ -231,13 +319,19 @@ function PatientDoctorSearchContent() {
             title="No doctors match your filters"
             description="Try changing your search criteria or clearing filters."
             action={
-              <Button onClick={clearFilters} variant="secondary">Clear Filters</Button>
+              <Button onClick={clearFilters} variant="secondary">
+                Clear Filters
+              </Button>
             }
           />
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {results?.content.map((doctor) => (
-              <DoctorCard key={doctor.doctorProfileId} doctor={doctor} viewMode="detail" />
+              <DoctorCard
+                key={doctor.doctorProfileId}
+                doctor={doctor}
+                viewMode="detail"
+              />
             ))}
           </div>
         )}
@@ -257,5 +351,9 @@ function PatientDoctorSearchContent() {
 }
 
 export default function PatientDoctorsPage() {
-  return <ProtectedRoute roles={["PATIENT"]}><PatientDoctorSearchContent /></ProtectedRoute>;
+  return (
+    <ProtectedRoute roles={["PATIENT"]}>
+      <PatientDoctorSearchContent />
+    </ProtectedRoute>
+  );
 }

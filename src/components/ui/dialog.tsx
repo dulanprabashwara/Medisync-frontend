@@ -54,7 +54,9 @@ export function Dialog({
           <X className="size-5" />
         </button>
         <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
-        {description && <p className="mt-2 text-sm text-slate-500">{description}</p>}
+        {description && (
+          <p className="mt-2 text-sm text-slate-500">{description}</p>
+        )}
         <div className="mt-6">{children}</div>
       </div>
     </dialog>

@@ -13,10 +13,11 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export const buttonVariants = (variant: ButtonVariant = "primary") => {
   const baseStyles =
     "inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 disabled:opacity-50 disabled:pointer-events-none";
-  
+
   const variants = {
     primary: "bg-teal-700 text-white hover:bg-teal-800",
-    secondary: "border border-slate-300 bg-white text-slate-800 hover:bg-slate-50",
+    secondary:
+      "border border-slate-300 bg-white text-slate-800 hover:bg-slate-50",
     ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
     danger: "bg-rose-700 text-white hover:bg-rose-800",
   };
@@ -38,7 +39,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       asChild, // Ignored in implementation, but fixes type error if missed
       ...props
     },
-    ref
+    ref,
   ) => {
     return (
       <button
@@ -51,7 +52,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {loading && loadingText ? loadingText : children}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";

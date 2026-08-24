@@ -3,7 +3,7 @@ import type { DoctorFeeStatus, DispensingStatus, PrescriptionStatus } from "@/ty
 
 export type ConsultationStatus = "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 export type ConsultationSenderType = "PATIENT" | "DOCTOR";
-export type ConsultationEventType = "NEW_MESSAGE" | "CONSULTATION_STATUS_CHANGED" | "PAYMENT_STATUS_CHANGED";
+export type ConsultationEventType = "NEW_MESSAGE" | "CONSULTATION_STATUS_CHANGED" | "PAYMENT_STATUS_CHANGED" | "MESSAGE_DELETED";
 
 export interface ConsultationPaymentSummary {
   prescriptionId: string;
@@ -52,6 +52,8 @@ export interface ConsultationMessage {
   content: string | null;
   attachments: ConsultationMessageAttachment[];
   sentAt: string;
+  deleted: boolean;
+  deletedAt: string | null;
 }
 
 export interface ConsultationMessageAttachment {

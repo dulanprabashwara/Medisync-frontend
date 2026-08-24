@@ -14,11 +14,15 @@ export function ProfileImageEditor({ compact = false }: { compact?: boolean }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const imageUrl = previewUrl || profile?.profileImageUrl;
-  const initials = `${profile?.firstName?.[0] ?? "M"}${profile?.lastName?.[0] ?? ""}`.toUpperCase();
+  const initials =
+    `${profile?.firstName?.[0] ?? "M"}${profile?.lastName?.[0] ?? ""}`.toUpperCase();
 
-  useEffect(() => () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-  }, [previewUrl]);
+  useEffect(
+    () => () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    },
+    [previewUrl],
+  );
 
   async function choose(file: File | undefined) {
     if (!file || !session) return;
@@ -42,7 +46,11 @@ export function ProfileImageEditor({ compact = false }: { compact?: boolean }) {
       await refreshProfile();
       setPreviewUrl(null);
     } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : "The profile photo could not be uploaded.");
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "The profile photo could not be uploaded.",
+      );
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -57,37 +65,80 @@ export function ProfileImageEditor({ compact = false }: { compact?: boolean }) {
       await removeMyProfileImage(session.access_token);
       await refreshProfile();
     } catch (removeError) {
-      setError(removeError instanceof Error ? removeError.message : "The profile photo could not be removed.");
+      setError(
+        removeError instanceof Error
+          ? removeError.message
+          : "The profile photo could not be removed.",
+      );
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <section className={compact ? "flex items-center gap-4" : "mt-7 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"}>
-      <div className={compact ? "flex items-center gap-4" : "flex flex-wrap items-center gap-5"}>
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-teal-100 text-xl font-bold text-teal-900 ring-4 ring-white shadow">
-          {imageUrl ? <img src={imageUrl} alt={`${profile?.firstName ?? "User"} profile`} className="h-full w-full object-cover" /> : initials}
+    <section
+      className={
+        compact
+          ? ""
+          : "mt-7 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+      }
+    >
+      <div
+        className={
+          compact
+            ? "flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6"
+            : "flex flex-wrap items-center gap-5"
+        }
+      >
+        <div className="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-teal-100 text-3xl font-bold text-teal-900 ring-4 ring-white shadow">
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={`${profile?.firstName ?? "User"} profile`}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            initials
+          )}
         </div>
-        <div>
-          {!compact ? <h2 className="text-lg font-semibold text-slate-950">Profile photo</h2> : null}
-          {!compact ? <p className="mt-1 text-sm text-slate-500">JPEG, PNG, or WebP. Maximum 5 MB.</p> : null}
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" disabled={busy} onClick={() => inputRef.current?.click()}
-              className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
-              {busy ? "Updating…" : imageUrl ? "Replace photo" : "Add photo"}
+        <div className="flex flex-col items-start">
+          {!compact ? (
+            <h2 className="text-lg font-semibold text-slate-950">
+              Profile photo
+            </h2>
+          ) : null}
+          <div className={compact ? "mt-1 flex flex-wrap gap-2" : "mt-3 flex flex-wrap gap-2"}>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => inputRef.current?.click()}
+              className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              {busy ? "Updating…" : imageUrl ? "Edit photo" : "Add photo"}
             </button>
             {profile?.profileImageUrl ? (
-              <button type="button" disabled={busy} onClick={() => void remove()}
-                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-50">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void remove()}
+                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-50"
+              >
                 Remove
               </button>
             ) : null}
           </div>
+          <p className="mt-2 text-xs text-slate-500">
+            JPEG, PNG, or WebP. Maximum 5 MB.
+          </p>
         </div>
       </div>
-      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
-        onChange={(event) => void choose(event.target.files?.[0])} />
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={(event) => void choose(event.target.files?.[0])}
+      />
       {error ? <p className="mt-3 text-sm text-rose-700">{error}</p> : null}
     </section>
   );

@@ -15,10 +15,14 @@ export function Pagination({
   if (totalPages <= 1) return null;
 
   return (
-    <nav className={`flex items-center justify-between border-t border-slate-200 bg-white px-4 py-3 sm:px-6 ${className}`} aria-label="Pagination">
+    <nav
+      className={`flex items-center justify-between border-t border-slate-200 bg-white px-4 py-3 sm:px-6 ${className}`}
+      aria-label="Pagination"
+    >
       <div className="hidden sm:block">
         <p className="text-sm text-slate-700">
-          Page <span className="font-medium text-slate-950">{page + 1}</span> of <span className="font-medium text-slate-950">{totalPages}</span>
+          Page <span className="font-medium text-slate-950">{page + 1}</span> of{" "}
+          <span className="font-medium text-slate-950">{totalPages}</span>
         </p>
       </div>
       <div className="flex flex-1 justify-between sm:justify-end gap-3">

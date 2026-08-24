@@ -27,7 +27,11 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-async function withTimeout<T>(promise: PromiseLike<T>, milliseconds: number, message: string): Promise<T> {
+async function withTimeout<T>(
+  promise: PromiseLike<T>,
+  milliseconds: number,
+  message: string,
+): Promise<T> {
   let timeout: ReturnType<typeof setTimeout> | undefined;
   try {
     return await Promise.race([
@@ -83,7 +87,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(nextProfile);
     } catch (profileError) {
       if (operation !== operationRef.current) return;
-      const canKeepCurrentProfile = profileRef.current &&
+      const canKeepCurrentProfile =
+        profileRef.current &&
         sessionRef.current?.user.id === nextSession.user.id;
       if (!canKeepCurrentProfile) {
         profileRef.current = null;
@@ -128,30 +133,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await applySession(data.session);
       } catch (sessionError) {
         if (!active) return;
-        setError(sessionError instanceof Error ? sessionError.message : "Your secure session could not be checked.");
+        setError(
+          sessionError instanceof Error
+            ? sessionError.message
+            : "Your secure session could not be checked.",
+        );
         setLoading(false);
       }
     })();
 
-    const { data: listener } = client.auth.onAuthStateChange((event, nextSession) => {
-      if (!active) return;
+    const { data: listener } = client.auth.onAuthStateChange(
+      (event, nextSession) => {
+        if (!active) return;
 
-      // getSession above owns initialization. Supabase also emits INITIAL_SESSION,
-      // so processing both would duplicate the profile request and restart the loader.
-      if (event === "INITIAL_SESSION") return;
+        // getSession above owns initialization. Supabase also emits INITIAL_SESSION,
+        // so processing both would duplicate the profile request and restart the loader.
+        if (event === "INITIAL_SESSION") return;
 
-      const sameUser = sessionRef.current?.user.id === nextSession?.user.id;
-      if ((event === "TOKEN_REFRESHED" || event === "SIGNED_IN") && sameUser && profileRef.current) {
-        sessionRef.current = nextSession;
-        setLatestApiAccessToken(nextSession?.access_token ?? null);
-        setError(null);
-        setLoading(false);
-        return;
-      }
+        const sameUser = sessionRef.current?.user.id === nextSession?.user.id;
+        if (
+          (event === "TOKEN_REFRESHED" || event === "SIGNED_IN") &&
+          sameUser &&
+          profileRef.current
+        ) {
+          sessionRef.current = nextSession;
+          setLatestApiAccessToken(nextSession?.access_token ?? null);
+          setError(null);
+          setLoading(false);
+          return;
+        }
 
-      if (!profileRef.current || !sameUser) setLoading(true);
-      window.setTimeout(() => void applySession(nextSession), 0);
-    });
+        if (!profileRef.current || !sameUser) setLoading(true);
+        window.setTimeout(() => void applySession(nextSession), 0);
+      },
+    );
 
     return () => {
       active = false;
@@ -169,7 +184,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         "The authentication service did not respond in time. Refresh the page to try again.",
       );
     } catch (sessionError) {
-      setError(sessionError instanceof Error ? sessionError.message : "Your secure session could not be checked.");
+      setError(
+        sessionError instanceof Error
+          ? sessionError.message
+          : "Your secure session could not be checked.",
+      );
       setLoading(false);
       return null;
     }
@@ -214,12 +233,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const refreshWhenVisible = () => {
-      if (document.visibilityState === "visible" && sessionRef.current && profileRef.current) {
+      if (
+        document.visibilityState === "visible" &&
+        sessionRef.current &&
+        profileRef.current
+      ) {
         void refreshProfile();
       }
     };
     document.addEventListener("visibilitychange", refreshWhenVisible);
-    return () => document.removeEventListener("visibilitychange", refreshWhenVisible);
+    return () =>
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
   }, [refreshProfile]);
 
   const signOut = useCallback(async () => {
@@ -237,7 +261,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ session, profile, loading, refreshing, error, refreshProfile, signOut }),
+    () => ({
+      session,
+      profile,
+      loading,
+      refreshing,
+      error,
+      refreshProfile,
+      signOut,
+    }),
     [session, profile, loading, refreshing, error, refreshProfile, signOut],
   );
 

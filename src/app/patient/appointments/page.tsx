@@ -23,7 +23,7 @@ export default function PatientAppointmentsPage() {
   const { session } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [activeTab, setActiveTab] = useState<Tab>("upcoming");
-  
+
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [cancelId, setCancelId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
@@ -41,7 +41,11 @@ export default function PatientAppointmentsPage() {
       const page = await getPatientAppointments(session.access_token);
       setAppointments(page.content);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Your online consultations could not be loaded.");
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Your online consultations could not be loaded.",
+      );
     } finally {
       setLoading(false);
     }
@@ -50,7 +54,9 @@ export default function PatientAppointmentsPage() {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       if (new URLSearchParams(window.location.search).get("created") === "1") {
-        setMessage("Your online consultation request was submitted. The doctor can now review it.");
+        setMessage(
+          "Your online consultation request was submitted. The doctor can now review it.",
+        );
       }
       setNow(Date.now());
       void load();
@@ -59,13 +65,32 @@ export default function PatientAppointmentsPage() {
   }, [load]);
 
   const groups = useMemo(() => {
-    const asc = (a: Appointment, b: Appointment) => new Date(a.scheduledStart).getTime() - new Date(b.scheduledStart).getTime();
-    const desc = (a: Appointment, b: Appointment) => new Date(b.scheduledStart).getTime() - new Date(a.scheduledStart).getTime();
-    
+    const asc = (a: Appointment, b: Appointment) =>
+      new Date(a.scheduledStart).getTime() -
+      new Date(b.scheduledStart).getTime();
+    const desc = (a: Appointment, b: Appointment) =>
+      new Date(b.scheduledStart).getTime() -
+      new Date(a.scheduledStart).getTime();
+
     return {
-      upcoming: appointments.filter((a) => a.status === "CONFIRMED" || a.consultationStatus === "IN_PROGRESS" || a.consultationStatus === "SCHEDULED").sort(asc),
+      upcoming: appointments
+        .filter(
+          (a) =>
+            a.status === "CONFIRMED" ||
+            a.consultationStatus === "IN_PROGRESS" ||
+            a.consultationStatus === "SCHEDULED",
+        )
+        .sort(asc),
       requests: appointments.filter((a) => a.status === "REQUESTED").sort(asc),
-      history: appointments.filter((a) => a.status !== "REQUESTED" && a.status !== "CONFIRMED" && a.consultationStatus !== "IN_PROGRESS" && a.consultationStatus !== "SCHEDULED").sort(desc),
+      history: appointments
+        .filter(
+          (a) =>
+            a.status !== "REQUESTED" &&
+            a.status !== "CONFIRMED" &&
+            a.consultationStatus !== "IN_PROGRESS" &&
+            a.consultationStatus !== "SCHEDULED",
+        )
+        .sort(desc),
     };
   }, [appointments]);
 
@@ -74,13 +99,21 @@ export default function PatientAppointmentsPage() {
     setBusy(appointmentId);
     setError(null);
     try {
-      await cancelPatientAppointment(session.access_token, appointmentId, cancelReason.trim());
+      await cancelPatientAppointment(
+        session.access_token,
+        appointmentId,
+        cancelReason.trim(),
+      );
       setCancelId(null);
       setCancelReason("");
       setMessage("The consultation was cancelled.");
       await load();
     } catch (cancelError) {
-      setError(cancelError instanceof Error ? cancelError.message : "The consultation could not be cancelled.");
+      setError(
+        cancelError instanceof Error
+          ? cancelError.message
+          : "The consultation could not be cancelled.",
+      );
     } finally {
       setBusy(null);
     }
@@ -93,7 +126,10 @@ export default function PatientAppointmentsPage() {
     if (appointment.consultationStatus === "IN_PROGRESS") {
       return <StatusBadge tone="info">In Progress</StatusBadge>;
     }
-    if (appointment.status === "CONFIRMED" || appointment.consultationStatus === "SCHEDULED") {
+    if (
+      appointment.status === "CONFIRMED" ||
+      appointment.consultationStatus === "SCHEDULED"
+    ) {
       return <StatusBadge tone="success">Scheduled</StatusBadge>;
     }
     if (appointment.consultationStatus === "COMPLETED") {
@@ -111,7 +147,12 @@ export default function PatientAppointmentsPage() {
     return <StatusBadge tone="neutral">{appointment.status}</StatusBadge>;
   }
 
-  const renderList = (list: Appointment[], emptyTitle: string, emptyDesc: string, emptyIcon: React.ElementType) => {
+  const renderList = (
+    list: Appointment[],
+    emptyTitle: string,
+    emptyDesc: string,
+    emptyIcon: React.ElementType,
+  ) => {
     if (list.length === 0) {
       return (
         <EmptyState
@@ -119,7 +160,10 @@ export default function PatientAppointmentsPage() {
           title={emptyTitle}
           description={emptyDesc}
           action={
-            <Link href="/patient/doctors" className={buttonVariants("secondary")}>
+            <Link
+              href="/patient/doctors"
+              className={buttonVariants("secondary")}
+            >
               Find a Doctor
             </Link>
           }
@@ -131,50 +175,86 @@ export default function PatientAppointmentsPage() {
       <div className="space-y-6">
         {list.map((appointment) => {
           const expanded = expandedId === appointment.id;
-          const cancellable = (appointment.status === "REQUESTED" || appointment.status === "CONFIRMED")
-            && new Date(appointment.scheduledStart).getTime() > now
-            && (!appointment.consultationStatus || appointment.consultationStatus === "SCHEDULED");
+          const cancellable =
+            (appointment.status === "REQUESTED" ||
+              appointment.status === "CONFIRMED") &&
+            new Date(appointment.scheduledStart).getTime() > now &&
+            (!appointment.consultationStatus ||
+              appointment.consultationStatus === "SCHEDULED");
 
           return (
             <SectionCard key={appointment.id}>
               <div className="flex flex-col sm:flex-row gap-6 items-start justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-950">{formatDoctorName(appointment.doctorName)}</h3>
-                  <p className="font-medium text-teal-700 text-sm mb-3">{appointment.specializationName}</p>
-                  <p className="text-sm text-slate-600 mb-1">{formatAppointmentTime(appointment.scheduledStart)}</p>
-                  <p className="text-sm text-slate-600">{appointment.hospitalName}</p>
+                  <h3 className="text-lg font-semibold text-slate-950">
+                    {formatDoctorName(appointment.doctorName)}
+                  </h3>
+                  <p className="font-medium text-teal-700 text-sm mb-3">
+                    {appointment.specializationName}
+                  </p>
+                  <p className="text-sm text-slate-600 mb-1">
+                    {formatAppointmentTime(appointment.scheduledStart)}
+                  </p>
+                  <p className="text-sm text-slate-600">
+                    {appointment.hospitalName}
+                  </p>
                 </div>
                 <div className="flex flex-col items-start sm:items-end gap-3 shrink-0">
                   {getStatusBadge(appointment)}
                   {appointment.consultationId && (
-                    <Link href={`/patient/consultations/${appointment.consultationId}`} className={buttonVariants("primary")}>
+                    <Link
+                      href={`/patient/consultations/${appointment.consultationId}`}
+                      className={buttonVariants("primary")}
+                    >
                       Open Consultation
                     </Link>
                   )}
                 </div>
               </div>
 
-              {appointment.status === "REJECTED" && appointment.doctorRejectionReason && (
-                <div className="mt-5 p-4 rounded-xl bg-rose-50 border border-rose-100 text-sm">
-                  <span className="font-semibold text-rose-900 block mb-1">Reason for decline:</span>
-                  <span className="text-rose-800">{appointment.doctorRejectionReason}</span>
-                </div>
-              )}
+              {appointment.status === "REJECTED" &&
+                appointment.doctorRejectionReason && (
+                  <div className="mt-5 p-4 rounded-xl bg-rose-50 border border-rose-100 text-sm">
+                    <span className="font-semibold text-rose-900 block mb-1">
+                      Reason for decline:
+                    </span>
+                    <span className="text-rose-800">
+                      {appointment.doctorRejectionReason}
+                    </span>
+                  </div>
+                )}
 
-              {appointment.status.startsWith("CANCELLED") && appointment.cancellationReason && (
-                <div className="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-100 text-sm">
-                  <span className="font-semibold text-slate-900 block mb-1">Cancellation reason:</span>
-                  <span className="text-slate-700">{appointment.cancellationReason}</span>
-                </div>
-              )}
+              {appointment.status.startsWith("CANCELLED") &&
+                appointment.cancellationReason && (
+                  <div className="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-100 text-sm">
+                    <span className="font-semibold text-slate-900 block mb-1">
+                      Cancellation reason:
+                    </span>
+                    <span className="text-slate-700">
+                      {appointment.cancellationReason}
+                    </span>
+                  </div>
+                )}
 
               <div className="mt-6 pt-6 border-t border-slate-100">
                 <div className="flex flex-wrap gap-3">
-                  <Button variant="secondary" onClick={() => setExpandedId(expanded ? null : appointment.id)}>
+                  <Button
+                    variant="secondary"
+                    onClick={() =>
+                      setExpandedId(expanded ? null : appointment.id)
+                    }
+                  >
                     {expanded ? "Hide Details" : "View Details"}
                   </Button>
                   {cancellable && (
-                    <Button variant="danger" onClick={() => setCancelId(cancelId === appointment.id ? null : appointment.id)}>
+                    <Button
+                      variant="danger"
+                      onClick={() =>
+                        setCancelId(
+                          cancelId === appointment.id ? null : appointment.id,
+                        )
+                      }
+                    >
                       Cancel Request
                     </Button>
                   )}
@@ -183,23 +263,39 @@ export default function PatientAppointmentsPage() {
                 {expanded && (
                   <dl className="mt-6 grid gap-6 sm:grid-cols-2 text-sm bg-slate-50 p-5 rounded-2xl">
                     <div>
-                      <dt className="text-slate-500 font-medium mb-1">Reason for consultation</dt>
-                      <dd className="font-medium text-slate-900">{appointment.symptoms.reasonForVisit}</dd>
+                      <dt className="text-slate-500 font-medium mb-1">
+                        Reason for consultation
+                      </dt>
+                      <dd className="font-medium text-slate-900">
+                        {appointment.symptoms.reasonForVisit}
+                      </dd>
                     </div>
                     <div>
-                      <dt className="text-slate-500 font-medium mb-1">Symptoms</dt>
-                      <dd className="font-medium text-slate-900">{appointment.symptoms.symptoms}</dd>
+                      <dt className="text-slate-500 font-medium mb-1">
+                        Symptoms
+                      </dt>
+                      <dd className="font-medium text-slate-900">
+                        {appointment.symptoms.symptoms}
+                      </dd>
                     </div>
                     {appointment.symptoms.symptomDuration && (
                       <div>
-                        <dt className="text-slate-500 font-medium mb-1">Duration</dt>
-                        <dd className="font-medium text-slate-900">{appointment.symptoms.symptomDuration}</dd>
+                        <dt className="text-slate-500 font-medium mb-1">
+                          Duration
+                        </dt>
+                        <dd className="font-medium text-slate-900">
+                          {appointment.symptoms.symptomDuration}
+                        </dd>
                       </div>
                     )}
                     {appointment.symptoms.additionalNotes && (
                       <div className="sm:col-span-2">
-                        <dt className="text-slate-500 font-medium mb-1">Additional notes</dt>
-                        <dd className="font-medium text-slate-900 whitespace-pre-wrap">{appointment.symptoms.additionalNotes}</dd>
+                        <dt className="text-slate-500 font-medium mb-1">
+                          Additional notes
+                        </dt>
+                        <dd className="font-medium text-slate-900 whitespace-pre-wrap">
+                          {appointment.symptoms.additionalNotes}
+                        </dd>
                       </div>
                     )}
                   </dl>
@@ -207,7 +303,10 @@ export default function PatientAppointmentsPage() {
 
                 {cancelId === appointment.id && (
                   <div className="mt-6 p-5 rounded-2xl bg-rose-50 border border-rose-100">
-                    <Label htmlFor={`cancel-${appointment.id}`} className="text-rose-900">
+                    <Label
+                      htmlFor={`cancel-${appointment.id}`}
+                      className="text-rose-900"
+                    >
                       Cancellation reason (optional)
                     </Label>
                     <Input
@@ -218,7 +317,11 @@ export default function PatientAppointmentsPage() {
                       onChange={(e) => setCancelReason(e.target.value)}
                     />
                     <div className="mt-4 flex gap-3">
-                      <Button variant="danger" loading={busy === appointment.id} onClick={() => void cancel(appointment.id)}>
+                      <Button
+                        variant="danger"
+                        loading={busy === appointment.id}
+                        onClick={() => void cancel(appointment.id)}
+                      >
                         Confirm Cancellation
                       </Button>
                       <Button variant="ghost" onClick={() => setCancelId(null)}>
@@ -246,15 +349,23 @@ export default function PatientAppointmentsPage() {
   return (
     <ProtectedRoute roles={["PATIENT"]}>
       <div>
-        <PortalHeading 
-          eyebrow="Patient Care" 
-          title="My Consultations" 
+        <PortalHeading
+          eyebrow="Patient Care"
+          title="My Consultations"
           backHref="/patient/dashboard"
-          description="Manage your consultation requests, upcoming sessions and history." 
+          description="Manage your consultation requests, upcoming sessions and history."
         />
-        
-        {error && <Alert tone="error" className="mb-6">{error}</Alert>}
-        {message && <Alert tone="success" className="mb-6">{message}</Alert>}
+
+        {error && (
+          <Alert tone="error" className="mb-6">
+            {error}
+          </Alert>
+        )}
+        {message && (
+          <Alert tone="success" className="mb-6">
+            {message}
+          </Alert>
+        )}
 
         <div className="mb-8 border-b border-slate-200">
           <nav className="-mb-px flex gap-6" aria-label="Tabs">
@@ -267,7 +378,9 @@ export default function PatientAppointmentsPage() {
             >
               <Calendar className="inline-block size-4 mr-2 mb-0.5" />
               Upcoming
-              <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{groups.upcoming.length}</span>
+              <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                {groups.upcoming.length}
+              </span>
             </button>
             <button
               onClick={() => setActiveTab("requests")}
@@ -278,7 +391,9 @@ export default function PatientAppointmentsPage() {
             >
               <Clock className="inline-block size-4 mr-2 mb-0.5" />
               Requests
-              <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{groups.requests.length}</span>
+              <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                {groups.requests.length}
+              </span>
             </button>
             <button
               onClick={() => setActiveTab("history")}
@@ -294,26 +409,29 @@ export default function PatientAppointmentsPage() {
         </div>
 
         <div>
-          {activeTab === "upcoming" && renderList(
-            groups.upcoming, 
-            "No upcoming consultations", 
-            "You don't have any confirmed or scheduled consultations.", 
-            Calendar
-          )}
-          
-          {activeTab === "requests" && renderList(
-            groups.requests, 
-            "No pending requests", 
-            "You don't have any consultation requests waiting for a doctor's response.", 
-            Activity
-          )}
-          
-          {activeTab === "history" && renderList(
-            groups.history, 
-            "No consultation history", 
-            "You haven't completed or cancelled any consultations yet.", 
-            History
-          )}
+          {activeTab === "upcoming" &&
+            renderList(
+              groups.upcoming,
+              "No upcoming consultations",
+              "You don't have any confirmed or scheduled consultations.",
+              Calendar,
+            )}
+
+          {activeTab === "requests" &&
+            renderList(
+              groups.requests,
+              "No pending requests",
+              "You don't have any consultation requests waiting for a doctor's response.",
+              Activity,
+            )}
+
+          {activeTab === "history" &&
+            renderList(
+              groups.history,
+              "No consultation history",
+              "You haven't completed or cancelled any consultations yet.",
+              History,
+            )}
         </div>
       </div>
     </ProtectedRoute>

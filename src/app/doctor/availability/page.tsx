@@ -1,10 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type FormEvent,
+} from "react";
 import { inputClassName } from "@/components/auth-card";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
-import { PortalHeading, InlineError, StateBadge, formatAppointmentTime } from "@/components/portal-ui";
+import {
+  PortalHeading,
+  InlineError,
+  StateBadge,
+  formatAppointmentTime,
+} from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
 import {
   createDoctorAvailability,
@@ -37,7 +48,11 @@ function DoctorAvailabilityContent() {
     try {
       setWindows(await getDoctorAvailability(session.access_token));
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Availability could not be loaded.");
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Availability could not be loaded.",
+      );
     } finally {
       setLoading(false);
     }
@@ -45,12 +60,17 @@ function DoctorAvailabilityContent() {
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Colombo");
+      setTimeZone(
+        Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Colombo",
+      );
       setNow(Date.now());
       void load();
     }, 0);
     const minuteTimer = window.setInterval(() => setNow(Date.now()), 60_000);
-    return () => { window.clearTimeout(timer); window.clearInterval(minuteTimer); };
+    return () => {
+      window.clearTimeout(timer);
+      window.clearInterval(minuteTimer);
+    };
   }, [load]);
 
   const previewCount = useMemo(() => {
@@ -86,10 +106,16 @@ function DoctorAvailabilityContent() {
         slotDurationMinutes: duration,
         timeZone,
       });
-      setMessage(`${previewCount} online consultation time${previewCount === 1 ? "" : "s"} created.`);
+      setMessage(
+        `${previewCount} online consultation time${previewCount === 1 ? "" : "s"} created.`,
+      );
       await load();
     } catch (createError) {
-      setError(createError instanceof Error ? createError.message : "Availability could not be created.");
+      setError(
+        createError instanceof Error
+          ? createError.message
+          : "Availability could not be created.",
+      );
     } finally {
       setBusy(null);
     }
@@ -99,7 +125,9 @@ function DoctorAvailabilityContent() {
     .filter((availability) => new Date(availability.endsAt).getTime() > now)
     .map((availability) => ({
       ...availability,
-      slots: availability.slots.filter((slot) => new Date(slot.startsAt).getTime() > now),
+      slots: availability.slots.filter(
+        (slot) => new Date(slot.startsAt).getTime() > now,
+      ),
     }));
 
   async function toggleSlot(slotId: string, block: boolean) {
@@ -110,7 +138,11 @@ function DoctorAvailabilityContent() {
       await setDoctorSlotBlocked(session.access_token, slotId, block);
       await load();
     } catch (slotError) {
-      setError(slotError instanceof Error ? slotError.message : "The consultation time could not be updated.");
+      setError(
+        slotError instanceof Error
+          ? slotError.message
+          : "The consultation time could not be updated.",
+      );
     } finally {
       setBusy(null);
     }
@@ -122,10 +154,16 @@ function DoctorAvailabilityContent() {
     setError(null);
     try {
       await deactivateDoctorAvailability(session.access_token, windowId);
-      setMessage("The consultation availability window was deactivated. Its open times are now unavailable.");
+      setMessage(
+        "The consultation availability window was deactivated. Its open times are now unavailable.",
+      );
       await load();
     } catch (deactivateError) {
-      setError(deactivateError instanceof Error ? deactivateError.message : "Availability could not be deactivated.");
+      setError(
+        deactivateError instanceof Error
+          ? deactivateError.message
+          : "Availability could not be deactivated.",
+      );
     } finally {
       setBusy(null);
     }
@@ -133,36 +171,92 @@ function DoctorAvailabilityContent() {
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
-      <PortalHeading eyebrow="Doctor scheduling" title="Consultation Availability" backHref="/doctor/dashboard"
-        description="Publish specific future windows for online consultations. MediSync generates the times patients can request." />
+      <PortalHeading
+        eyebrow="Doctor scheduling"
+        title="Consultation Availability"
+        backHref="/doctor/dashboard"
+        description="Publish specific future windows for online consultations. MediSync generates the times patients can request."
+      />
 
       <div className="mt-7 space-y-3">
         <InlineError message={error} />
-        {message ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900" role="status">{message}</div> : null}
+        {message ? (
+          <div
+            className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900"
+            role="status"
+          >
+            {message}
+          </div>
+        ) : null}
       </div>
 
       <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <h2 className="text-xl font-semibold text-slate-950">Create consultation availability</h2>
-        <p className="mt-2 text-sm text-slate-600">Times are interpreted in {timeZone} and stored with their absolute timezone.</p>
-        <form className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-4" onSubmit={create}>
-          <label className="text-sm font-medium text-slate-700">Date
-            <input className={inputClassName} min={new Date().toLocaleDateString("en-CA")} required type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+        <h2 className="text-xl font-semibold text-slate-950">
+          Create consultation availability
+        </h2>
+        <p className="mt-2 text-sm text-slate-600">
+          Times are interpreted in {timeZone} and stored with their absolute
+          timezone.
+        </p>
+        <form
+          className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-4"
+          onSubmit={create}
+        >
+          <label className="text-sm font-medium text-slate-700">
+            Date
+            <input
+              className={inputClassName}
+              min={new Date().toLocaleDateString("en-CA")}
+              required
+              type="date"
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+            />
           </label>
-          <label className="text-sm font-medium text-slate-700">Start time
-            <input className={inputClassName} required type="time" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} />
+          <label className="text-sm font-medium text-slate-700">
+            Start time
+            <input
+              className={inputClassName}
+              required
+              type="time"
+              value={startsAt}
+              onChange={(event) => setStartsAt(event.target.value)}
+            />
           </label>
-          <label className="text-sm font-medium text-slate-700">End time
-            <input className={inputClassName} required type="time" value={endsAt} onChange={(event) => setEndsAt(event.target.value)} />
+          <label className="text-sm font-medium text-slate-700">
+            End time
+            <input
+              className={inputClassName}
+              required
+              type="time"
+              value={endsAt}
+              onChange={(event) => setEndsAt(event.target.value)}
+            />
           </label>
-          <label className="text-sm font-medium text-slate-700">Consultation duration
-            <select className={inputClassName} value={duration} onChange={(event) => setDuration(Number(event.target.value))}>
-              {durations.map((value) => <option key={value} value={value}>{value} minutes</option>)}
+          <label className="text-sm font-medium text-slate-700">
+            Consultation duration
+            <select
+              className={inputClassName}
+              value={duration}
+              onChange={(event) => setDuration(Number(event.target.value))}
+            >
+              {durations.map((value) => (
+                <option key={value} value={value}>
+                  {value} minutes
+                </option>
+              ))}
             </select>
           </label>
           <div className="flex items-center justify-between gap-4 rounded-2xl bg-teal-50 p-4 md:col-span-2 lg:col-span-4">
-            <p className="text-sm font-medium text-teal-900">Preview: {previewCount} complete consultation time{previewCount === 1 ? "" : "s"} will be generated.</p>
-            <button className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60"
-              disabled={busy !== null || previewCount < 1} type="submit">
+            <p className="text-sm font-medium text-teal-900">
+              Preview: {previewCount} complete consultation time
+              {previewCount === 1 ? "" : "s"} will be generated.
+            </p>
+            <button
+              className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60"
+              disabled={busy !== null || previewCount < 1}
+              type="submit"
+            >
               {busy === "create" ? "Creating..." : "Create availability"}
             </button>
           </div>
@@ -170,39 +264,97 @@ function DoctorAvailabilityContent() {
       </section>
 
       <section className="mt-10" aria-labelledby="availability-list-heading">
-        <h2 className="text-2xl font-semibold text-slate-950" id="availability-list-heading">Your consultation availability</h2>
-        {loading ? <LoadingPanel label="Loading availability..." /> : visibleWindows.length === 0 ? (
-          <div className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600">You have not created any availability yet.</div>
+        <h2
+          className="text-2xl font-semibold text-slate-950"
+          id="availability-list-heading"
+        >
+          Your consultation availability
+        </h2>
+        {loading ? (
+          <LoadingPanel label="Loading availability..." />
+        ) : visibleWindows.length === 0 ? (
+          <div className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600">
+            You have not created any availability yet.
+          </div>
         ) : (
           <div className="mt-5 space-y-5">
             {visibleWindows.map((availability) => (
-              <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" key={availability.id}>
+              <article
+                className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+                key={availability.id}
+              >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-3">
-                      <h3 className="font-semibold text-slate-950">{formatAppointmentTime(availability.startsAt)}</h3>
-                      <span className={`rounded-full px-3 py-1 text-xs font-bold ${availability.active ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-600"}`}>{availability.active ? "ACTIVE" : "INACTIVE"}</span>
+                      <h3 className="font-semibold text-slate-950">
+                        {formatAppointmentTime(availability.startsAt)}
+                      </h3>
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-bold ${availability.active ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-600"}`}
+                      >
+                        {availability.active ? "ACTIVE" : "INACTIVE"}
+                      </span>
                     </div>
-                    <p className="mt-2 text-sm text-slate-600">Until {formatAppointmentTime(availability.endsAt)} · {availability.slotDurationMinutes}-minute consultations · {availability.timeZone}</p>
+                    <p className="mt-2 text-sm text-slate-600">
+                      Until {formatAppointmentTime(availability.endsAt)} ·{" "}
+                      {availability.slotDurationMinutes}-minute consultations ·{" "}
+                      {availability.timeZone}
+                    </p>
                   </div>
-                  {availability.active && new Date(availability.endsAt).getTime() > now ? (
-                    <button className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60"
-                      disabled={busy !== null} onClick={() => void deactivate(availability.id)}>
-                      {busy === availability.id ? "Deactivating..." : "Deactivate"}
+                  {availability.active &&
+                  new Date(availability.endsAt).getTime() > now ? (
+                    <button
+                      className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60"
+                      disabled={busy !== null}
+                      onClick={() => void deactivate(availability.id)}
+                    >
+                      {busy === availability.id
+                        ? "Deactivating..."
+                        : "Deactivate"}
                     </button>
                   ) : null}
                 </div>
                 <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {availability.slots.map((slot) => (
-                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 p-4" key={slot.id}>
+                    <div
+                      className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 p-4"
+                      key={slot.id}
+                    >
                       <div>
-                        <p className="text-sm font-semibold text-slate-900">{new Date(slot.startsAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}–{new Date(slot.endsAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
-                        <div className="mt-2"><StateBadge status={slot.status} /></div>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {new Date(slot.startsAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                          –
+                          {new Date(slot.endsAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                        <div className="mt-2">
+                          <StateBadge status={slot.status} />
+                        </div>
                       </div>
-                      {availability.active && new Date(slot.startsAt).getTime() > now && (slot.status === "AVAILABLE" || slot.status === "BLOCKED") ? (
-                        <button className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
-                          disabled={busy !== null} onClick={() => void toggleSlot(slot.id, slot.status === "AVAILABLE")}>
-                          {busy === slot.id ? "Updating..." : slot.status === "AVAILABLE" ? "Block" : "Unblock"}
+                      {availability.active &&
+                      new Date(slot.startsAt).getTime() > now &&
+                      (slot.status === "AVAILABLE" ||
+                        slot.status === "BLOCKED") ? (
+                        <button
+                          className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                          disabled={busy !== null}
+                          onClick={() =>
+                            void toggleSlot(
+                              slot.id,
+                              slot.status === "AVAILABLE",
+                            )
+                          }
+                        >
+                          {busy === slot.id
+                            ? "Updating..."
+                            : slot.status === "AVAILABLE"
+                              ? "Block"
+                              : "Unblock"}
                         </button>
                       ) : null}
                     </div>
@@ -218,5 +370,9 @@ function DoctorAvailabilityContent() {
 }
 
 export default function DoctorAvailabilityPage() {
-  return <ProtectedRoute roles={["DOCTOR"]}><DoctorAvailabilityContent /></ProtectedRoute>;
+  return (
+    <ProtectedRoute roles={["DOCTOR"]}>
+      <DoctorAvailabilityContent />
+    </ProtectedRoute>
+  );
 }

@@ -7,7 +7,12 @@ import { ConsultationCancellationPanel } from "@/components/consultation-cancell
 import { ConsultationChat } from "@/components/consultation-chat";
 import { DoctorConsultationPrescriptions } from "@/components/doctor-consultation-prescriptions";
 import { LoadingPanel } from "@/components/loading-panel";
-import { ConsultationStatusBadge, InlineError, PortalHeading, formatAppointmentTime } from "@/components/portal-ui";
+import {
+  ConsultationStatusBadge,
+  InlineError,
+  PortalHeading,
+  formatAppointmentTime,
+} from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useConsultationEvents } from "@/hooks/use-consultation-events";
 import {
@@ -19,14 +24,22 @@ import {
   sendDoctorConsultationMessage,
   startDoctorConsultation,
   updateDoctorClinicalNote,
+  deleteDoctorConsultationMessage,
 } from "@/lib/api";
 import { mergeConsultationMessages } from "@/lib/consultation-messages";
-import type { ClinicalNote, ConsultationDetails, ConsultationEvent, ConsultationMessage } from "@/types/consultations";
+import type {
+  ClinicalNote,
+  ConsultationDetails,
+  ConsultationEvent,
+  ConsultationMessage,
+} from "@/types/consultations";
 
 function DoctorConsultationContent() {
   const { consultationId } = useParams<{ consultationId: string }>();
   const { session } = useAuth();
-  const [consultation, setConsultation] = useState<ConsultationDetails | null>(null);
+  const [consultation, setConsultation] = useState<ConsultationDetails | null>(
+    null,
+  );
   const [messages, setMessages] = useState<ConsultationMessage[]>([]);
   const [clinicalNote, setClinicalNote] = useState<ClinicalNote | null>(null);
   const [noteText, setNoteText] = useState("");
@@ -44,30 +57,56 @@ function DoctorConsultationContent() {
         getDoctorConsultationMessages(session.access_token, consultationId),
       ]);
       setConsultation(details);
-      setMessages((current) => mergeConsultationMessages(current, history.content));
+      setMessages((current) =>
+        mergeConsultationMessages(current, history.content),
+      );
     } catch (reconcileError) {
-      setError(reconcileError instanceof Error ? reconcileError.message : "The consultation could not be refreshed.");
+      setError(
+        reconcileError instanceof Error
+          ? reconcileError.message
+          : "The consultation could not be refreshed.",
+      );
     }
   }, [consultationId, session]);
 
-  const handleEvent = useCallback((event: ConsultationEvent) => {
-    if (event.eventType === "NEW_MESSAGE" && event.message) {
-      setMessages((current) => mergeConsultationMessages(current, [event.message!]));
-    }
-    if (event.eventType === "CONSULTATION_STATUS_CHANGED" && event.status) {
-      setConsultation((current) => current ? {
-        ...current,
-        status: event.status!,
-        chatEnabled: event.status !== "CANCELLED",
-      } : current);
-      void reconcile();
-    }
-    if (event.eventType === "PAYMENT_STATUS_CHANGED") {
-      void reconcile();
-    }
-  }, [reconcile]);
+  const handleEvent = useCallback(
+    (event: ConsultationEvent) => {
+      if (event.eventType === "NEW_MESSAGE" && event.message) {
+        setMessages((current) =>
+          mergeConsultationMessages(current, [event.message!]),
+        );
+      }
+      if (event.eventType === "CONSULTATION_STATUS_CHANGED" && event.status) {
+        setConsultation((current) =>
+          current
+            ? {
+                ...current,
+                status: event.status!,
+                chatEnabled: event.status !== "CANCELLED",
+              }
+            : current,
+        );
+        void reconcile();
+      }
+      if (event.eventType === "PAYMENT_STATUS_CHANGED") {
+        void reconcile();
+      }
+      if (event.eventType === "MESSAGE_DELETED" && event.message) {
+        setMessages((current) =>
+          current.map((msg) =>
+            msg.messageId === event.message!.messageId ? event.message! : msg
+          )
+        );
+      }
+    },
+    [reconcile],
+  );
 
-  const liveStatus = useConsultationEvents(consultationId, handleEvent, reconcile);
+  const liveStatus = useConsultationEvents(
+    consultationId,
+    handleEvent,
+    reconcile,
+  );
 
   useEffect(() => {
     const timer = window.setTimeout(async () => {
@@ -85,7 +124,11 @@ function DoctorConsultationContent() {
         setClinicalNote(note);
         setNoteText(note.noteText);
       } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : "The consultation room could not be loaded.");
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "The consultation room could not be loaded.",
+        );
       } finally {
         setLoading(false);
       }
@@ -109,16 +152,27 @@ function DoctorConsultationContent() {
     }
   }
 
+  async function handleDelete(messageId: string) {
+    if (!session) throw new Error("Your authentication session has expired.");
+    await deleteDoctorConsultationMessage(session.access_token, consultationId, messageId);
+  }
+
   async function start() {
     if (!session) return;
     setBusy("start");
     setError(null);
     setMessage(null);
     try {
-      setConsultation(await startDoctorConsultation(session.access_token, consultationId));
+      setConsultation(
+        await startDoctorConsultation(session.access_token, consultationId),
+      );
       setMessage("The consultation is now in progress.");
     } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : "The consultation could not be started.");
+      setError(
+        actionError instanceof Error
+          ? actionError.message
+          : "The consultation could not be started.",
+      );
     } finally {
       setBusy(null);
     }
@@ -135,16 +189,31 @@ function DoctorConsultationContent() {
     setMessage(null);
     try {
       if (noteText !== (clinicalNote?.noteText ?? "")) {
-        const saved = await updateDoctorClinicalNote(session.access_token, consultationId, noteText);
+        const saved = await updateDoctorClinicalNote(
+          session.access_token,
+          consultationId,
+          noteText,
+        );
         setClinicalNote(saved);
         setNoteText(saved.noteText);
       }
-      const completed = await completeDoctorConsultation(session.access_token, consultationId);
+      const completed = await completeDoctorConsultation(
+        session.access_token,
+        consultationId,
+      );
       setConsultation(completed);
-      setClinicalNote((current) => current ? { ...current, finalized: true } : current);
-      setMessage("The consultation is complete. Messaging remains available for related questions.");
+      setClinicalNote((current) =>
+        current ? { ...current, finalized: true } : current,
+      );
+      setMessage(
+        "The consultation is complete. Messaging remains available for related questions.",
+      );
     } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : "The consultation could not be completed.");
+      setError(
+        actionError instanceof Error
+          ? actionError.message
+          : "The consultation could not be completed.",
+      );
     } finally {
       setBusy(null);
     }
@@ -156,12 +225,20 @@ function DoctorConsultationContent() {
     setError(null);
     setMessage(null);
     try {
-      const saved = await updateDoctorClinicalNote(session.access_token, consultationId, noteText);
+      const saved = await updateDoctorClinicalNote(
+        session.access_token,
+        consultationId,
+        noteText,
+      );
       setClinicalNote(saved);
       setNoteText(saved.noteText);
       setMessage("Private clinical note saved.");
     } catch (noteError) {
-      setError(noteError instanceof Error ? noteError.message : "The clinical note could not be saved.");
+      setError(
+        noteError instanceof Error
+          ? noteError.message
+          : "The clinical note could not be saved.",
+      );
     } finally {
       setBusy(null);
     }
@@ -169,33 +246,59 @@ function DoctorConsultationContent() {
 
   async function confirmPayment(prescriptionId: string) {
     if (!session || !consultation?.paymentSummaries) return;
-    const confirmed = window.confirm("Confirm that you received this consultation fee? This action is recorded in the audit log.");
+    const confirmed = window.confirm(
+      "Confirm that you received this consultation fee? This action is recorded in the audit log.",
+    );
     if (!confirmed) return;
     setBusy("payment-" + prescriptionId);
     setError(null);
     setMessage(null);
     try {
       await confirmPrescriptionPayment(session.access_token, prescriptionId);
-      setMessage("Consultation fee confirmed. The patient can now generate the prescription QR.");
+      setMessage(
+        "Consultation fee confirmed. The patient can now generate the prescription QR.",
+      );
       await reconcile();
     } catch (paymentError) {
-      setError(paymentError instanceof Error ? paymentError.message : "Payment could not be confirmed.");
+      setError(
+        paymentError instanceof Error
+          ? paymentError.message
+          : "Payment could not be confirmed.",
+      );
     } finally {
       setBusy(null);
     }
   }
 
-  if (loading && !consultation) return <LoadingPanel label="Loading the online consultation..." />;
-  const noteReadOnly = consultation?.status === "COMPLETED" || consultation?.status === "CANCELLED";
+  if (loading && !consultation)
+    return <LoadingPanel label="Loading the online consultation..." />;
+  const noteReadOnly =
+    consultation?.status === "COMPLETED" ||
+    consultation?.status === "CANCELLED";
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 lg:px-8 lg:py-14">
-      <PortalHeading eyebrow="Online consultation" title={consultation ? `Patient: ${consultation.patientName}` : "Consultation room"}
-        backHref="/doctor/appointments" backLabel="Back to online consultations"
-        description="Manage this consultation lifecycle, authenticated chat, and your private clinical documentation." />
+      <PortalHeading
+        eyebrow="Online consultation"
+        title={
+          consultation
+            ? `Patient: ${consultation.patientName}`
+            : "Consultation room"
+        }
+        backHref="/doctor/appointments"
+        backLabel="Back to online consultations"
+        description="Manage this consultation lifecycle, authenticated chat, and your private clinical documentation."
+      />
       <div className="mt-7 space-y-3">
         <InlineError message={error} />
-        {message ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900" role="status">{message}</div> : null}
+        {message ? (
+          <div
+            className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900"
+            role="status"
+          >
+            {message}
+          </div>
+        ) : null}
       </div>
 
       {consultation ? (
@@ -203,32 +306,65 @@ function DoctorConsultationContent() {
           <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
             <div className="flex flex-wrap items-start justify-between gap-5">
               <div>
-                <p className="text-sm text-slate-600">Scheduled {formatAppointmentTime(consultation.scheduledStart)}</p>
-                <p className="mt-1 text-sm text-slate-600">{consultation.specializationName} · {consultation.departmentName}</p>
+                <p className="text-sm text-slate-600">
+                  Scheduled {formatAppointmentTime(consultation.scheduledStart)}
+                </p>
+                <p className="mt-1 text-sm text-slate-600">
+                  {consultation.specializationName} ·{" "}
+                  {consultation.departmentName}
+                </p>
               </div>
               <ConsultationStatusBadge status={consultation.status} />
             </div>
             <dl className="mt-6 grid gap-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
-              <Detail label="Reason for consultation" value={consultation.symptoms.reasonForVisit} />
-              <Detail label="Submitted symptoms" value={consultation.symptoms.symptoms} />
-              <Detail label="Symptom duration" value={consultation.symptoms.symptomDuration} />
-              <Detail label="Additional notes" value={consultation.symptoms.additionalNotes} />
+              <Detail
+                label="Reason for consultation"
+                value={consultation.symptoms.reasonForVisit}
+              />
+              <Detail
+                label="Submitted symptoms"
+                value={consultation.symptoms.symptoms}
+              />
+              <Detail
+                label="Symptom duration"
+                value={consultation.symptoms.symptomDuration}
+              />
+              <Detail
+                label="Additional notes"
+                value={consultation.symptoms.additionalNotes}
+              />
             </dl>
             <div className="mt-6 flex flex-wrap gap-3">
               {consultation.status === "SCHEDULED" ? (
-                <button className="rounded-xl bg-teal-700 px-6 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60"
-                  disabled={busy !== null} onClick={() => void start()}>
+                <button
+                  className="rounded-xl bg-teal-700 px-6 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60"
+                  disabled={busy !== null}
+                  onClick={() => void start()}
+                >
                   {busy === "start" ? "Starting..." : "Start Consultation"}
                 </button>
               ) : null}
               {consultation.status === "IN_PROGRESS" ? (
-                <button className="rounded-xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
-                  disabled={busy !== null} onClick={() => void complete()}>
-                  {busy === "complete" ? "Completing..." : "Complete Consultation"}
+                <button
+                  className="rounded-xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+                  disabled={busy !== null}
+                  onClick={() => void complete()}
+                >
+                  {busy === "complete"
+                    ? "Completing..."
+                    : "Complete Consultation"}
                 </button>
               ) : null}
-              {consultation.status === "COMPLETED" ? <p className="text-sm font-semibold text-emerald-700">Consultation completed</p> : null}
-              {consultation.status === "CANCELLED" ? <p className="text-sm font-semibold text-slate-600">Consultation cancelled</p> : null}
+              {consultation.status === "COMPLETED" ? (
+                <p className="text-sm font-semibold text-emerald-700">
+                  Consultation completed
+                </p>
+              ) : null}
+              {consultation.status === "CANCELLED" ? (
+                <p className="text-sm font-semibold text-slate-600">
+                  Consultation cancelled
+                </p>
+              ) : null}
             </div>
           </section>
 
@@ -241,16 +377,33 @@ function DoctorConsultationContent() {
           ) : null}
 
           <div className="mt-8">
-            <ConsultationChat messages={messages} currentSender="DOCTOR"
-              consultationStatus={consultation.status} liveStatus={liveStatus}
-              sending={sending} onSend={send} />
+            <ConsultationChat
+              messages={messages}
+              currentSender="DOCTOR"
+              consultationStatus={consultation.status}
+              liveStatus={liveStatus}
+              sending={sending}
+              onSend={send}
+              onDelete={handleDelete}
+            />
           </div>
 
-          {session ? <DoctorConsultationPrescriptions accessToken={session.access_token} consultationId={consultationId} consultationStatus={consultation.status} /> : null}
+          {session ? (
+            <DoctorConsultationPrescriptions
+              accessToken={session.access_token}
+              consultationId={consultationId}
+              consultationStatus={consultation.status}
+            />
+          ) : null}
 
           {consultation.paymentSummaries.map((summary) => (
-            <div key={summary.prescriptionId} className={`mt-8 overflow-hidden rounded-2xl border shadow-sm ${summary.doctorPaymentStatus === "CONFIRMED" || summary.doctorFeeAmount === 0 ? "border-emerald-200 bg-white" : "border-slate-200 bg-white"}`}>
-              <div className={`border-b px-6 py-4 ${summary.doctorPaymentStatus === "CONFIRMED" || summary.doctorFeeAmount === 0 ? "border-emerald-100 bg-emerald-50" : "border-slate-100 bg-slate-50"}`}>
+            <div
+              key={summary.prescriptionId}
+              className={`mt-8 overflow-hidden rounded-2xl border shadow-sm ${summary.doctorPaymentStatus === "CONFIRMED" || summary.doctorFeeAmount === 0 ? "border-emerald-200 bg-white" : "border-slate-200 bg-white"}`}
+            >
+              <div
+                className={`border-b px-6 py-4 ${summary.doctorPaymentStatus === "CONFIRMED" || summary.doctorFeeAmount === 0 ? "border-emerald-100 bg-emerald-50" : "border-slate-100 bg-slate-50"}`}
+              >
                 <h3 className="font-semibold text-slate-900">
                   Prescription Issued
                 </h3>
@@ -260,12 +413,20 @@ function DoctorConsultationContent() {
                   <div className="space-y-6">
                     <div>
                       <p className="text-sm text-slate-500">Consultation Fee</p>
-                      <p className="mt-1 text-xl font-semibold text-slate-900">{summary.doctorFeeCurrency} {Number(summary.doctorFeeAmount).toFixed(2)}</p>
+                      <p className="mt-1 text-xl font-semibold text-slate-900">
+                        {summary.doctorFeeCurrency}{" "}
+                        {Number(summary.doctorFeeAmount).toFixed(2)}
+                      </p>
                     </div>
 
                     <div>
-                      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${summary.doctorPaymentStatus === "CONFIRMED" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
-                        Status: {summary.doctorPaymentStatus === "CONFIRMED" ? "Payment Confirmed" : "Awaiting Your Confirmation"}
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${summary.doctorPaymentStatus === "CONFIRMED" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}
+                      >
+                        Status:{" "}
+                        {summary.doctorPaymentStatus === "CONFIRMED"
+                          ? "Payment Confirmed"
+                          : "Awaiting Your Confirmation"}
                       </span>
                       <p className="mt-2 text-sm text-slate-600">
                         {summary.doctorPaymentStatus === "CONFIRMED"
@@ -274,40 +435,89 @@ function DoctorConsultationContent() {
                       </p>
                     </div>
 
-                    {summary.doctorPaymentStatus === "AWAITING_CONFIRMATION" && (consultation.status === "IN_PROGRESS" || consultation.status === "COMPLETED") ? (
-                      <button type="button" className="rounded-xl bg-amber-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-950 disabled:opacity-50"
-                        disabled={busy !== null} onClick={() => void confirmPayment(summary.prescriptionId)}>
-                        {busy === "payment-" + summary.prescriptionId ? "Confirming…" : "Confirm Payment Received"}
+                    {summary.doctorPaymentStatus === "AWAITING_CONFIRMATION" &&
+                    (consultation.status === "IN_PROGRESS" ||
+                      consultation.status === "COMPLETED") ? (
+                      <button
+                        type="button"
+                        className="rounded-xl bg-amber-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-950 disabled:opacity-50"
+                        disabled={busy !== null}
+                        onClick={() =>
+                          void confirmPayment(summary.prescriptionId)
+                        }
+                      >
+                        {busy === "payment-" + summary.prescriptionId
+                          ? "Confirming…"
+                          : "Confirm Payment Received"}
                       </button>
                     ) : null}
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-600">You have issued a prescription with no consultation fee required.</p>
+                  <p className="text-sm text-slate-600">
+                    You have issued a prescription with no consultation fee
+                    required.
+                  </p>
                 )}
               </div>
             </div>
           ))}
 
-          <section className="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm sm:p-8" aria-labelledby="clinical-note-heading">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-800">Doctor only</p>
-            <h2 className="mt-2 text-2xl font-semibold text-amber-950" id="clinical-note-heading">Private Clinical Note</h2>
-            <p className="mt-2 text-sm text-amber-900">Visible only to you as the assigned doctor. It is never included in patient chat or patient consultation responses.</p>
-            <label className="mt-5 block text-sm font-medium text-amber-950" htmlFor="clinical-note">Clinical documentation</label>
-            <textarea className="mt-2 min-h-48 w-full resize-y rounded-xl border border-amber-300 bg-white px-4 py-3 text-slate-950 outline-none focus:border-amber-600 focus:ring-4 focus:ring-amber-600/10 disabled:bg-amber-100"
-              disabled={noteReadOnly || busy !== null} id="clinical-note" maxLength={20000}
-              onChange={(event) => setNoteText(event.target.value)} value={noteText} />
+          <section
+            className="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm sm:p-8"
+            aria-labelledby="clinical-note-heading"
+          >
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-800">
+              Doctor only
+            </p>
+            <h2
+              className="mt-2 text-2xl font-semibold text-amber-950"
+              id="clinical-note-heading"
+            >
+              Private Clinical Note
+            </h2>
+            <p className="mt-2 text-sm text-amber-900">
+              Visible only to you as the assigned doctor. It is never included
+              in patient chat or patient consultation responses.
+            </p>
+            <label
+              className="mt-5 block text-sm font-medium text-amber-950"
+              htmlFor="clinical-note"
+            >
+              Clinical documentation
+            </label>
+            <textarea
+              className="mt-2 min-h-48 w-full resize-y rounded-xl border border-amber-300 bg-white px-4 py-3 text-slate-950 outline-none focus:border-amber-600 focus:ring-4 focus:ring-amber-600/10 disabled:bg-amber-100"
+              disabled={noteReadOnly || busy !== null}
+              id="clinical-note"
+              maxLength={20000}
+              onChange={(event) => setNoteText(event.target.value)}
+              value={noteText}
+            />
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-              <span className="text-xs text-amber-800">{noteText.length}/20000 · {clinicalNote?.updatedAt ? `Last saved ${new Date(clinicalNote.updatedAt).toLocaleString()}` : "Not saved yet"}</span>
+              <span className="text-xs text-amber-800">
+                {noteText.length}/20000 ·{" "}
+                {clinicalNote?.updatedAt
+                  ? `Last saved ${new Date(clinicalNote.updatedAt).toLocaleString()}`
+                  : "Not saved yet"}
+              </span>
               {!noteReadOnly ? (
-                <button className="rounded-xl bg-amber-800 px-6 py-3 text-sm font-semibold text-white hover:bg-amber-900 disabled:opacity-60"
-                  disabled={busy !== null} onClick={() => void saveNote()}>
+                <button
+                  className="rounded-xl bg-amber-800 px-6 py-3 text-sm font-semibold text-white hover:bg-amber-900 disabled:opacity-60"
+                  disabled={busy !== null}
+                  onClick={() => void saveNote()}
+                >
                   {busy === "note" ? "Saving..." : "Save Note"}
                 </button>
-              ) : <span className="text-sm font-semibold text-amber-900">Clinical note is read-only.</span>}
+              ) : (
+                <span className="text-sm font-semibold text-amber-900">
+                  Clinical note is read-only.
+                </span>
+              )}
             </div>
             {consultation.status === "IN_PROGRESS" ? (
               <p className="mt-5 rounded-2xl bg-white/70 p-4 text-sm text-amber-950">
-                Completing this consultation will finalize the current clinical note. The chat will remain available.
+                Completing this consultation will finalize the current clinical
+                note. The chat will remain available.
               </p>
             ) : null}
           </section>
@@ -318,9 +528,20 @@ function DoctorConsultationContent() {
 }
 
 function Detail({ label, value }: { label: string; value: string | null }) {
-  return <div><dt className="font-medium text-slate-500">{label}</dt><dd className="mt-1 whitespace-pre-wrap text-slate-950">{value || "Not provided"}</dd></div>;
+  return (
+    <div>
+      <dt className="font-medium text-slate-500">{label}</dt>
+      <dd className="mt-1 whitespace-pre-wrap text-slate-950">
+        {value || "Not provided"}
+      </dd>
+    </div>
+  );
 }
 
 export default function DoctorConsultationPage() {
-  return <ProtectedRoute roles={["DOCTOR"]}><DoctorConsultationContent /></ProtectedRoute>;
+  return (
+    <ProtectedRoute roles={["DOCTOR"]}>
+      <DoctorConsultationContent />
+    </ProtectedRoute>
+  );
 }

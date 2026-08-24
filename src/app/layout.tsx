@@ -7,7 +7,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "MediSync | Connected care, built around people",
-  description: "A secure foundation for digital healthcare and remote patient management.",
+  description:
+    "A secure foundation for digital healthcare and remote patient management.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -15,9 +16,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" className={GeistSans.variable}>
       <body className="bg-slate-50 font-sans text-slate-950 antialiased selection:bg-teal-100 selection:text-teal-900">
         <AuthProvider>
-          <AppShell>
-            {children}
-          </AppShell>
+          <AppShell>{children}</AppShell>
         </AuthProvider>
       </body>
     </html>

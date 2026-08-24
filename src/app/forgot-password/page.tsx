@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { AuthCard, FormAlert, inputClassName, primaryButtonClassName } from "@/components/auth-card";
+import {
+  AuthCard,
+  FormAlert,
+  inputClassName,
+  primaryButtonClassName,
+} from "@/components/auth-card";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 export default function ForgotPasswordPage() {
@@ -15,29 +20,61 @@ export default function ForgotPasswordPage() {
     setBusy(true);
     setMessage(null);
     try {
-      const { error } = await getSupabaseBrowserClient().auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
-      });
+      const { error } =
+        await getSupabaseBrowserClient().auth.resetPasswordForEmail(
+          email.trim(),
+          {
+            redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
+          },
+        );
       if (error) throw error;
       setIsError(false);
-      setMessage("If an account exists for that address, Supabase will send password reset instructions.");
+      setMessage(
+        "If an account exists for that address, Supabase will send password reset instructions.",
+      );
     } catch (resetError) {
       setIsError(true);
-      setMessage(resetError instanceof Error ? resetError.message : "The reset request failed.");
+      setMessage(
+        resetError instanceof Error
+          ? resetError.message
+          : "The reset request failed.",
+      );
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <AuthCard eyebrow="Account recovery" title="Reset your password" description="We will send a secure recovery link to your email address." footer={{ text: "Remembered it?", label: "Return to sign in", href: "/login" }}>
+    <AuthCard
+      eyebrow="Account recovery"
+      title="Reset your password"
+      description="We will send a secure recovery link to your email address."
+      footer={{
+        text: "Remembered it?",
+        label: "Return to sign in",
+        href: "/login",
+      }}
+    >
       {message ? <FormAlert message={message} success={!isError} /> : null}
       <form className="space-y-5" onSubmit={handleSubmit}>
         <label className="block text-sm font-medium text-slate-700">
           Email address
-          <input className={inputClassName} type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+          <input
+            className={inputClassName}
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
         </label>
-        <button className={primaryButtonClassName} disabled={busy} type="submit">{busy ? "Sending link…" : "Send reset link"}</button>
+        <button
+          className={primaryButtonClassName}
+          disabled={busy}
+          type="submit"
+        >
+          {busy ? "Sending link…" : "Send reset link"}
+        </button>
       </form>
     </AuthCard>
   );

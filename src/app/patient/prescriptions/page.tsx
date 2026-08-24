@@ -33,7 +33,11 @@ export default function PatientPrescriptionsPage() {
       const page = await getPatientPrescriptions(session.access_token, 0, 50);
       setItems(page.content);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Prescriptions could not be loaded.");
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Prescriptions could not be loaded.",
+      );
     } finally {
       setLoading(false);
     }
@@ -44,11 +48,16 @@ export default function PatientPrescriptionsPage() {
     return () => window.clearTimeout(timer);
   }, [load]);
 
-  const filteredItems = items.filter(item => {
+  const filteredItems = items.filter((item) => {
     if (filter === "ALL") return true;
     if (filter === "CANCELLED") return item.status === "CANCELLED";
     if (filter === "DISPENSED") return item.dispensingStatus === "DISPENSED";
-    if (filter === "ACTIVE") return item.status === "ISSUED" && item.dispensingStatus === "NOT_DISPENSED" && !item.expired;
+    if (filter === "ACTIVE")
+      return (
+        item.status === "ISSUED" &&
+        item.dispensingStatus === "NOT_DISPENSED" &&
+        !item.expired
+      );
     return true;
   });
 
@@ -63,14 +72,18 @@ export default function PatientPrescriptionsPage() {
   return (
     <ProtectedRoute roles={["PATIENT"]}>
       <div>
-        <PortalHeading 
-          eyebrow="Patient Care" 
-          title="Prescriptions" 
-          description="View prescriptions issued through your online consultations." 
-          backHref="/patient/dashboard" 
+        <PortalHeading
+          eyebrow="Patient Care"
+          title="Prescriptions"
+          description="View prescriptions issued through your online consultations."
+          backHref="/patient/dashboard"
         />
-        
-        {error && <Alert tone="error" className="mb-6">{error}</Alert>}
+
+        {error && (
+          <Alert tone="error" className="mb-6">
+            {error}
+          </Alert>
+        )}
 
         <div className="mb-8 border-b border-slate-200 overflow-x-auto hide-scrollbar">
           <nav className="-mb-px flex gap-6 min-w-max" aria-label="Tabs">
@@ -78,8 +91,8 @@ export default function PatientPrescriptionsPage() {
               { id: "ALL", label: "All" },
               { id: "ACTIVE", label: "Active" },
               { id: "DISPENSED", label: "Dispensed" },
-              { id: "CANCELLED", label: "Cancelled" }
-            ].map(tab => (
+              { id: "CANCELLED", label: "Cancelled" },
+            ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setFilter(tab.id as FilterType)}
@@ -97,26 +110,51 @@ export default function PatientPrescriptionsPage() {
         {filteredItems.length === 0 ? (
           <EmptyState
             icon={FileText}
-            title={filter === "ALL" ? "No prescriptions yet" : `No ${filter.toLowerCase()} prescriptions`}
-            description={filter === "ALL" ? "Prescriptions issued during your consultations will appear here." : `You do not have any prescriptions matching this filter.`}
+            title={
+              filter === "ALL"
+                ? "No prescriptions yet"
+                : `No ${filter.toLowerCase()} prescriptions`
+            }
+            description={
+              filter === "ALL"
+                ? "Prescriptions issued during your consultations will appear here."
+                : `You do not have any prescriptions matching this filter.`
+            }
           />
         ) : (
           <div className="grid gap-6 sm:grid-cols-2">
             {filteredItems.map((item) => (
-              <SectionCard key={item.id} className="flex flex-col h-full hover:border-teal-300 transition-colors">
+              <SectionCard
+                key={item.id}
+                className="flex flex-col h-full hover:border-teal-300 transition-colors"
+              >
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div>
-                    <h2 className="text-lg font-semibold text-slate-950">{formatDoctorName(item.doctorName)}</h2>
-                    <p className="text-sm text-slate-600">{formatAppointmentTime(item.issuedAt)}</p>
+                    <h2 className="text-lg font-semibold text-slate-950">
+                      {formatDoctorName(item.doctorName)}
+                    </h2>
+                    <p className="text-sm text-slate-600">
+                      {formatAppointmentTime(item.issuedAt)}
+                    </p>
                   </div>
-                  <StatusBadge tone={
-                    item.status === "CANCELLED" ? "error" :
-                    item.dispensingStatus === "DISPENSED" ? "neutral" :
-                    item.expired ? "warning" : "success"
-                  }>
-                    {item.status === "CANCELLED" ? "Cancelled" :
-                     item.dispensingStatus === "DISPENSED" ? "Dispensed" :
-                     item.expired ? "Expired" : "Issued"}
+                  <StatusBadge
+                    tone={
+                      item.status === "CANCELLED"
+                        ? "error"
+                        : item.dispensingStatus === "DISPENSED"
+                          ? "neutral"
+                          : item.expired
+                            ? "warning"
+                            : "success"
+                    }
+                  >
+                    {item.status === "CANCELLED"
+                      ? "Cancelled"
+                      : item.dispensingStatus === "DISPENSED"
+                        ? "Dispensed"
+                        : item.expired
+                          ? "Expired"
+                          : "Issued"}
                   </StatusBadge>
                 </div>
 
@@ -124,27 +162,44 @@ export default function PatientPrescriptionsPage() {
                   {item.status === "CANCELLED" ? (
                     <div className="flex items-center gap-2 text-rose-700 bg-rose-50 p-3 rounded-lg">
                       <Ban className="size-4 shrink-0" />
-                      <span className="font-medium">Prescription Cancelled</span>
+                      <span className="font-medium">
+                        Prescription Cancelled
+                      </span>
                     </div>
                   ) : (
                     <>
                       <div className="text-slate-700 font-medium bg-slate-50 p-3 rounded-lg flex items-center justify-between">
-                        <span>{item.medicineCount} medicine{item.medicineCount === 1 ? "" : "s"}</span>
-                        <span className="text-slate-500 font-normal">Valid until {formatAppointmentTime(item.validUntil)}</span>
+                        <span>
+                          {item.medicineCount} medicine
+                          {item.medicineCount === 1 ? "" : "s"}
+                        </span>
+                        <span className="text-slate-500 font-normal">
+                          Valid until {formatAppointmentTime(item.validUntil)}
+                        </span>
                       </div>
-                      
+
                       {item.dispensingStatus === "DISPENSED" ? (
                         <div className="flex items-start gap-2 text-emerald-700">
                           <CheckCircle2 className="size-4 shrink-0 mt-0.5" />
                           <div>
-                            <p className="font-medium">Dispensed {formatAppointmentTime(item.dispensedAt!)}</p>
-                            {item.dispensingPharmacy && <p className="text-xs mt-0.5 opacity-80">{item.dispensingPharmacy}</p>}
+                            <p className="font-medium">
+                              Dispensed{" "}
+                              {formatAppointmentTime(item.dispensedAt!)}
+                            </p>
+                            {item.dispensingPharmacy && (
+                              <p className="text-xs mt-0.5 opacity-80">
+                                {item.dispensingPharmacy}
+                              </p>
+                            )}
                           </div>
                         </div>
-                      ) : !item.expired && item.doctorFeeStatus === "AWAITING_CONFIRMATION" ? (
+                      ) : !item.expired &&
+                        item.doctorFeeStatus === "AWAITING_CONFIRMATION" ? (
                         <div className="flex items-center gap-2 text-amber-700">
                           <AlertCircle className="size-4 shrink-0" />
-                          <span className="font-medium">QR pending payment</span>
+                          <span className="font-medium">
+                            QR pending payment
+                          </span>
                         </div>
                       ) : !item.expired ? (
                         <div className="flex items-center gap-2 text-teal-700">

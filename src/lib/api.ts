@@ -104,21 +104,25 @@ async function apiRequest<T>(
   const abortFromCaller = () => controller.abort();
   init.signal?.addEventListener("abort", abortFromCaller, { once: true });
   try {
-    const isFormData = typeof FormData !== "undefined" && init.body instanceof FormData;
+    const isFormData =
+      typeof FormData !== "undefined" && init.body instanceof FormData;
     const response = await fetch(`${apiBaseUrl}${path}`, {
       ...init,
       signal: controller.signal,
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${latestAccessToken || accessToken}`,
-        ...(init.body && !isFormData ? { "Content-Type": "application/json" } : {}),
+        ...(init.body && !isFormData
+          ? { "Content-Type": "application/json" }
+          : {}),
         ...init.headers,
       },
       cache: "no-store",
     });
 
     if (response.status === 401 && authenticationRetry) {
-      const { data, error } = await getSupabaseBrowserClient().auth.refreshSession();
+      const { data, error } =
+        await getSupabaseBrowserClient().auth.refreshSession();
       if (!error && data.session?.access_token) {
         setLatestApiAccessToken(data.session.access_token);
         return apiRequest<T>(path, data.session.access_token, init, false);
@@ -153,7 +157,10 @@ async function apiRequest<T>(
 export const getMyProfile = (accessToken: string) =>
   apiRequest<MediSyncProfile>("/api/users/me", accessToken);
 
-export function updatePatientProfile(accessToken: string, data: { firstName: string; lastName: string; phone?: string | null }) {
+export function updatePatientProfile(
+  accessToken: string,
+  data: { firstName: string; lastName: string; phone?: string | null },
+) {
   return apiRequest<MediSyncProfile>("/api/users/me", accessToken, {
     method: "PATCH",
     body: JSON.stringify(data),
@@ -166,14 +173,20 @@ export const getMyAccountStatus = (accessToken: string) =>
 export const uploadMyProfileImage = (accessToken: string, file: File) => {
   const form = new FormData();
   form.append("file", file);
-  return apiRequest<MediSyncProfile>("/api/users/me/profile-image", accessToken, {
-    method: "POST",
-    body: form,
-  });
+  return apiRequest<MediSyncProfile>(
+    "/api/users/me/profile-image",
+    accessToken,
+    {
+      method: "POST",
+      body: form,
+    },
+  );
 };
 
 export const removeMyProfileImage = (accessToken: string) =>
-  apiRequest<MediSyncProfile>("/api/users/me/profile-image", accessToken, { method: "DELETE" });
+  apiRequest<MediSyncProfile>("/api/users/me/profile-image", accessToken, {
+    method: "DELETE",
+  });
 
 export const completeOnboarding = (
   accessToken: string,
@@ -187,7 +200,10 @@ export const completeOnboarding = (
 export const getDoctorProfile = (accessToken: string) =>
   apiRequest<DoctorProfessionalProfile>("/api/doctor/profile", accessToken);
 
-export const updateDoctorProfile = (accessToken: string, input: DoctorProfileInput) =>
+export const updateDoctorProfile = (
+  accessToken: string,
+  input: DoctorProfileInput,
+) =>
   apiRequest<DoctorProfessionalProfile>("/api/doctor/profile", accessToken, {
     method: "PUT",
     body: JSON.stringify(input),
@@ -203,14 +219,20 @@ export const submitDoctorVerification = (accessToken: string) =>
 export const getReferenceHospitals = (accessToken: string) =>
   apiRequest<HospitalReference[]>("/api/reference/hospitals", accessToken);
 
-export const getReferenceDepartments = (accessToken: string, hospitalId: string) =>
+export const getReferenceDepartments = (
+  accessToken: string,
+  hospitalId: string,
+) =>
   apiRequest<DepartmentReference[]>(
     `/api/reference/hospitals/${hospitalId}/departments`,
     accessToken,
   );
 
 export const getReferenceSpecializations = (accessToken: string) =>
-  apiRequest<SpecializationReference[]>("/api/reference/specializations", accessToken);
+  apiRequest<SpecializationReference[]>(
+    "/api/reference/specializations",
+    accessToken,
+  );
 
 export const getAdminHospitals = (accessToken: string) =>
   apiRequest<AdminHospital[]>("/api/admin/hospitals", accessToken);
@@ -218,18 +240,24 @@ export const getAdminHospitals = (accessToken: string) =>
 export const createAdminHospital = (
   accessToken: string,
   input: Omit<AdminHospital, "id" | "createdAt" | "updatedAt" | "doctorCount">,
-) => apiRequest<AdminHospital>("/api/admin/hospitals", accessToken, {
-  method: "POST",
-  body: JSON.stringify(input),
-});
+) =>
+  apiRequest<AdminHospital>("/api/admin/hospitals", accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 
 export const updateAdminHospital = (
   accessToken: string,
   hospital: Omit<AdminHospital, "createdAt" | "updatedAt" | "doctorCount">,
-) => apiRequest<AdminHospital>(`/api/admin/hospitals/${hospital.id}`, accessToken, {
-  method: "PUT",
-  body: JSON.stringify(hospital),
-});
+) =>
+  apiRequest<AdminHospital>(
+    `/api/admin/hospitals/${hospital.id}`,
+    accessToken,
+    {
+      method: "PUT",
+      body: JSON.stringify(hospital),
+    },
+  );
 
 export const getAdminDepartments = (accessToken: string) =>
   apiRequest<AdminDepartment[]>("/api/admin/departments", accessToken);
@@ -237,18 +265,24 @@ export const getAdminDepartments = (accessToken: string) =>
 export const createAdminDepartment = (
   accessToken: string,
   input: Pick<AdminDepartment, "hospitalId" | "name" | "active">,
-) => apiRequest<AdminDepartment>("/api/admin/departments", accessToken, {
-  method: "POST",
-  body: JSON.stringify(input),
-});
+) =>
+  apiRequest<AdminDepartment>("/api/admin/departments", accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 
 export const updateAdminDepartment = (
   accessToken: string,
   department: Pick<AdminDepartment, "id" | "hospitalId" | "name" | "active">,
-) => apiRequest<AdminDepartment>(`/api/admin/departments/${department.id}`, accessToken, {
-  method: "PUT",
-  body: JSON.stringify(department),
-});
+) =>
+  apiRequest<AdminDepartment>(
+    `/api/admin/departments/${department.id}`,
+    accessToken,
+    {
+      method: "PUT",
+      body: JSON.stringify(department),
+    },
+  );
 
 export const getAdminSpecializations = (accessToken: string) =>
   apiRequest<AdminSpecialization[]>("/api/admin/specializations", accessToken);
@@ -256,44 +290,69 @@ export const getAdminSpecializations = (accessToken: string) =>
 export const createAdminSpecialization = (
   accessToken: string,
   input: Pick<AdminSpecialization, "name" | "description" | "active">,
-) => apiRequest<AdminSpecialization>("/api/admin/specializations", accessToken, {
-  method: "POST",
-  body: JSON.stringify(input),
-});
+) =>
+  apiRequest<AdminSpecialization>("/api/admin/specializations", accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 
 export const updateAdminSpecialization = (
   accessToken: string,
-  specialization: Pick<AdminSpecialization, "id" | "name" | "description" | "active">,
-) => apiRequest<AdminSpecialization>(
-  `/api/admin/specializations/${specialization.id}`,
-  accessToken,
-  { method: "PUT", body: JSON.stringify(specialization) },
-);
+  specialization: Pick<
+    AdminSpecialization,
+    "id" | "name" | "description" | "active"
+  >,
+) =>
+  apiRequest<AdminSpecialization>(
+    `/api/admin/specializations/${specialization.id}`,
+    accessToken,
+    { method: "PUT", body: JSON.stringify(specialization) },
+  );
 
 export const getPendingDoctors = (accessToken: string) =>
   apiRequest<AdminDoctorReview[]>("/api/admin/doctors/pending", accessToken);
 
 export const verifyDoctor = (accessToken: string, doctorId: string) =>
-  apiRequest<AdminDoctorReview>(`/api/admin/doctors/${doctorId}/verify`, accessToken, {
-    method: "POST",
-  });
+  apiRequest<AdminDoctorReview>(
+    `/api/admin/doctors/${doctorId}/verify`,
+    accessToken,
+    {
+      method: "POST",
+    },
+  );
 
-export const rejectDoctor = (accessToken: string, doctorId: string, reason: string) =>
-  apiRequest<AdminDoctorReview>(`/api/admin/doctors/${doctorId}/reject`, accessToken, {
-    method: "POST",
-    body: JSON.stringify({ reason }),
-  });
+export const rejectDoctor = (
+  accessToken: string,
+  doctorId: string,
+  reason: string,
+) =>
+  apiRequest<AdminDoctorReview>(
+    `/api/admin/doctors/${doctorId}/reject`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    },
+  );
 
 export const getPharmacistProfessionalProfile = (accessToken: string) =>
-  apiRequest<PharmacistProfessionalProfile>("/api/pharmacist/professional-profile", accessToken);
+  apiRequest<PharmacistProfessionalProfile>(
+    "/api/pharmacist/professional-profile",
+    accessToken,
+  );
 
 export const updatePharmacistProfessionalProfile = (
   accessToken: string,
   input: PharmacistProfileInput,
-) => apiRequest<PharmacistProfessionalProfile>("/api/pharmacist/professional-profile", accessToken, {
-  method: "PUT",
-  body: JSON.stringify(input),
-});
+) =>
+  apiRequest<PharmacistProfessionalProfile>(
+    "/api/pharmacist/professional-profile",
+    accessToken,
+    {
+      method: "PUT",
+      body: JSON.stringify(input),
+    },
+  );
 
 export const submitPharmacistVerification = (accessToken: string) =>
   apiRequest<PharmacistProfessionalProfile>(
@@ -303,34 +362,63 @@ export const submitPharmacistVerification = (accessToken: string) =>
   );
 
 export const getPendingPharmacists = (accessToken: string) =>
-  apiRequest<AdminPharmacistReview[]>("/api/admin/pharmacists/pending", accessToken);
+  apiRequest<AdminPharmacistReview[]>(
+    "/api/admin/pharmacists/pending",
+    accessToken,
+  );
 
 export const verifyPharmacist = (accessToken: string, pharmacistId: string) =>
-  apiRequest<AdminPharmacistReview>(`/api/admin/pharmacists/${pharmacistId}/verify`, accessToken, {
-    method: "POST",
-  });
+  apiRequest<AdminPharmacistReview>(
+    `/api/admin/pharmacists/${pharmacistId}/verify`,
+    accessToken,
+    {
+      method: "POST",
+    },
+  );
 
-export const rejectPharmacist = (accessToken: string, pharmacistId: string, reason: string) =>
-  apiRequest<AdminPharmacistReview>(`/api/admin/pharmacists/${pharmacistId}/reject`, accessToken, {
-    method: "POST",
-    body: JSON.stringify({ reason }),
-  });
+export const rejectPharmacist = (
+  accessToken: string,
+  pharmacistId: string,
+  reason: string,
+) =>
+  apiRequest<AdminPharmacistReview>(
+    `/api/admin/pharmacists/${pharmacistId}/reject`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    },
+  );
 
 export const getDoctorAvailability = (accessToken: string) =>
   apiRequest<AvailabilityWindow[]>("/api/doctor/availability", accessToken);
 
-export const createDoctorAvailability = (accessToken: string, input: CreateAvailabilityInput) =>
+export const createDoctorAvailability = (
+  accessToken: string,
+  input: CreateAvailabilityInput,
+) =>
   apiRequest<AvailabilityWindow>("/api/doctor/availability", accessToken, {
     method: "POST",
     body: JSON.stringify(input),
   });
 
-export const deactivateDoctorAvailability = (accessToken: string, windowId: string) =>
-  apiRequest<AvailabilityWindow>(`/api/doctor/availability/${windowId}/deactivate`, accessToken, {
-    method: "PATCH",
-  });
+export const deactivateDoctorAvailability = (
+  accessToken: string,
+  windowId: string,
+) =>
+  apiRequest<AvailabilityWindow>(
+    `/api/doctor/availability/${windowId}/deactivate`,
+    accessToken,
+    {
+      method: "PATCH",
+    },
+  );
 
-export const setDoctorSlotBlocked = (accessToken: string, slotId: string, blocked: boolean) =>
+export const setDoctorSlotBlocked = (
+  accessToken: string,
+  slotId: string,
+  blocked: boolean,
+) =>
   apiRequest<AppointmentSlot>(
     `/api/doctor/availability/slots/${slotId}/${blocked ? "block" : "unblock"}`,
     accessToken,
@@ -346,15 +434,22 @@ export interface DoctorSearchFilters {
   size?: number;
 }
 
-export const searchPatientDoctors = (accessToken: string, filters: DoctorSearchFilters) => {
+export const searchPatientDoctors = (
+  accessToken: string,
+  filters: DoctorSearchFilters,
+) => {
   const query = new URLSearchParams();
   if (filters.q) query.set("q", filters.q);
   if (filters.hospitalId) query.set("hospitalId", filters.hospitalId);
   if (filters.departmentId) query.set("departmentId", filters.departmentId);
-  if (filters.specializationId) query.set("specializationId", filters.specializationId);
+  if (filters.specializationId)
+    query.set("specializationId", filters.specializationId);
   query.set("page", String(filters.page ?? 0));
   query.set("size", String(filters.size ?? 10));
-  return apiRequest<PageResponse<DoctorSummary>>(`/api/patient/doctors?${query}`, accessToken);
+  return apiRequest<PageResponse<DoctorSummary>>(
+    `/api/patient/doctors?${query}`,
+    accessToken,
+  );
 };
 
 export const getPatientDoctor = (accessToken: string, doctorId: string) =>
@@ -365,28 +460,44 @@ export const getPatientDoctorSlots = (
   doctorId: string,
   from: string,
   to: string,
-) => apiRequest<AppointmentSlot[]>(
-  `/api/patient/doctors/${doctorId}/slots?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
-  accessToken,
-);
+) =>
+  apiRequest<AppointmentSlot[]>(
+    `/api/patient/doctors/${doctorId}/slots?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+    accessToken,
+  );
 
-export const createPatientAppointment = (accessToken: string, input: CreateAppointmentInput) =>
+export const createPatientAppointment = (
+  accessToken: string,
+  input: CreateAppointmentInput,
+) =>
   apiRequest<Appointment>("/api/patient/appointments", accessToken, {
     method: "POST",
     body: JSON.stringify(input),
   });
 
-export const getPatientAppointments = (accessToken: string, page = 0, size = 50) =>
+export const getPatientAppointments = (
+  accessToken: string,
+  page = 0,
+  size = 50,
+) =>
   apiRequest<PageResponse<Appointment>>(
     `/api/patient/appointments?page=${page}&size=${size}`,
     accessToken,
   );
 
-export const cancelPatientAppointment = (accessToken: string, appointmentId: string, reason: string) =>
-  apiRequest<Appointment>(`/api/patient/appointments/${appointmentId}/cancel`, accessToken, {
-    method: "POST",
-    body: JSON.stringify({ reason: reason || null }),
-  });
+export const cancelPatientAppointment = (
+  accessToken: string,
+  appointmentId: string,
+  reason: string,
+) =>
+  apiRequest<Appointment>(
+    `/api/patient/appointments/${appointmentId}/cancel`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ reason: reason || null }),
+    },
+  );
 
 export const getDoctorAppointments = (
   accessToken: string,
@@ -396,65 +507,119 @@ export const getDoctorAppointments = (
 ) => {
   const query = new URLSearchParams({ page: String(page), size: String(size) });
   if (status) query.set("status", status);
-  return apiRequest<PageResponse<Appointment>>(`/api/doctor/appointments?${query}`, accessToken);
+  return apiRequest<PageResponse<Appointment>>(
+    `/api/doctor/appointments?${query}`,
+    accessToken,
+  );
 };
 
-export const acceptDoctorAppointment = (accessToken: string, appointmentId: string) =>
-  apiRequest<Appointment>(`/api/doctor/appointments/${appointmentId}/accept`, accessToken, {
-    method: "POST",
-  });
+export const acceptDoctorAppointment = (
+  accessToken: string,
+  appointmentId: string,
+) =>
+  apiRequest<Appointment>(
+    `/api/doctor/appointments/${appointmentId}/accept`,
+    accessToken,
+    {
+      method: "POST",
+    },
+  );
 
-export const rejectDoctorAppointment = (accessToken: string, appointmentId: string, reason: string) =>
-  apiRequest<Appointment>(`/api/doctor/appointments/${appointmentId}/reject`, accessToken, {
-    method: "POST",
-    body: JSON.stringify({ reason }),
-  });
+export const rejectDoctorAppointment = (
+  accessToken: string,
+  appointmentId: string,
+  reason: string,
+) =>
+  apiRequest<Appointment>(
+    `/api/doctor/appointments/${appointmentId}/reject`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    },
+  );
 
-export const cancelDoctorAppointment = (accessToken: string, appointmentId: string, reason: string) =>
-  apiRequest<Appointment>(`/api/doctor/appointments/${appointmentId}/cancel`, accessToken, {
-    method: "POST",
-    body: JSON.stringify({ reason }),
-  });
+export const cancelDoctorAppointment = (
+  accessToken: string,
+  appointmentId: string,
+  reason: string,
+) =>
+  apiRequest<Appointment>(
+    `/api/doctor/appointments/${appointmentId}/cancel`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    },
+  );
 
-export const getPatientConsultation = (accessToken: string, consultationId: string) =>
-  apiRequest<ConsultationDetails>(`/api/patient/consultations/${consultationId}`, accessToken);
+export const getPatientConsultation = (
+  accessToken: string,
+  consultationId: string,
+) =>
+  apiRequest<ConsultationDetails>(
+    `/api/patient/consultations/${consultationId}`,
+    accessToken,
+  );
 
 export const getPatientConsultationMessages = (
   accessToken: string,
   consultationId: string,
   page = 0,
   size = 100,
-) => apiRequest<ConsultationMessagePage>(
-  `/api/patient/consultations/${consultationId}/messages?page=${page}&size=${size}`,
-  accessToken,
-);
+) =>
+  apiRequest<ConsultationMessagePage>(
+    `/api/patient/consultations/${consultationId}/messages?page=${page}&size=${size}`,
+    accessToken,
+  );
 
 export const sendPatientConsultationMessage = (
   accessToken: string,
   consultationId: string,
   content: string,
   images: File[] = [],
-) => sendConsultationMessage("patient", accessToken, consultationId, content, images);
+) =>
+  sendConsultationMessage(
+    "patient",
+    accessToken,
+    consultationId,
+    content,
+    images,
+  );
 
-export const getDoctorConsultation = (accessToken: string, consultationId: string) =>
-  apiRequest<ConsultationDetails>(`/api/doctor/consultations/${consultationId}`, accessToken);
+export const getDoctorConsultation = (
+  accessToken: string,
+  consultationId: string,
+) =>
+  apiRequest<ConsultationDetails>(
+    `/api/doctor/consultations/${consultationId}`,
+    accessToken,
+  );
 
 export const getDoctorConsultationMessages = (
   accessToken: string,
   consultationId: string,
   page = 0,
   size = 100,
-) => apiRequest<ConsultationMessagePage>(
-  `/api/doctor/consultations/${consultationId}/messages?page=${page}&size=${size}`,
-  accessToken,
-);
+) =>
+  apiRequest<ConsultationMessagePage>(
+    `/api/doctor/consultations/${consultationId}/messages?page=${page}&size=${size}`,
+    accessToken,
+  );
 
 export const sendDoctorConsultationMessage = (
   accessToken: string,
   consultationId: string,
   content: string,
   images: File[] = [],
-) => sendConsultationMessage("doctor", accessToken, consultationId, content, images);
+) =>
+  sendConsultationMessage(
+    "doctor",
+    accessToken,
+    consultationId,
+    content,
+    images,
+  );
 
 function sendConsultationMessage(
   role: "patient" | "doctor",
@@ -473,90 +638,223 @@ function sendConsultationMessage(
   const form = new FormData();
   if (content.trim()) form.append("content", content.trim());
   images.forEach((image) => form.append("images", image));
-  return apiRequest<ConsultationMessage>(path, accessToken, { method: "POST", body: form });
+  return apiRequest<ConsultationMessage>(path, accessToken, {
+    method: "POST",
+  });
 }
 
-export const startDoctorConsultation = (accessToken: string, consultationId: string) =>
-  apiRequest<ConsultationDetails>(`/api/doctor/consultations/${consultationId}/start`, accessToken, {
-    method: "POST",
-  });
+export const deletePatientConsultationMessage = (
+  accessToken: string,
+  consultationId: string,
+  messageId: string,
+) =>
+  apiRequest<void>(
+    `/api/patient/consultations/${consultationId}/messages/${messageId}`,
+    accessToken,
+    { method: "DELETE" },
+  );
 
-export const completeDoctorConsultation = (accessToken: string, consultationId: string) =>
-  apiRequest<ConsultationDetails>(`/api/doctor/consultations/${consultationId}/complete`, accessToken, {
-    method: "POST",
-  });
+export const deleteDoctorConsultationMessage = (
+  accessToken: string,
+  consultationId: string,
+  messageId: string,
+) =>
+  apiRequest<void>(
+    `/api/doctor/consultations/${consultationId}/messages/${messageId}`,
+    accessToken,
+    { method: "DELETE" },
+  );
 
-export const getDoctorClinicalNote = (accessToken: string, consultationId: string) =>
-  apiRequest<ClinicalNote>(`/api/doctor/consultations/${consultationId}/clinical-note`, accessToken);
+export const startDoctorConsultation = (
+  accessToken: string,
+  consultationId: string,
+) =>
+  apiRequest<ConsultationDetails>(
+    `/api/doctor/consultations/${consultationId}/start`,
+    accessToken,
+    {
+      method: "POST",
+    },
+  );
+
+export const completeDoctorConsultation = (
+  accessToken: string,
+  consultationId: string,
+) =>
+  apiRequest<ConsultationDetails>(
+    `/api/doctor/consultations/${consultationId}/complete`,
+    accessToken,
+    {
+      method: "POST",
+    },
+  );
+
+export const getDoctorClinicalNote = (
+  accessToken: string,
+  consultationId: string,
+) =>
+  apiRequest<ClinicalNote>(
+    `/api/doctor/consultations/${consultationId}/clinical-note`,
+    accessToken,
+  );
 
 export const updateDoctorClinicalNote = (
   accessToken: string,
   consultationId: string,
   noteText: string,
-) => apiRequest<ClinicalNote>(
-  `/api/doctor/consultations/${consultationId}/clinical-note`,
-  accessToken,
-  { method: "PUT", body: JSON.stringify({ noteText }) },
-);
+) =>
+  apiRequest<ClinicalNote>(
+    `/api/doctor/consultations/${consultationId}/clinical-note`,
+    accessToken,
+    { method: "PUT", body: JSON.stringify({ noteText }) },
+  );
 
-export const getDoctorPrescriptions = (accessToken: string, page = 0, size = 20) =>
-  apiRequest<PageResponse<DoctorPrescription>>(`/api/doctor/prescriptions?page=${page}&size=${size}`, accessToken);
+export const getDoctorPrescriptions = (
+  accessToken: string,
+  page = 0,
+  size = 20,
+) =>
+  apiRequest<PageResponse<DoctorPrescription>>(
+    `/api/doctor/prescriptions?page=${page}&size=${size}`,
+    accessToken,
+  );
 
 export const getDoctorPrescription = (accessToken: string, id: string) =>
-  apiRequest<DoctorPrescription>(`/api/doctor/prescriptions/${id}`, accessToken);
+  apiRequest<DoctorPrescription>(
+    `/api/doctor/prescriptions/${id}`,
+    accessToken,
+  );
 
-export const getConsultationPrescriptions = (accessToken: string, consultationId: string) =>
-  apiRequest<DoctorPrescription[]>(`/api/doctor/consultations/${consultationId}/prescriptions`, accessToken);
+export const getConsultationPrescriptions = (
+  accessToken: string,
+  consultationId: string,
+) =>
+  apiRequest<DoctorPrescription[]>(
+    `/api/doctor/consultations/${consultationId}/prescriptions`,
+    accessToken,
+  );
 
-export const createPrescriptionDraft = (accessToken: string, consultationId: string) =>
-  apiRequest<DoctorPrescription>(`/api/doctor/consultations/${consultationId}/prescriptions`, accessToken, { method: "POST" });
+export const createPrescriptionDraft = (
+  accessToken: string,
+  consultationId: string,
+) =>
+  apiRequest<DoctorPrescription>(
+    `/api/doctor/consultations/${consultationId}/prescriptions`,
+    accessToken,
+    { method: "POST" },
+  );
 
-export const updatePrescriptionDraft = (accessToken: string, id: string, input: PrescriptionDraftInput) =>
-  apiRequest<DoctorPrescription>(`/api/doctor/prescriptions/${id}`, accessToken, { method: "PUT", body: JSON.stringify(input) });
+export const updatePrescriptionDraft = (
+  accessToken: string,
+  id: string,
+  input: PrescriptionDraftInput,
+) =>
+  apiRequest<DoctorPrescription>(
+    `/api/doctor/prescriptions/${id}`,
+    accessToken,
+    { method: "PUT", body: JSON.stringify(input) },
+  );
 
 export const issuePrescription = (accessToken: string, id: string) =>
-  apiRequest<DoctorPrescription>(`/api/doctor/prescriptions/${id}/issue`, accessToken, { method: "POST" });
+  apiRequest<DoctorPrescription>(
+    `/api/doctor/prescriptions/${id}/issue`,
+    accessToken,
+    { method: "POST" },
+  );
 
 export const confirmPrescriptionPayment = (accessToken: string, id: string) =>
-  apiRequest<DoctorPrescription>(`/api/doctor/prescriptions/${id}/confirm-payment`, accessToken, {
-    method: "POST",
-  });
+  apiRequest<DoctorPrescription>(
+    `/api/doctor/prescriptions/${id}/confirm-payment`,
+    accessToken,
+    {
+      method: "POST",
+    },
+  );
 
-export const cancelPrescription = (accessToken: string, id: string, reason: string) =>
-  apiRequest<DoctorPrescription>(`/api/doctor/prescriptions/${id}/cancel`, accessToken, { method: "POST", body: JSON.stringify({ reason }) });
+export const cancelPrescription = (
+  accessToken: string,
+  id: string,
+  reason: string,
+) =>
+  apiRequest<DoctorPrescription>(
+    `/api/doctor/prescriptions/${id}/cancel`,
+    accessToken,
+    { method: "POST", body: JSON.stringify({ reason }) },
+  );
 
 export const discardPrescriptionDraft = (accessToken: string, id: string) =>
-  apiRequest<void>(`/api/doctor/prescriptions/${id}`, accessToken, { method: "DELETE" });
+  apiRequest<void>(`/api/doctor/prescriptions/${id}`, accessToken, {
+    method: "DELETE",
+  });
 
-export const getPatientPrescriptions = (accessToken: string, page = 0, size = 20) =>
-  apiRequest<PageResponse<PatientPrescriptionSummary>>(`/api/patient/prescriptions?page=${page}&size=${size}`, accessToken);
+export const getPatientPrescriptions = (
+  accessToken: string,
+  page = 0,
+  size = 20,
+) =>
+  apiRequest<PageResponse<PatientPrescriptionSummary>>(
+    `/api/patient/prescriptions?page=${page}&size=${size}`,
+    accessToken,
+  );
 
 export const getPatientPrescription = (accessToken: string, id: string) =>
-  apiRequest<PatientPrescriptionDetail>(`/api/patient/prescriptions/${id}`, accessToken);
+  apiRequest<PatientPrescriptionDetail>(
+    `/api/patient/prescriptions/${id}`,
+    accessToken,
+  );
 
-export const generatePatientPrescriptionQr = (accessToken: string, id: string) =>
-  apiRequest<PrescriptionQrResponse>(`/api/patient/prescriptions/${id}/qr`, accessToken, { method: "POST" });
+export const generatePatientPrescriptionQr = (
+  accessToken: string,
+  id: string,
+) =>
+  apiRequest<PrescriptionQrResponse>(
+    `/api/patient/prescriptions/${id}/qr`,
+    accessToken,
+    { method: "POST" },
+  );
 
-export const verifyPharmacistPrescription = (accessToken: string, qrPayload: string) =>
-  apiRequest<PharmacyPrescriptionVerification>("/api/pharmacist/prescriptions/verify", accessToken, {
-    method: "POST",
-    body: JSON.stringify({ qrPayload }),
-  });
+export const verifyPharmacistPrescription = (
+  accessToken: string,
+  qrPayload: string,
+) =>
+  apiRequest<PharmacyPrescriptionVerification>(
+    "/api/pharmacist/prescriptions/verify",
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ qrPayload }),
+    },
+  );
 
 export const dispensePharmacistPrescription = (
   accessToken: string,
   qrPayload: string,
   note: string,
-) => apiRequest<DispensePrescriptionResult>("/api/pharmacist/prescriptions/dispense", accessToken, {
-  method: "POST",
-  body: JSON.stringify({ qrPayload, note: note.trim() || null }),
-});
+) =>
+  apiRequest<DispensePrescriptionResult>(
+    "/api/pharmacist/prescriptions/dispense",
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ qrPayload, note: note.trim() || null }),
+    },
+  );
 
-export const getPharmacistDispensations = (accessToken: string, page = 0, size = 20) =>
-  apiRequest<DispensationHistoryPage>(`/api/pharmacist/dispensations?page=${page}&size=${size}`, accessToken);
+export const getPharmacistDispensations = (
+  accessToken: string,
+  page = 0,
+  size = 20,
+) =>
+  apiRequest<DispensationHistoryPage>(
+    `/api/pharmacist/dispensations?page=${page}&size=${size}`,
+    accessToken,
+  );
 
 export const getPharmacistDispensation = (accessToken: string, id: string) =>
-  apiRequest<DispensationHistoryDetail>(`/api/pharmacist/dispensations/${id}`, accessToken);
+  apiRequest<DispensationHistoryDetail>(
+    `/api/pharmacist/dispensations/${id}`,
+    accessToken,
+  );
 
 export interface AdminUserFilters {
   q?: string;
@@ -572,39 +870,62 @@ export interface AdminUserFilters {
   size?: number;
 }
 
-export const getAdminUsers = (accessToken: string, filters: AdminUserFilters = {}) => {
+export const getAdminUsers = (
+  accessToken: string,
+  filters: AdminUserFilters = {},
+) => {
   const query = new URLSearchParams();
   Object.entries(filters).forEach(([key, value]) => {
     if (value !== undefined && value !== "") query.set(key, String(value));
   });
   query.set("page", String(filters.page ?? 0));
   query.set("size", String(filters.size ?? 20));
-  return apiRequest<PageResponse<AdminUserSummary>>(`/api/admin/users?${query}`, accessToken);
+  return apiRequest<PageResponse<AdminUserSummary>>(
+    `/api/admin/users?${query}`,
+    accessToken,
+  );
 };
 
-export const getAdminDoctors = (accessToken: string, filters: Omit<AdminUserFilters, "role"> = {}) => {
+export const getAdminDoctors = (
+  accessToken: string,
+  filters: Omit<AdminUserFilters, "role"> = {},
+) => {
   const query = new URLSearchParams();
   Object.entries(filters).forEach(([key, value]) => {
-    if (key !== "role" && value !== undefined && value !== "") query.set(key, String(value));
+    if (key !== "role" && value !== undefined && value !== "")
+      query.set(key, String(value));
   });
   query.set("page", String(filters.page ?? 0));
   query.set("size", String(filters.size ?? 20));
-  return apiRequest<PageResponse<AdminUserSummary>>(`/api/admin/doctors?${query}`, accessToken);
+  return apiRequest<PageResponse<AdminUserSummary>>(
+    `/api/admin/doctors?${query}`,
+    accessToken,
+  );
 };
 
 export const getAdminUser = (accessToken: string, userId: string) =>
   apiRequest<AdminUserDetail>(`/api/admin/users/${userId}`, accessToken);
 
-export const banAdminUser = (accessToken: string, userId: string, reason: string) =>
+export const banAdminUser = (
+  accessToken: string,
+  userId: string,
+  reason: string,
+) =>
   apiRequest<AdminUserDetail>(`/api/admin/users/${userId}/ban`, accessToken, {
     method: "POST",
     body: JSON.stringify({ reason }),
   });
 
 export const unbanAdminUser = (accessToken: string, userId: string) =>
-  apiRequest<AdminUserDetail>(`/api/admin/users/${userId}/unban`, accessToken, { method: "POST" });
+  apiRequest<AdminUserDetail>(`/api/admin/users/${userId}/unban`, accessToken, {
+    method: "POST",
+  });
 
-export const deleteAdminUser = (accessToken: string, userId: string, reason: string) =>
+export const deleteAdminUser = (
+  accessToken: string,
+  userId: string,
+  reason: string,
+) =>
   apiRequest<AdminUserDetail>(`/api/admin/users/${userId}`, accessToken, {
     method: "DELETE",
     body: JSON.stringify({ reason }),
@@ -623,25 +944,48 @@ export interface AuditFilters {
   size?: number;
 }
 
-export const getAdminAuditEvents = (accessToken: string, filters: AuditFilters = {}) => {
+export const getAdminAuditEvents = (
+  accessToken: string,
+  filters: AuditFilters = {},
+) => {
   const query = new URLSearchParams();
   Object.entries(filters).forEach(([key, value]) => {
     if (value !== undefined && value !== "") query.set(key, String(value));
   });
   query.set("page", String(filters.page ?? 0));
   query.set("size", String(filters.size ?? 50));
-  return apiRequest<PageResponse<AuditEvent>>(`/api/admin/audit-logs?${query}`, accessToken);
+  return apiRequest<PageResponse<AuditEvent>>(
+    `/api/admin/audit-logs?${query}`,
+    accessToken,
+  );
 };
 
 export const getAdminAnalyticsSummary = (accessToken: string) =>
   apiRequest<AnalyticsSummary>("/api/admin/analytics/summary", accessToken);
 
-export const getAdminAnalyticsTimeseries = (accessToken: string, days: 7 | 30 | 90) =>
-  apiRequest<AnalyticsPoint[]>(`/api/admin/analytics/timeseries?days=${days}`, accessToken);
+export const getAdminAnalyticsTimeseries = (
+  accessToken: string,
+  days: 7 | 30 | 90,
+) =>
+  apiRequest<AnalyticsPoint[]>(
+    `/api/admin/analytics/timeseries?days=${days}`,
+    accessToken,
+  );
 
-export const getAdminAnalyticsActivity = (accessToken: string, days: 7 | 30 | 90) =>
-  apiRequest<ActivityResponse>(`/api/admin/analytics/user-activity?days=${days}`, accessToken);
+export const getAdminAnalyticsActivity = (
+  accessToken: string,
+  days: 7 | 30 | 90,
+) =>
+  apiRequest<ActivityResponse>(
+    `/api/admin/analytics/user-activity?days=${days}`,
+    accessToken,
+  );
 
-export const updateAdminProfile = (accessToken: string, data: { firstName: string; lastName: string; phone?: string }) =>
-  apiRequest<MediSyncProfile>("/api/admin/profile", accessToken, { method: "PATCH", body: JSON.stringify(data) });
-
+export const updateAdminProfile = (
+  accessToken: string,
+  data: { firstName: string; lastName: string; phone?: string },
+) =>
+  apiRequest<MediSyncProfile>("/api/admin/profile", accessToken, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });

@@ -28,13 +28,19 @@ export interface NavigationGroup {
 const patientNavigation: NavigationGroup[] = [
   {
     name: "Overview",
-    items: [{ name: "Dashboard", href: "/patient/dashboard", icon: LayoutDashboard }],
+    items: [
+      { name: "Dashboard", href: "/patient/dashboard", icon: LayoutDashboard },
+    ],
   },
   {
     name: "Care",
     items: [
       { name: "Find a Doctor", href: "/patient/doctors", icon: Search },
-      { name: "Consultations", href: "/patient/appointments", icon: MessageSquare }, // The prompt mentioned patient consultations list is currently at /appointments
+      {
+        name: "Consultations",
+        href: "/patient/appointments",
+        icon: MessageSquare,
+      }, // The prompt mentioned patient consultations list is currently at /appointments
       { name: "Prescriptions", href: "/patient/prescriptions", icon: FileText },
     ],
   },
@@ -47,7 +53,9 @@ const patientNavigation: NavigationGroup[] = [
 const doctorNavigation: NavigationGroup[] = [
   {
     name: "Overview",
-    items: [{ name: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard }],
+    items: [
+      { name: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard },
+    ],
   },
   {
     name: "Care",
@@ -57,18 +65,32 @@ const doctorNavigation: NavigationGroup[] = [
       { name: "Prescriptions", href: "/doctor/prescriptions", icon: FileText },
     ],
   },
+  {
+    name: "Account",
+    items: [{ name: "Profile", href: "/doctor/profile", icon: User }],
+  },
 ];
 
 const pharmacistNavigation: NavigationGroup[] = [
   {
     name: "Overview",
-    items: [{ name: "Dashboard", href: "/pharmacist/dashboard", icon: LayoutDashboard }],
+    items: [
+      {
+        name: "Dashboard",
+        href: "/pharmacist/dashboard",
+        icon: LayoutDashboard,
+      },
+    ],
   },
   {
     name: "Pharmacy",
     items: [
       { name: "Scan Prescription", href: "/pharmacist/scan", icon: ScanLine },
-      { name: "Dispensing History", href: "/pharmacist/dispensing-history", icon: History },
+      {
+        name: "Dispensing History",
+        href: "/pharmacist/dispensing-history",
+        icon: History,
+      },
     ],
   },
   {
@@ -80,7 +102,9 @@ const pharmacistNavigation: NavigationGroup[] = [
 const adminNavigation: NavigationGroup[] = [
   {
     name: "Overview",
-    items: [{ name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard }],
+    items: [
+      { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+    ],
   },
   {
     name: "Management",
@@ -109,7 +133,7 @@ export const navigationByRole: Record<UserRole, NavigationGroup[]> = {
 export function getActiveRoute(pathname: string, role: UserRole) {
   const groups = navigationByRole[role];
   let activeHref = "";
-  
+
   for (const group of groups) {
     for (const item of group.items) {
       if (pathname === item.href || pathname.startsWith(item.href + "/")) {

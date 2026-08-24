@@ -1,5 +1,11 @@
 import type { ReactNode } from "react";
-import { AlertCircle, CheckCircle2, Info, AlertTriangle, type LucideIcon } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Info,
+  AlertTriangle,
+  type LucideIcon,
+} from "lucide-react";
 
 export type AlertTone = "info" | "success" | "warning" | "error" | "neutral";
 

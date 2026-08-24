@@ -2,7 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { AuthCard, FormAlert, inputClassName, primaryButtonClassName } from "@/components/auth-card";
+import {
+  AuthCard,
+  FormAlert,
+  inputClassName,
+  primaryButtonClassName,
+} from "@/components/auth-card";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 export default function RegisterPage() {
@@ -19,8 +24,10 @@ export default function RegisterPage() {
     setErrorMessage(null);
     setSuccessMessage(null);
     if (!email.trim()) return setErrorMessage("Enter a valid email address.");
-    if (password.length < 8) return setErrorMessage("Use a password with at least 8 characters.");
-    if (password !== confirmPassword) return setErrorMessage("The passwords do not match.");
+    if (password.length < 8)
+      return setErrorMessage("Use a password with at least 8 characters.");
+    if (password !== confirmPassword)
+      return setErrorMessage("The passwords do not match.");
 
     setBusy(true);
     try {
@@ -28,14 +35,18 @@ export default function RegisterPage() {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding` },
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
+        },
       });
       if (error) throw error;
       if (data.session) {
         router.replace("/onboarding");
         router.refresh();
       } else {
-        setSuccessMessage("Check your email to confirm your account, then sign in to complete your MediSync profile.");
+        setSuccessMessage(
+          "Check your email to confirm your account, then sign in to complete your MediSync profile.",
+        );
       }
     } catch (registrationError) {
       setErrorMessage(
@@ -60,17 +71,44 @@ export default function RegisterPage() {
       <form className="space-y-5" onSubmit={handleSubmit} noValidate>
         <label className="block text-sm font-medium text-slate-700">
           Email address
-          <input className={inputClassName} type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+          <input
+            className={inputClassName}
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
         </label>
         <label className="block text-sm font-medium text-slate-700">
           Password
-          <input className={inputClassName} type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={8} />
+          <input
+            className={inputClassName}
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+            minLength={8}
+          />
         </label>
         <label className="block text-sm font-medium text-slate-700">
           Confirm password
-          <input className={inputClassName} type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} required minLength={8} />
+          <input
+            className={inputClassName}
+            type="password"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+            required
+            minLength={8}
+          />
         </label>
-        <button className={primaryButtonClassName} disabled={busy || Boolean(successMessage)} type="submit">
+        <button
+          className={primaryButtonClassName}
+          disabled={busy || Boolean(successMessage)}
+          type="submit"
+        >
           {busy ? "Creating account…" : "Create account"}
         </button>
       </form>

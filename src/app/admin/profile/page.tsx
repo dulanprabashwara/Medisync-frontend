@@ -9,15 +9,15 @@ import { AdminNavigation } from "@/components/admin-navigation";
 
 function AdminProfileContent() {
   const { profile } = useAuth();
-  
+
   return (
     <main className="mx-auto max-w-3xl px-6 py-10 lg:px-8 lg:py-14">
       <AdminNavigation />
-      <PortalHeading 
-        eyebrow="Admin Profile" 
+      <PortalHeading
+        eyebrow="Admin Profile"
         title={`${profile?.firstName ?? "Administrator"} Profile`}
         description="Manage your administration account details and profile picture."
-        backHref="/admin/dashboard" 
+        backHref="/admin/dashboard"
       />
       <ProfileImageEditor />
       <AdminProfileEditor />
@@ -26,5 +26,9 @@ function AdminProfileContent() {
 }
 
 export default function AdminProfilePage() {
-  return <ProtectedRoute roles={["ADMIN"]}><AdminProfileContent /></ProtectedRoute>;
+  return (
+    <ProtectedRoute roles={["ADMIN"]}>
+      <AdminProfileContent />
+    </ProtectedRoute>
+  );
 }

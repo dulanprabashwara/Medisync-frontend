@@ -10,12 +10,21 @@ export function ConsultationCancellationPanel({
   viewer: "PATIENT" | "DOCTOR";
 }) {
   const cancelledBy = cancelledByLabel(appointmentStatus, viewer);
-  const reason = cancellationReason?.trim() || "No cancellation reason was provided.";
+  const reason =
+    cancellationReason?.trim() || "No cancellation reason was provided.";
 
   return (
-    <section className="mt-8 rounded-3xl border border-rose-200 bg-rose-50 p-6 shadow-sm sm:p-8" aria-labelledby="consultation-cancelled-heading">
-      <p className="text-xs font-bold uppercase tracking-[0.16em] text-rose-700">Consultation status</p>
-      <h2 className="mt-2 text-2xl font-semibold text-rose-950" id="consultation-cancelled-heading">
+    <section
+      className="mt-8 rounded-3xl border border-rose-200 bg-rose-50 p-6 shadow-sm sm:p-8"
+      aria-labelledby="consultation-cancelled-heading"
+    >
+      <p className="text-xs font-bold uppercase tracking-[0.16em] text-rose-700">
+        Consultation status
+      </p>
+      <h2
+        className="mt-2 text-2xl font-semibold text-rose-950"
+        id="consultation-cancelled-heading"
+      >
         Consultation Cancelled
       </h2>
       <dl className="mt-5 space-y-4 text-sm">
@@ -32,7 +41,10 @@ export function ConsultationCancellationPanel({
   );
 }
 
-function cancelledByLabel(appointmentStatus: AppointmentStatus, viewer: "PATIENT" | "DOCTOR") {
+function cancelledByLabel(
+  appointmentStatus: AppointmentStatus,
+  viewer: "PATIENT" | "DOCTOR",
+) {
   if (appointmentStatus === "CANCELLED_BY_PATIENT") {
     return viewer === "PATIENT" ? "You" : "Patient";
   }

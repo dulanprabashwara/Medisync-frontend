@@ -7,32 +7,45 @@ import { Printer, AlertCircle, CheckCircle2, QrCode } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { PortalHeading, formatAppointmentTime } from "@/components/portal-ui";
-import { PrescriptionItemsView, PrescriptionQr, PrescriptionStatusBadge } from "@/components/prescription-ui";
+import {
+  PrescriptionItemsView,
+  PrescriptionQr,
+  PrescriptionStatusBadge,
+} from "@/components/prescription-ui";
 import { ProtectedRoute } from "@/components/protected-route";
 import { SectionCard } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
-import { generatePatientPrescriptionQr, getPatientPrescription } from "@/lib/api";
+import {
+  generatePatientPrescriptionQr,
+  getPatientPrescription,
+} from "@/lib/api";
 import { formatDoctorName } from "@/lib/formatters";
 import type { PatientPrescriptionDetail } from "@/types/prescriptions";
 
 export default function PatientPrescriptionDetailPage() {
   const { prescriptionId } = useParams<{ prescriptionId: string }>();
   const { session } = useAuth();
-  
+
   const [value, setValue] = useState<PatientPrescriptionDetail | null>(null);
   const [qrPayload, setQrPayload] = useState<string | null>(null);
   const [qrBusy, setQrBusy] = useState(false);
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!session) return;
     try {
-      setValue(await getPatientPrescription(session.access_token, prescriptionId));
+      setValue(
+        await getPatientPrescription(session.access_token, prescriptionId),
+      );
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "The prescription could not be loaded.");
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "The prescription could not be loaded.",
+      );
     } finally {
       setLoading(false);
     }
@@ -48,11 +61,18 @@ export default function PatientPrescriptionDetailPage() {
     setQrBusy(true);
     setError(null);
     try {
-      const generated = await generatePatientPrescriptionQr(session.access_token, prescriptionId);
+      const generated = await generatePatientPrescriptionQr(
+        session.access_token,
+        prescriptionId,
+      );
       setQrPayload(generated.qrPayload);
     } catch (generateError) {
       setQrPayload(null);
-      setError(generateError instanceof Error ? generateError.message : "The QR could not be generated.");
+      setError(
+        generateError instanceof Error
+          ? generateError.message
+          : "The QR could not be generated.",
+      );
       await load();
     } finally {
       setQrBusy(false);
@@ -74,22 +94,26 @@ export default function PatientPrescriptionDetailPage() {
   return (
     <ProtectedRoute roles={["PATIENT"]}>
       <div className="space-y-8 pb-10">
-        <PortalHeading 
-          eyebrow="Patient Care" 
-          title="Prescription Details" 
-          description="Your issued clinical medication instructions." 
-          backHref="/patient/prescriptions" 
+        <PortalHeading
+          eyebrow="Patient Care"
+          title="Prescription Details"
+          description="Your issued clinical medication instructions."
+          backHref="/patient/prescriptions"
           backLabel="Back to prescriptions"
           action={
             !cancelled ? (
-              <Button variant="secondary" onClick={() => window.print()} className="print:hidden">
+              <Button
+                variant="secondary"
+                onClick={() => window.print()}
+                className="print:hidden"
+              >
                 <Printer className="size-4 mr-2" />
                 Print Prescription
               </Button>
             ) : null
           }
         />
-        
+
         {error && <Alert tone="error">{error}</Alert>}
 
         {value && (
@@ -98,33 +122,51 @@ export default function PatientPrescriptionDetailPage() {
               <SectionCard>
                 <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-6">
                   <div>
-                    <h2 className="text-xl font-semibold text-slate-950">{formatDoctorName(value.doctorName)}</h2>
-                    <p className="text-sm font-medium text-teal-700 mt-1">{value.specializationName}</p>
-                    <p className="text-sm text-slate-600">{value.medicalRegistrationNumber}</p>
+                    <h2 className="text-xl font-semibold text-slate-950">
+                      {formatDoctorName(value.doctorName)}
+                    </h2>
+                    <p className="text-sm font-medium text-teal-700 mt-1">
+                      {value.specializationName}
+                    </p>
+                    <p className="text-sm text-slate-600">
+                      {value.medicalRegistrationNumber}
+                    </p>
                   </div>
-                  <PrescriptionStatusBadge status={value.status} expired={value.expired} dispensingStatus={value.dispensingStatus} />
+                  <PrescriptionStatusBadge
+                    status={value.status}
+                    expired={value.expired}
+                    dispensingStatus={value.dispensingStatus}
+                  />
                 </div>
-                
+
                 <dl className="grid gap-4 sm:grid-cols-2 text-sm pt-6 border-t border-slate-100">
                   <div>
                     <dt className="text-slate-500 mb-1">Hospital</dt>
-                    <dd className="font-medium text-slate-900">{value.hospitalName}</dd>
+                    <dd className="font-medium text-slate-900">
+                      {value.hospitalName}
+                    </dd>
                     <dd className="text-slate-600">{value.departmentName}</dd>
                   </div>
                   <div>
                     <dt className="text-slate-500 mb-1">Consultation Date</dt>
-                    <dd className="font-medium text-slate-900">{formatAppointmentTime(value.consultationScheduledStart)}</dd>
+                    <dd className="font-medium text-slate-900">
+                      {formatAppointmentTime(value.consultationScheduledStart)}
+                    </dd>
                   </div>
                   {value.issuedAt && (
                     <div>
                       <dt className="text-slate-500 mb-1">Issued</dt>
-                      <dd className="font-medium text-slate-900">{formatAppointmentTime(value.issuedAt)}</dd>
+                      <dd className="font-medium text-slate-900">
+                        {formatAppointmentTime(value.issuedAt)}
+                      </dd>
                     </div>
                   )}
                   {value.validUntil && (
                     <div>
                       <dt className="text-slate-500 mb-1">Valid Until</dt>
-                      <dd className="font-medium text-slate-900">{formatAppointmentTime(value.validUntil)}</dd>
+                      <dd className="font-medium text-slate-900">
+                        {formatAppointmentTime(value.validUntil)}
+                      </dd>
                     </div>
                   )}
                 </dl>
@@ -132,24 +174,41 @@ export default function PatientPrescriptionDetailPage() {
 
               {dispensed && (
                 <Alert tone="success" icon={CheckCircle2}>
-                  <div className="font-semibold mb-1">Prescription Dispensed</div>
-                  <div>
-                    {value.dispensedAt && `Dispensed ${formatAppointmentTime(value.dispensedAt)}`}
-                    {value.dispensingPharmacy && ` · Pharmacy: ${value.dispensingPharmacy}`}
+                  <div className="font-semibold mb-1">
+                    Prescription Dispensed
                   </div>
-                  <div className="mt-2 text-xs">This prescription has already been dispensed. Another QR cannot be generated.</div>
+                  <div>
+                    {value.dispensedAt &&
+                      `Dispensed ${formatAppointmentTime(value.dispensedAt)}`}
+                    {value.dispensingPharmacy &&
+                      ` · Pharmacy: ${value.dispensingPharmacy}`}
+                  </div>
+                  <div className="mt-2 text-xs">
+                    This prescription has already been dispensed. Another QR
+                    cannot be generated.
+                  </div>
                 </Alert>
               )}
 
               {cancelled && (
                 <Alert tone="error" icon={AlertCircle}>
-                  <div className="font-semibold mb-1">Prescription Cancelled</div>
-                  {value.cancelledAt && <div className="mb-2">Cancelled {formatAppointmentTime(value.cancelledAt)}</div>}
+                  <div className="font-semibold mb-1">
+                    Prescription Cancelled
+                  </div>
+                  {value.cancelledAt && (
+                    <div className="mb-2">
+                      Cancelled {formatAppointmentTime(value.cancelledAt)}
+                    </div>
+                  )}
                   <div className="bg-rose-100/50 p-3 rounded-lg text-rose-900 mb-2">
                     <span className="font-medium block mb-1">Reason:</span>
-                    {value.cancellationReason || "No cancellation reason was provided."}
+                    {value.cancellationReason ||
+                      "No cancellation reason was provided."}
                   </div>
-                  <div className="text-xs">Medicine details and instructions are no longer displayed for a cancelled prescription.</div>
+                  <div className="text-xs">
+                    Medicine details and instructions are no longer displayed
+                    for a cancelled prescription.
+                  </div>
                 </Alert>
               )}
 
@@ -157,10 +216,11 @@ export default function PatientPrescriptionDetailPage() {
                 <>
                   {value.expired && (
                     <Alert tone="warning" icon={AlertCircle}>
-                      This prescription has expired. Contact your doctor if you need further care.
+                      This prescription has expired. Contact your doctor if you
+                      need further care.
                     </Alert>
                   )}
-                  
+
                   <SectionCard title="Medicines">
                     <PrescriptionItemsView items={value.items} />
                   </SectionCard>
@@ -178,20 +238,32 @@ export default function PatientPrescriptionDetailPage() {
 
             <div className="lg:col-span-1 print:hidden">
               {!cancelled && !dispensed && (
-                <SectionCard title="Prescription QR" className={
-                  awaitingPayment ? "border-amber-200" : "border-teal-200 bg-teal-50/30"
-                }>
+                <SectionCard
+                  title="Prescription QR"
+                  className={
+                    awaitingPayment
+                      ? "border-amber-200"
+                      : "border-teal-200 bg-teal-50/30"
+                  }
+                >
                   {awaitingPayment ? (
                     <div className="text-center space-y-5 py-4">
                       <div className="size-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto text-amber-600">
                         <AlertCircle className="size-8" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-amber-900">QR pending payment</p>
-                        <p className="mt-2 text-sm text-amber-700">QR generation will become available after the required payment is confirmed.</p>
+                        <p className="text-sm font-medium text-amber-900">
+                          QR pending payment
+                        </p>
+                        <p className="mt-2 text-sm text-amber-700">
+                          QR generation will become available after the required
+                          payment is confirmed.
+                        </p>
                       </div>
                       <Button asChild variant="secondary" className="w-full">
-                        <Link href={`/patient/consultations/${value.consultationId}`}>
+                        <Link
+                          href={`/patient/consultations/${value.consultationId}`}
+                        >
                           Return to Consultation
                         </Link>
                       </Button>
@@ -199,12 +271,18 @@ export default function PatientPrescriptionDetailPage() {
                   ) : qrPayload ? (
                     <div className="text-center space-y-6 py-2">
                       <p className="text-sm text-slate-600">
-                        A verified MediSync pharmacist can scan this QR. Generating a new QR will invalidate the previous one.
+                        A verified MediSync pharmacist can scan this QR.
+                        Generating a new QR will invalidate the previous one.
                       </p>
                       <div className="flex justify-center">
                         <PrescriptionQr payload={qrPayload} />
                       </div>
-                      <Button variant="secondary" className="w-full" disabled={qrBusy} onClick={() => void generateQr()}>
+                      <Button
+                        variant="secondary"
+                        className="w-full"
+                        disabled={qrBusy}
+                        onClick={() => void generateQr()}
+                      >
                         {qrBusy ? "Generating..." : "Generate New QR"}
                       </Button>
                     </div>
@@ -216,13 +294,20 @@ export default function PatientPrescriptionDetailPage() {
                       <p className="text-sm text-slate-600">
                         Your prescription is ready for pharmacy verification.
                       </p>
-                      <Button className="w-full" disabled={qrBusy} onClick={() => void generateQr()}>
+                      <Button
+                        className="w-full"
+                        disabled={qrBusy}
+                        onClick={() => void generateQr()}
+                      >
                         {qrBusy ? "Generating..." : "Generate QR"}
                       </Button>
                     </div>
                   ) : (
                     <div className="text-center py-4">
-                      <p className="text-sm text-slate-600">QR generation is unavailable because this prescription is expired.</p>
+                      <p className="text-sm text-slate-600">
+                        QR generation is unavailable because this prescription
+                        is expired.
+                      </p>
                     </div>
                   )}
                 </SectionCard>
