@@ -17,7 +17,7 @@ import {
   updatePatientProfile,
 } from "@/lib/api";
 import { SectionCard } from "@/components/ui/card";
-import { Input, Label } from "@/components/ui/forms";
+import { Input, Label, Textarea } from "@/components/ui/forms";
 import type {
   PharmacistProfessionalProfile,
   PharmacistProfileInput,
@@ -299,10 +299,12 @@ function Content() {
           value={form.pharmacyRegistrationNumber}
           onChange={(text) => updateField("pharmacyRegistrationNumber", text)}
         />
-        <label className="block text-sm font-semibold text-slate-700">
-          Pharmacy address <span className="text-rose-600">*</span>
-          <textarea
-            className={`${inputClassName} min-h-28 resize-y`}
+        <div className="space-y-2">
+          <Label>
+            Pharmacy address <span className="text-rose-600">*</span>
+          </Label>
+          <Textarea
+            className="min-h-28 resize-none"
             required
             maxLength={500}
             disabled={!value?.editable}
@@ -311,7 +313,7 @@ function Content() {
               updateField("pharmacyAddress", event.target.value)
             }
           />
-        </label>
+        </div>
         <ProfileField
           label="Qualifications"
           maxLength={500}
