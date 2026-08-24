@@ -255,7 +255,55 @@ function UsersContent() {
             {total} account{total === 1 ? "" : "s"}
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-212.5 text-left text-sm">
+            {/* Mobile View */}
+            <div className="grid gap-4 p-4 md:hidden">
+              {users.map((user) => (
+                <article key={user.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col gap-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar user={user} />
+                      <div className="min-w-0">
+                        <p className="font-semibold text-slate-950 truncate">
+                          {user.firstName} {user.lastName}
+                        </p>
+                        <p className="text-sm text-slate-500 truncate">{user.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Role & Status</p>
+                      <div className="flex flex-wrap gap-2 items-center">
+                        <span className="text-slate-700">{user.role}</span>
+                        <Status value={user.status} />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Verification</p>
+                      <span className="text-slate-700">{user.verificationStatus ?? "—"}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Last Activity</p>
+                      <span className="text-slate-700">{new Date(user.lastRecordedActivityAt).toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <Professional user={user} />
+                    <Link
+                      className="text-sm font-semibold text-teal-700 bg-teal-50 px-3 py-1.5 rounded-lg hover:bg-teal-100 transition-colors"
+                      href={`/admin/users/${user.id}`}
+                    >
+                      View details
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {/* Desktop View */}
+            <table className="hidden w-full min-w-212.5 text-left text-sm md:table">
               <thead className="bg-slate-50 text-slate-600">
                 <tr>
                   <th className="p-4">User</th>
