@@ -21,14 +21,14 @@ import { SectionCard } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Alert } from "@/components/ui/alert";
 import { formatDoctorName } from "@/lib/formatters";
-import { FileText, ClipboardList } from "lucide-react";
+import { FileText, ClipboardList, Loader2 } from "lucide-react";
 
 function Content() {
   const { session } = useAuth();
   const [items, setItems] = useState<DispensationHistorySummary[]>([]);
-  const [selected, setSelected] = useState<DispensationHistoryDetail | null>(
-    null,
-  );
+  const [selectedSummary, setSelectedSummary] = useState<DispensationHistorySummary | null>(null);
+  const [selectedDetail, setSelectedDetail] = useState<DispensationHistoryDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,9 +58,12 @@ function Content() {
 
   async function open(item: DispensationHistorySummary) {
     if (!session) return;
+    setSelectedSummary(item);
+    setSelectedDetail(null);
+    setDetailLoading(true);
     setError(null);
     try {
-      setSelected(
+      setSelectedDetail(
         await getPharmacistDispensation(session.access_token, item.id),
       );
     } catch (detailError) {
@@ -69,6 +72,8 @@ function Content() {
           ? detailError.message
           : "The dispensing record could not be loaded.",
       );
+    } finally {
+      setDetailLoading(false);
     }
   }
 
@@ -76,11 +81,11 @@ function Content() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get('id');
-    if (id && items.length > 0 && !selected) {
+    if (id && items.length > 0 && !selectedSummary) {
       const item = items.find(i => i.id === id);
       if (item) void open(item);
     }
-  }, [items, selected]);
+  }, [items, selectedSummary]);
 
   if (loading) return <LoadingPanel label="Loading dispensing history..." />;
 
@@ -136,35 +141,43 @@ function Content() {
       </div>
 
       <Dialog
-        open={!!selected}
-        onClose={() => setSelected(null)}
+        open={!!selectedSummary}
+        onClose={() => {
+          setSelectedSummary(null);
+          setSelectedDetail(null);
+        }}
         title="Dispensing Record"
         className="max-w-3xl"
       >
-        {selected && (
+        {detailLoading ? (
+          <div className="py-20 flex flex-col items-center justify-center gap-4 text-slate-500">
+            <Loader2 className="size-8 animate-spin text-teal-600" />
+            <p className="text-sm font-medium">Loading dispensing record...</p>
+          </div>
+        ) : selectedDetail ? (
           <div className="space-y-8 mt-2 text-slate-900">
             <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 bg-slate-50 p-5 rounded-2xl border border-slate-100">
-              <HistoryDetail label="Patient" value={selected.patientName} />
-              <HistoryDetail label="Doctor" value={formatDoctorName(selected.doctorName)} />
+              <HistoryDetail label="Patient" value={selectedDetail.patientName} />
+              <HistoryDetail label="Doctor" value={formatDoctorName(selectedDetail.doctorName)} />
               <HistoryDetail
                 label="Dispensed"
-                value={formatAppointmentTime(selected.dispensedAt)}
+                value={formatAppointmentTime(selectedDetail.dispensedAt)}
               />
-              <HistoryDetail label="Pharmacy" value={selected.pharmacyName} />
+              <HistoryDetail label="Pharmacy" value={selectedDetail.pharmacyName} />
               <HistoryDetail
                 label="Pharmacist Registration"
-                value={selected.pharmacistRegistrationNumber}
+                value={selectedDetail.pharmacistRegistrationNumber}
               />
               <HistoryDetail
                 label="Issued"
-                value={formatAppointmentTime(selected.issuedAt)}
+                value={formatAppointmentTime(selectedDetail.issuedAt)}
               />
             </div>
 
             <div>
               <h3 className="text-lg font-semibold mb-4">Medicines Dispensed</h3>
               <div className="space-y-3">
-                {selected.items.map((item) => (
+                {selectedDetail.items.map((item) => (
                   <article
                     className="rounded-2xl border border-slate-200 p-4"
                     key={item.position}
@@ -186,16 +199,16 @@ function Content() {
               </div>
             </div>
 
-            {selected.dispensingNote ? (
+            {selectedDetail.dispensingNote ? (
               <div>
                 <h3 className="text-lg font-semibold mb-3">Dispensing Note</h3>
                 <div className="rounded-2xl bg-slate-50 p-5 border border-slate-100 text-sm whitespace-pre-wrap text-slate-800">
-                  {selected.dispensingNote}
+                  {selectedDetail.dispensingNote}
                 </div>
               </div>
             ) : null}
           </div>
-        )}
+        ) : null}
       </Dialog>
     </main>
   );
