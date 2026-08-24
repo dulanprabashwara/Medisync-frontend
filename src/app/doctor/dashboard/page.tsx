@@ -96,7 +96,7 @@ function DoctorDashboardContent() {
 
   if (!verified) {
     return (
-      <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
+      <div className="max-w-6xl mx-auto space-y-8">
         <PortalHeading
           eyebrow="Doctor Portal"
           title={`Welcome, ${formatDoctorName(`${user?.firstName || ""} ${user?.lastName || ""}`.trim())}`}
@@ -136,7 +136,7 @@ function DoctorDashboardContent() {
   } : null;
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="max-w-6xl mx-auto space-y-8">
       <PortalHeading
         eyebrow="Doctor Portal"
         title={`Good morning, ${formatDoctorName(`${user?.firstName || ""} ${user?.lastName || ""}`.trim())}`}

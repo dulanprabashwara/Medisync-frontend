@@ -23,6 +23,7 @@ export interface NavigationItem {
   name: string;
   href: string;
   icon: React.ElementType;
+  matchPaths?: string[];
 }
 
 export interface NavigationGroup {
@@ -45,7 +46,8 @@ const patientNavigation: NavigationGroup[] = [
         name: "Consultations",
         href: "/patient/appointments",
         icon: MessageSquare,
-      }, // The prompt mentioned patient consultations list is currently at /appointments
+        matchPaths: ["/patient/consultations"],
+      },
       { name: "Prescriptions", href: "/patient/prescriptions", icon: FileText },
     ],
   },
@@ -65,7 +67,7 @@ const doctorNavigation: NavigationGroup[] = [
   {
     name: "Care",
     items: [
-      { name: "Consultations", href: "/doctor/appointments", icon: Calendar },
+      { name: "Consultations", href: "/doctor/appointments", icon: Calendar, matchPaths: ["/doctor/consultations"] },
       { name: "Availability", href: "/doctor/availability", icon: Clock },
       { name: "Prescriptions", href: "/doctor/prescriptions", icon: FileText },
     ],
@@ -152,7 +154,11 @@ export function getActiveRoute(pathname: string, role: UserRole) {
 
   for (const group of groups) {
     for (const item of group.items) {
-      if (pathname === item.href || pathname.startsWith(item.href + "/")) {
+      if (
+        pathname === item.href ||
+        pathname.startsWith(item.href + "/") ||
+        (item.matchPaths?.some(mp => pathname === mp || pathname.startsWith(mp + "/")))
+      ) {
         // Find the longest match
         if (item.href.length > activeHref.length) {
           activeHref = item.href;

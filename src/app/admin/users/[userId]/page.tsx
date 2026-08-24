@@ -125,12 +125,13 @@ function UserDetailContent() {
   if (!detail && !error) return <LoadingPanel label="Loading user details…" />;
   const user = detail?.user;
   return (
-    <main className="mx-auto max-w-5xl px-6 py-10 lg:px-8 lg:py-14">
+    <div className="max-w-5xl mx-auto space-y-8">
       <PortalHeading
         eyebrow="Administration"
         title={user ? `${user.firstName} ${user.lastName}` : "User details"}
         description="Operational profile, activity counts, and account restriction history."
         backHref="/admin/users"
+        backLabel="Back to users"
       />
       <div className="mt-6">
         <InlineError message={error} />
@@ -342,7 +343,7 @@ function UserDetailContent() {
           ) : null}
         </>
       ) : null}
-    </main>
+    </div>
   );
 }
 
