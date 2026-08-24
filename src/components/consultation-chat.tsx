@@ -394,26 +394,43 @@ export function ConsultationChat({
       </div>
 
       {openImage && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 p-4 sm:p-8"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setOpenImage(null)}
+        <dialog
+          aria-label="Image preview"
+          ref={(el) => {
+            if (el && !el.open) {
+              document.body.style.overflow = "hidden";
+              el.showModal();
+            }
+          }}
+          onClose={() => {
+            document.body.style.overflow = "";
+            setOpenImage(null);
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              document.body.style.overflow = "";
+              setOpenImage(null);
+            }
+          }}
+          className="m-0 h-full w-full max-w-none bg-transparent p-0 backdrop:bg-slate-950/90 open:flex open:items-center open:justify-center"
         >
           <button
             type="button"
             className="absolute right-4 top-4 rounded-full bg-white/10 hover:bg-white/20 p-2 text-white transition-colors"
-            onClick={() => setOpenImage(null)}
+            aria-label="Close image preview"
+            onClick={() => {
+              document.body.style.overflow = "";
+              setOpenImage(null);
+            }}
           >
             <X className="size-6" />
           </button>
           <img
             src={openImage}
             alt="Preview"
-            className="max-h-full max-w-full rounded-lg object-contain shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
+            className="max-h-full max-w-full rounded-lg object-contain shadow-2xl p-4 sm:p-8"
           />
-        </div>
+        </dialog>
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { FormAlert, inputClassName } from "@/components/auth-card";
+import { FormAlert } from "@/components/auth-card";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { PortalHeading } from "@/components/portal-ui";
@@ -93,7 +93,7 @@ function clearDraft(userId: string) {
 }
 
 function Content() {
-  const { session, refreshProfile } = useAuth();
+  const { session } = useAuth();
   const [value, setValue] = useState<PharmacistProfessionalProfile | null>(
     null,
   );

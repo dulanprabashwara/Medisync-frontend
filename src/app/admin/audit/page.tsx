@@ -5,6 +5,9 @@ import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { InlineError, PortalHeading } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 import { getAdminAuditEvents, type AuditFilters } from "@/lib/api";
 import type { AuditEvent } from "@/types/admin";
 
@@ -179,7 +182,9 @@ function AuditContent() {
               </p>
               {Object.keys(event.metadata).length ? (
                 <dl className="mt-3 flex flex-wrap gap-2">
-                  {Object.entries(event.metadata).map(([key, value]) => (
+                  {Object.entries(event.metadata)
+                    .filter(([key]) => !["bankAccountHolder", "bankName", "bankBranch", "bankAccountNumber", "qrToken", "qrHash", "clinicalNote", "chatMessage"].includes(key))
+                    .map(([key, value]) => (
                     <div
                       key={key}
                       className="rounded-lg bg-slate-100 px-3 py-2 text-xs"
@@ -192,10 +197,24 @@ function AuditContent() {
               ) : null}
             </article>
           ))}
-          {events.length === 0 ? (
-            <p className="rounded-2xl bg-white p-8 text-center text-slate-500">
-              No audit events match these filters.
-            </p>
+          {error && events.length === 0 ? (
+            <div className="rounded-2xl bg-white p-8 text-center">
+              <h3 className="font-semibold text-rose-900">Unable to load audit events</h3>
+              <p className="mt-1 text-sm text-rose-700">{error}</p>
+            </div>
+          ) : events.length === 0 ? (
+            <div className="rounded-2xl bg-white p-8 text-center">
+              <EmptyState
+                icon={Search}
+                title="No audit events found"
+                description="No audit events match these filters."
+                action={
+                  <Button onClick={() => setFilters({ page: 0 })} variant="secondary">
+                    Clear Filters
+                  </Button>
+                }
+              />
+            </div>
           ) : null}
           <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4">
             <button

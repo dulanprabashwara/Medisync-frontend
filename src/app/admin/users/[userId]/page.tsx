@@ -164,7 +164,9 @@ function UserDetailContent() {
               </p>
             </div>
             <dl className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {Object.entries(detail.roleProfile).map(([key, value]) => (
+              {Object.entries(detail.roleProfile)
+                .filter(([key]) => !["bankAccountHolder", "bankName", "bankBranch", "bankAccountNumber", "qrToken", "qrHash"].includes(key))
+                .map(([key, value]) => (
                 <Data key={key} label={label(key)} value={String(value)} />
               ))}
               <Data

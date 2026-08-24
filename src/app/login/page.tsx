@@ -77,9 +77,12 @@ export default function LoginPage() {
     >
       {message ? <FormAlert message={message} /> : null}
       <form className="space-y-5" onSubmit={handleSubmit} noValidate>
-        <label className="block text-sm font-medium text-slate-700">
-          Email address
+        <div className="space-y-1">
+          <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+            Email address
+          </label>
           <input
+            id="email"
             className={inputClassName}
             type="email"
             autoComplete="email"
@@ -87,19 +90,24 @@ export default function LoginPage() {
             onChange={(event) => setEmail(event.target.value)}
             placeholder="you@example.com"
             required
+            aria-invalid={message ? "true" : undefined}
           />
-        </label>
-        <label className="block text-sm font-medium text-slate-700">
-          Password
+        </div>
+        <div className="space-y-1">
+          <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+            Password
+          </label>
           <input
+            id="password"
             className={inputClassName}
             type="password"
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
+            aria-invalid={message ? "true" : undefined}
           />
-        </label>
+        </div>
         <div className="text-right">
           <Link
             className="text-sm font-semibold text-teal-700 hover:text-teal-800"

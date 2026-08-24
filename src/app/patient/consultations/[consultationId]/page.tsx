@@ -7,9 +7,6 @@ import {
   Info,
   Receipt,
   PanelRight,
-  PanelRightClose,
-  PanelRightOpen,
-  X,
 } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { ConsultationCancellationPanel } from "@/components/consultation-cancellation-panel";

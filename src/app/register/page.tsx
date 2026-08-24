@@ -69,20 +69,27 @@ export default function RegisterPage() {
       {errorMessage ? <FormAlert message={errorMessage} /> : null}
       {successMessage ? <FormAlert message={successMessage} success /> : null}
       <form className="space-y-5" onSubmit={handleSubmit} noValidate>
-        <label className="block text-sm font-medium text-slate-700">
-          Email address
+        <div className="space-y-1">
+          <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+            Email address
+          </label>
           <input
+            id="email"
             className={inputClassName}
             type="email"
             autoComplete="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
+            aria-invalid={errorMessage ? "true" : undefined}
           />
-        </label>
-        <label className="block text-sm font-medium text-slate-700">
-          Password
+        </div>
+        <div className="space-y-1">
+          <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+            Password
+          </label>
           <input
+            id="password"
             className={inputClassName}
             type="password"
             autoComplete="new-password"
@@ -90,11 +97,15 @@ export default function RegisterPage() {
             onChange={(event) => setPassword(event.target.value)}
             required
             minLength={8}
+            aria-invalid={errorMessage ? "true" : undefined}
           />
-        </label>
-        <label className="block text-sm font-medium text-slate-700">
-          Confirm password
+        </div>
+        <div className="space-y-1">
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700">
+            Confirm password
+          </label>
           <input
+            id="confirmPassword"
             className={inputClassName}
             type="password"
             autoComplete="new-password"
@@ -102,8 +113,9 @@ export default function RegisterPage() {
             onChange={(event) => setConfirmPassword(event.target.value)}
             required
             minLength={8}
+            aria-invalid={errorMessage ? "true" : undefined}
           />
-        </label>
+        </div>
         <button
           className={primaryButtonClassName}
           disabled={busy || Boolean(successMessage)}

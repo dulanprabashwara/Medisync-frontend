@@ -21,7 +21,7 @@ import type {
 import type { AdminDoctorReview, AdminPharmacistReview } from "@/types/user";
 
 export default function AdminDashboardPage() {
-  const { session, profile } = useAuth();
+  const { session } = useAuth();
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

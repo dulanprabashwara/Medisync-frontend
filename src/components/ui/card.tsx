@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 
 export function SectionCard({
   title,
@@ -15,15 +15,17 @@ export function SectionCard({
   footer?: ReactNode;
   className?: string;
 }) {
+  const headingId = useId();
   return (
     <section
       className={`rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden ${className}`}
+      aria-labelledby={title ? headingId : undefined}
     >
       {(title || description || action) && (
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 p-5 sm:p-6 border-b border-slate-100">
           <div>
             {title && (
-              <h2 className="text-base font-semibold leading-6 text-slate-950">
+              <h2 id={headingId} className="text-base font-semibold leading-6 text-slate-950">
                 {title}
               </h2>
             )}

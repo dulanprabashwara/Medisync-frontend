@@ -7,6 +7,9 @@ import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { InlineError, PortalHeading } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { Users } from "lucide-react";
 import {
   getAdminDepartments,
   getAdminDoctors,
@@ -357,10 +360,24 @@ function UsersContent() {
               </tbody>
             </table>
           </div>
-          {users.length === 0 ? (
-            <p className="p-8 text-center text-slate-500">
-              No users match these filters.
-            </p>
+          {error && users.length === 0 ? (
+            <div className="p-8 text-center">
+              <h3 className="font-semibold text-rose-900">Unable to load users</h3>
+              <p className="mt-1 text-sm text-rose-700">{error}</p>
+            </div>
+          ) : users.length === 0 ? (
+            <div className="p-8 text-center">
+              <EmptyState
+                icon={Users}
+                title="No users found"
+                description="No users match these filters."
+                action={
+                  <Button onClick={() => setFilters({ page: 0 })} variant="secondary">
+                    Clear Filters
+                  </Button>
+                }
+              />
+            </div>
           ) : null}
           <div className="flex items-center justify-between border-t border-slate-200 p-4">
             <button
@@ -413,6 +430,7 @@ function FilterSelect({
       className="rounded-xl border border-slate-300 px-4 py-3"
       value={value}
       onChange={(event) => onChange(event.target.value)}
+      aria-label={label}
     >
       <option value="">{label}</option>
       {values.map((item) => (
@@ -438,6 +456,7 @@ function NamedFilter({
       className="rounded-xl border border-slate-300 px-4 py-3"
       value={value}
       onChange={(event) => onChange(event.target.value)}
+      aria-label={label}
     >
       <option value="">{label}</option>
       {values.map(([id, name]) => (

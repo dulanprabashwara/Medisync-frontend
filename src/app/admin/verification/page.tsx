@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { PortalHeading } from "@/components/portal-ui";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { inputClassName } from "@/components/auth-card";
@@ -162,7 +162,7 @@ export default function ProfessionalVerificationPage() {
       {tab === "doctors" && (
         <div className="space-y-6">
           {doctors.length === 0 ? (
-            <EmptyState message="No doctors are currently pending verification." />
+            <EmptyState title="No doctors are currently pending verification." />
           ) : (
             <div className="grid gap-4 lg:grid-cols-2">
               {doctors.map((doctor) => (
@@ -203,7 +203,7 @@ export default function ProfessionalVerificationPage() {
       {tab === "pharmacists" && (
         <div className="space-y-6">
           {pharmacists.length === 0 ? (
-            <EmptyState message="No pharmacists are currently pending verification." />
+            <EmptyState title="No pharmacists are currently pending verification." />
           ) : (
             <div className="grid gap-4 lg:grid-cols-2">
               {pharmacists.map((pharmacist) => (

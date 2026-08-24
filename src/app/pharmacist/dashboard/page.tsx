@@ -7,7 +7,7 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { PortalHeading, formatAppointmentTime } from "@/components/portal-ui";
-import { Button } from "@/components/ui/button";
+
 import { SectionCard, StatCard } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getPharmacistProfessionalProfile, getPharmacistDispensations } from "@/lib/api";
@@ -19,6 +19,7 @@ function PharmacistDashboardContent() {
   const { profile, session } = useAuth();
   const [professional, setProfessional] = useState<PharmacistProfessionalProfile | null>(null);
   const [historyPage, setHistoryPage] = useState<DispensationHistoryPage | null>(null);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -32,7 +33,7 @@ function PharmacistDashboardContent() {
           const history = await getPharmacistDispensations(session.access_token, 0, 5);
           setHistoryPage(history);
         } catch (e) {
-          // Ignore history failure on dashboard
+          setHistoryError(e instanceof Error ? e.message : "Failed to load recent dispensing history.");
         }
       }
     } finally {
@@ -142,7 +143,12 @@ function PharmacistDashboardContent() {
           </div>
 
           <SectionCard title="Recent Dispensing">
-            {!historyPage || historyPage.content.length === 0 ? (
+            {historyError ? (
+              <div className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-center shadow-sm">
+                <h3 className="font-semibold text-rose-900">Unable to load recent history</h3>
+                <p className="mt-1 text-sm text-rose-700">{historyError}</p>
+              </div>
+            ) : !historyPage || historyPage.content.length === 0 ? (
               <EmptyState
                 icon={QrCode}
                 title="No prescriptions dispensed yet"

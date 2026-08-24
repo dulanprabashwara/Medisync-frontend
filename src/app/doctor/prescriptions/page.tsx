@@ -51,8 +51,7 @@ function Content() {
   }, [load]);
 
   const groups = useMemo(() => {
-    const asc = (a: DoctorPrescription, b: DoctorPrescription) =>
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+
     const desc = (a: DoctorPrescription, b: DoctorPrescription) =>
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 

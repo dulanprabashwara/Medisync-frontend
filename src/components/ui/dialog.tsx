@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useId, type ReactNode } from "react";
 import { X } from "lucide-react";
 
 export function Dialog({
@@ -19,6 +19,8 @@ export function Dialog({
   className?: string;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  const descriptionId = useId();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -37,6 +39,8 @@ export function Dialog({
     <dialog
       ref={dialogRef}
       onClose={onClose}
+      aria-labelledby={titleId}
+      aria-describedby={description ? descriptionId : undefined}
       onClick={(e) => {
         if (e.target === dialogRef.current) onClose();
       }}
@@ -53,9 +57,9 @@ export function Dialog({
         >
           <X className="size-5" />
         </button>
-        <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 id={titleId} className="text-lg font-semibold text-slate-950">{title}</h2>
         {description && (
-          <p className="mt-2 text-sm text-slate-500">{description}</p>
+          <p id={descriptionId} className="mt-2 text-sm text-slate-500">{description}</p>
         )}
         <div className="mt-6">{children}</div>
       </div>

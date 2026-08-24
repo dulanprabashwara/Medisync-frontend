@@ -5,7 +5,7 @@ import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { PortalHeading } from "@/components/portal-ui";
 import { SectionCard } from "@/components/ui/card";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/forms";
@@ -204,7 +204,7 @@ export default function HospitalsPage() {
 
       <div className="grid gap-4">
         {hospitals.length === 0 ? (
-          <EmptyState message="No hospitals have been added yet." />
+          <EmptyState title="No hospitals have been added yet." />
         ) : (
           hospitals.map((hospital) => (
             <div key={hospital.id} className="rounded-xl border border-slate-200 bg-white p-5 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center shadow-sm">

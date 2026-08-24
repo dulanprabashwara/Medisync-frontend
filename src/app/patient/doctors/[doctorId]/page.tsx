@@ -324,6 +324,8 @@ function PatientDoctorDetailsContent() {
                             <button
                               key={slot.id}
                               onClick={() => setSelectedSlot(slot)}
+                              aria-pressed={isSelected}
+                              aria-label={`Select slot for ${new Date(slot.startsAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
                               className={`
                                 rounded-xl border px-3 py-2 text-sm font-medium transition-all
                                 ${

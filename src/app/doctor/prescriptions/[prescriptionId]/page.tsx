@@ -371,9 +371,12 @@ function Content() {
           {value.status === "DRAFT" ? (
             draftWritable ? (
               <section className="mt-6 space-y-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-                <label className="block text-sm font-medium">
-                  Validity (days) <span className="text-rose-600">*</span>
+                <div className="space-y-1">
+                  <label htmlFor="validity-days" className="block text-sm font-medium">
+                    Validity (days) <span className="text-rose-600">*</span>
+                  </label>
                   <input
+                    id="validity-days"
                     className={`mt-2 block w-full rounded-xl border px-4 py-3 ${validationErrors.validityDays ? "border-rose-500 bg-rose-50" : "border-slate-300"}`}
                     min={1}
                     max={90}
@@ -397,10 +400,13 @@ function Content() {
                       {validationErrors.validityDays}
                     </span>
                   ) : null}
-                </label>
-                <label className="block text-sm font-medium">
-                  Doctor consultation fee (LKR)
+                </div>
+                <div className="space-y-1">
+                  <label htmlFor="doctor-fee" className="block text-sm font-medium">
+                    Doctor consultation fee (LKR)
+                  </label>
                   <input
+                    id="doctor-fee"
                     className={`mt-2 block w-full rounded-xl border px-4 py-3 ${validationErrors.doctorFeeAmount ? "border-rose-500 bg-rose-50" : "border-slate-300"}`}
                     min={0}
                     max={99999999.99}
@@ -446,10 +452,13 @@ function Content() {
                       </Link>
                     </div>
                   ) : null}
-                </label>
-                <label className="block text-sm font-medium">
-                  General instructions
+                </div>
+                <div className="space-y-1">
+                  <label htmlFor="general-instructions" className="block text-sm font-medium">
+                    General instructions
+                  </label>
                   <textarea
+                    id="general-instructions"
                     className="mt-2 min-h-28 w-full rounded-xl border border-slate-300 px-4 py-3"
                     maxLength={5000}
                     value={form.generalInstructions}
@@ -458,7 +467,7 @@ function Content() {
                       setForm({ ...form, generalInstructions: e.target.value });
                     }}
                   />
-                </label>
+                </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-xl font-semibold">
@@ -509,13 +518,17 @@ function Content() {
                       const required = requiredItemFields.includes(
                         field as (typeof requiredItemFields)[number],
                       );
+                      const fieldId = `item-${index}-${field}`;
                       return (
-                        <label className="text-sm font-medium" key={field}>
-                          {fieldLabels[field]}
-                          {required ? (
-                            <span className="text-rose-600"> *</span>
-                          ) : null}
+                        <div className="space-y-1" key={field}>
+                          <label htmlFor={fieldId} className="text-sm font-medium">
+                            {fieldLabels[field]}
+                            {required ? (
+                              <span className="text-rose-600"> *</span>
+                            ) : null}
+                          </label>
                           <input
+                            id={fieldId}
                             aria-invalid={Boolean(fieldError)}
                             maxLength={fieldMaxLengths[field]}
                             required={required}
@@ -530,12 +543,15 @@ function Content() {
                               {fieldError}
                             </span>
                           ) : null}
-                        </label>
+                        </div>
                       );
                     })}
-                    <label className="text-sm font-medium sm:col-span-2">
-                      Instructions
+                    <div className="space-y-1 sm:col-span-2">
+                      <label htmlFor={`item-${index}-instructions`} className="text-sm font-medium">
+                        Instructions
+                      </label>
                       <textarea
+                        id={`item-${index}-instructions`}
                         className="mt-1 min-h-20 w-full rounded-xl border border-slate-300 px-3 py-2"
                         maxLength={fieldMaxLengths.instructions}
                         value={item.instructions ?? ""}
@@ -543,10 +559,11 @@ function Content() {
                           change(index, "instructions", e.target.value)
                         }
                       />
-                    </label>
+                    </div>
                     <button
                       type="button"
                       className="justify-self-start text-sm font-semibold text-rose-700"
+                      aria-label={`Remove ${item.medicineName || `medicine ${index + 1}`}`}
                       onClick={() => {
                         setDirty(true);
                         setValidationErrors({});

@@ -36,7 +36,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       loadingText,
       disabled,
       children,
-      asChild, // Ignored in implementation, but fixes type error if missed
       ...props
     },
     ref,

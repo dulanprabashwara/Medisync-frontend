@@ -50,28 +50,36 @@ export default function UpdatePasswordPage() {
     >
       {message ? <FormAlert message={message} /> : null}
       <form className="space-y-5" onSubmit={handleSubmit}>
-        <label className="block text-sm font-medium text-slate-700">
-          New password
+        <div className="space-y-1">
+          <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+            New password
+          </label>
           <input
+            id="password"
             className={inputClassName}
             type="password"
             autoComplete="new-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
+            aria-invalid={message ? "true" : undefined}
           />
-        </label>
-        <label className="block text-sm font-medium text-slate-700">
-          Confirm new password
+        </div>
+        <div className="space-y-1">
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700">
+            Confirm new password
+          </label>
           <input
+            id="confirmPassword"
             className={inputClassName}
             type="password"
             autoComplete="new-password"
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
             required
+            aria-invalid={message ? "true" : undefined}
           />
-        </label>
+        </div>
         <button
           className={primaryButtonClassName}
           disabled={busy}

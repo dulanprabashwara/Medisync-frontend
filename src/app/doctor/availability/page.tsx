@@ -23,7 +23,7 @@ import {
   getDoctorAvailability,
   setDoctorSlotBlocked,
 } from "@/lib/api";
-import { SectionCard } from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Clock, Plus } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -191,9 +191,9 @@ function DoctorAvailabilityContent() {
         }
       />
 
-      {(error || message) && (
+      {((error && visibleWindows.length > 0) || message) && (
         <div className="mt-7 space-y-3">
-          {error && <InlineError message={error} />}
+          {error && visibleWindows.length > 0 && <InlineError message={error} />}
           {message ? (
             <div
               className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900"
@@ -209,7 +209,15 @@ function DoctorAvailabilityContent() {
         <h2 className="text-xl font-semibold text-slate-950 mb-5">
           Your Upcoming Availability
         </h2>
-        {loading ? (
+        {error && visibleWindows.length === 0 ? (
+          <div className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-center shadow-sm">
+            <h3 className="font-semibold text-rose-900">Unable to load availability</h3>
+            <p className="mt-1 text-sm text-rose-700">{error}</p>
+            <Button onClick={() => void load()} variant="secondary" className="mt-4 border-rose-200 text-rose-700 hover:bg-rose-100">
+              Retry
+            </Button>
+          </div>
+        ) : loading ? (
           <LoadingPanel label="Loading availability..." />
         ) : visibleWindows.length === 0 ? (
           <EmptyState

@@ -5,7 +5,7 @@ import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { PortalHeading } from "@/components/portal-ui";
 import { SectionCard } from "@/components/ui/card";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/forms";
@@ -189,7 +189,7 @@ export default function DepartmentsPage() {
 
       <div className="grid gap-4">
         {departments.length === 0 ? (
-          <EmptyState message="No departments have been added yet." />
+          <EmptyState title="No departments have been added yet." />
         ) : (
           departments.map((department) => (
             <div key={department.id} className="rounded-xl border border-slate-200 bg-white p-5 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center shadow-sm">

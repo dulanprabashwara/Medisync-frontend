@@ -541,6 +541,7 @@ function DoctorConsultationContent() {
                 </p>
               </div>
               <div className="flex-1 flex flex-col min-h-75">
+                <label htmlFor="clinical-note" className="sr-only">Clinical note</label>
                 <textarea
                   className="flex-1 w-full resize-none rounded-xl border border-amber-300 bg-white/80 px-4 py-3 text-sm text-slate-950 outline-none focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 disabled:bg-amber-100/50 disabled:text-slate-500 transition-all placeholder:text-amber-900/40"
                   disabled={noteReadOnly || busy !== null}

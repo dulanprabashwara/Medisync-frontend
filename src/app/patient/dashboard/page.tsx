@@ -8,7 +8,6 @@ import {
   Activity,
   FileText,
   AlertCircle,
-  CheckCircle2,
 } from "lucide-react";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/components/auth-provider";
@@ -19,7 +18,7 @@ import { LoadingPanel } from "@/components/loading-panel";
 import { SectionCard, StatCard } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import type { Appointment } from "@/types/appointments";
 import type { PatientPrescriptionSummary } from "@/types/prescriptions";
 
@@ -51,6 +50,7 @@ function PatientDashboardContent() {
       }
     }
     loadData();
+    return () => clearTimeout(timer);
   }, [session]);
 
   const { upcoming, pendingRequests, history } = useMemo(() => {

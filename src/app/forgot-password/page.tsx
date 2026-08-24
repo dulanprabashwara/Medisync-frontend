@@ -57,17 +57,21 @@ export default function ForgotPasswordPage() {
     >
       {message ? <FormAlert message={message} success={!isError} /> : null}
       <form className="space-y-5" onSubmit={handleSubmit}>
-        <label className="block text-sm font-medium text-slate-700">
-          Email address
+        <div className="space-y-1">
+          <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+            Email address
+          </label>
           <input
+            id="email"
             className={inputClassName}
             type="email"
             autoComplete="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
+            aria-invalid={isError ? "true" : undefined}
           />
-        </label>
+        </div>
         <button
           className={primaryButtonClassName}
           disabled={busy}

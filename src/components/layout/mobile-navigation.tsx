@@ -50,6 +50,7 @@ export function MobileNavigation() {
       <dialog
         ref={dialogRef}
         onClose={() => setOpen(false)}
+        aria-label="Mobile navigation"
         onClick={(e) => {
           if (e.target === dialogRef.current) setOpen(false);
         }}
@@ -69,10 +70,10 @@ export function MobileNavigation() {
         <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8">
           {groups.map((group) => (
             <div key={group.name}>
-              <h3 className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+              <h3 id={`mobile-nav-group-${group.name.replace(/\s+/g, '-')}`} className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
                 {group.name}
               </h3>
-              <nav className="space-y-1">
+              <nav aria-labelledby={`mobile-nav-group-${group.name.replace(/\s+/g, '-')}`} className="space-y-1">
                 {group.items.map((item) => {
                   const isActive = activeHref === item.href;
                   return (

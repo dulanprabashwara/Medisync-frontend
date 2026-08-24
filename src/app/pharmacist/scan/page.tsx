@@ -25,7 +25,7 @@ import { Alert } from "@/components/ui/alert";
 import { SectionCard } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDoctorName } from "@/lib/formatters";
-import { QrCode, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
+import { CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
 
 const readerId = "medisync-pharmacist-qr-reader";
 
@@ -256,9 +256,11 @@ function Content() {
             {showManual && (
               <SectionCard className="flex flex-col h-full">
                 <form onSubmit={submitManual} className="flex flex-col h-full">
-                  <h3 className="font-semibold text-lg text-slate-900">Enter Prescription QR</h3>
-                  <label className="mt-4 block flex-1">
+                  <h3 id="manual-qr-heading" className="font-semibold text-lg text-slate-900">Enter Prescription QR</h3>
+                  <div className="mt-4 block flex-1">
+                    <label htmlFor="manual-payload" className="sr-only">Prescription QR payload</label>
                     <textarea
+                      id="manual-payload"
                       className="w-full h-full min-h-48 resize-y rounded-xl border border-slate-300 px-4 py-3 font-mono text-sm focus-visible:outline-teal-600"
                       autoComplete="off"
                       spellCheck={false}
@@ -267,7 +269,7 @@ function Content() {
                       placeholder="MEDISYNC:RX:..."
                       required
                     />
-                  </label>
+                  </div>
                   <div className="mt-6 flex justify-end gap-3">
                     <Button variant="secondary" onClick={() => setShowManual(false)} type="button">Cancel</Button>
                     <Button type="submit" disabled={busy !== null || !manualPayload.trim()} loading={busy === "verify"}>
@@ -329,7 +331,7 @@ function VerificationResult({
     const isExpired = value.status === "EXPIRED";
     const isCancelled = value.status === "CANCELLED";
     const isDispensed = value.status === "ALREADY_DISPENSED";
-    const isInvalid = value.status === "QR_NO_LONGER_VALID" || value.status === "VERIFIED";
+
 
     return (
       <SectionCard className={`border ${isExpired || isCancelled ? "border-rose-200 bg-rose-50" : isDispensed ? "border-amber-200 bg-amber-50" : "border-slate-200"}`}>
@@ -456,10 +458,11 @@ function VerificationResult({
         )}
 
         <div className="mt-8 pt-6 border-t border-slate-200">
-          <label className="block text-sm font-semibold text-slate-900 mb-2">
+          <label htmlFor="dispensing-note" className="block text-sm font-semibold text-slate-900 mb-2">
             Dispensing Note (Optional)
           </label>
           <textarea
+            id="dispensing-note"
             className="w-full min-h-24 resize-y rounded-xl border border-slate-300 px-4 py-3 text-sm focus-visible:outline-teal-600"
             value={note}
             onChange={(e) => onNote(e.target.value)}

@@ -56,7 +56,7 @@ function Content() {
     return () => window.clearTimeout(timer);
   }, [load]);
 
-  async function open(item: DispensationHistorySummary) {
+  const open = useCallback(async (item: DispensationHistorySummary) => {
     if (!session) return;
     setSelectedSummary(item);
     setSelectedDetail(null);
@@ -75,7 +75,7 @@ function Content() {
     } finally {
       setDetailLoading(false);
     }
-  }
+  }, [session]);
 
   // Effect to automatically open if "id" is in query string (from dashboard link)
   useEffect(() => {

@@ -297,54 +297,65 @@ function PatientDoctorSearchContent() {
       </Dialog>
 
       <div className="mt-8">
-        {error && (
+        {error && !results ? (
           <Alert tone="error" className="mb-6">
-            {error}
+            <p>{error}</p>
+            <Button variant="secondary" className="mt-4" onClick={() => search(0)}>
+              Retry
+            </Button>
           </Alert>
-        )}
-
-        {!loading && results && (
-          <div className="mb-4 text-sm text-slate-500 font-medium">
-            {results.totalElements === 0
-              ? "No doctors found"
-              : `${results.totalElements} doctor${results.totalElements === 1 ? "" : "s"} found`}
-          </div>
-        )}
-
-        {loading && !results ? (
+        ) : loading && !results ? (
           <LoadingPanel label="Finding verified doctors..." />
         ) : results?.content.length === 0 ? (
-          <EmptyState
-            icon={Search}
-            title="No doctors match your filters"
-            description="Try changing your search criteria or clearing filters."
-            action={
-              <Button onClick={clearFilters} variant="secondary">
-                Clear Filters
-              </Button>
-            }
-          />
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {results?.content.map((doctor) => (
-              <DoctorCard
-                key={doctor.doctorProfileId}
-                doctor={doctor}
-                viewMode="detail"
-              />
-            ))}
-          </div>
-        )}
-
-        {results && results.totalPages > 1 && (
-          <div className="mt-8">
-            <Pagination
-              page={results.page}
-              totalPages={results.totalPages}
-              onPageChange={search}
+          <>
+            {error && (
+              <Alert tone="error" className="mb-6">
+                {error}
+              </Alert>
+            )}
+            <EmptyState
+              icon={Search}
+              title="No doctors match your filters"
+              description="Try changing your search criteria or clearing filters."
+              action={
+                <Button onClick={clearFilters} variant="secondary">
+                  Clear Filters
+                </Button>
+              }
             />
-          </div>
-        )}
+          </>
+        ) : results ? (
+          <>
+            {error && (
+              <Alert tone="error" className="mb-6">
+                {error}
+              </Alert>
+            )}
+            <div className="mb-4 text-sm text-slate-500 font-medium">
+              {results.totalElements === 0
+                ? "No doctors found"
+                : `${results.totalElements} doctor${results.totalElements === 1 ? "" : "s"} found`}
+            </div>
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {results.content.map((doctor) => (
+                <DoctorCard
+                  key={doctor.doctorProfileId}
+                  doctor={doctor}
+                  viewMode="detail"
+                />
+              ))}
+            </div>
+            {results.totalPages > 1 && (
+              <div className="mt-8">
+                <Pagination
+                  page={results.page}
+                  totalPages={results.totalPages}
+                  onPageChange={search}
+                />
+              </div>
+            )}
+          </>
+        ) : null}
       </div>
     </div>
   );

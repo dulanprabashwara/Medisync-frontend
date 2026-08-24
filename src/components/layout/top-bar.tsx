@@ -37,9 +37,18 @@ export function TopBar() {
         setMenuOpen(false);
       }
     }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && menuOpen) {
+        setMenuOpen(false);
+      }
+    }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuOpen]);
 
   async function handleLogout() {
     setBusy(true);
@@ -82,10 +91,12 @@ export function TopBar() {
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-x-3 rounded-xl p-1.5 text-sm font-semibold leading-6 text-slate-950 hover:bg-slate-50 transition-colors"
               aria-expanded={menuOpen}
+              aria-haspopup="menu"
             >
               <span className="sr-only">Open user menu</span>
               <div className="flex size-9 items-center justify-center rounded-xl bg-teal-100 text-teal-800 font-bold uppercase overflow-hidden">
                 {profile.profileImageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- Next Image optimization breaks expiring private signed URLs.
                   <img
                     src={profile.profileImageUrl}
                     alt=""

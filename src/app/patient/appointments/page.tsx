@@ -12,7 +12,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SectionCard } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Input, Label, Textarea } from "@/components/ui/forms";
+import { Label, Textarea } from "@/components/ui/forms";
 import { Alert } from "@/components/ui/alert";
 import { formatDoctorName } from "@/lib/formatters";
 import type { Appointment } from "@/types/appointments";
