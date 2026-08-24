@@ -59,7 +59,8 @@ export default function AdminDashboardPage() {
   }, [session]);
 
   useEffect(() => {
-    void loadData();
+    const timer = window.setTimeout(() => void loadData(), 0);
+    return () => window.clearTimeout(timer);
   }, [loadData]);
 
   if (loading) {

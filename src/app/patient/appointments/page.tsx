@@ -12,7 +12,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SectionCard } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Input, Label } from "@/components/ui/forms";
+import { Input, Label, Textarea } from "@/components/ui/forms";
 import { Alert } from "@/components/ui/alert";
 import { formatDoctorName } from "@/lib/formatters";
 import type { Appointment } from "@/types/appointments";
@@ -309,12 +309,12 @@ export default function PatientAppointmentsPage() {
                     >
                       Cancellation reason (optional)
                     </Label>
-                    <Input
+                    <Textarea
                       id={`cancel-${appointment.id}`}
-                      className="mt-2"
+                      className="mt-2 min-h-24"
                       maxLength={1000}
                       value={cancelReason}
-                      onChange={(e) => setCancelReason(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setCancelReason(e.target.value)}
                     />
                     <div className="mt-4 flex gap-3">
                       <Button
