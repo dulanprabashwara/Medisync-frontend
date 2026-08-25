@@ -46,7 +46,6 @@ function PatientDashboardContent() {
         setError(null);
       })
       .catch((err) => {
-        console.error("Failed to load dashboard data", err);
         setError(
           err instanceof Error
             ? err.message
@@ -76,7 +75,6 @@ function PatientDashboardContent() {
         }
       } catch (err) {
         if (!ignore) {
-          console.error("Failed to load dashboard data", err);
           setError(
             err instanceof Error
               ? err.message
