@@ -30,8 +30,8 @@ export function MediSyncBrand({
   iconOnly = false,
 }: MediSyncBrandProps) {
   const markSize = size === "compact" ? 32 : 40;
-  const wordmarkHeight = size === "compact" ? 22 : 26;
-  const wordmarkWidth = size === "compact" ? 110 : 130;
+  const wordmarkHeight = size === "compact" ? 22 : 28;
+  const wordmarkWidth = size === "compact" ? 66 : 84;
 
   return (
     <Link
