@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -19,13 +19,17 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { Dialog } from "@/components/ui/dialog";
+import { VideoRoom, PatientVideoButton } from "@/components/video-room";
 import { useConsultationEvents } from "@/hooks/use-consultation-events";
 import {
   getPatientConsultation,
   getPatientConsultationMessages,
   sendPatientConsultationMessage,
   deletePatientConsultationMessage,
+  patientJoinVideo,
+  getPatientVideoStatus,
 } from "@/lib/api";
+import type { VideoTokenResponse } from "@/lib/api";
 import { mergeConsultationMessages } from "@/lib/consultation-messages";
 import { formatDoctorName } from "@/lib/formatters";
 import type {
@@ -50,6 +54,11 @@ export default function PatientConsultationPage() {
 
   // Mobile drawer state
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
+  // Video state
+  const [videoActive, setVideoActive] = useState(false);
+  const [videoToken, setVideoToken] = useState<VideoTokenResponse | null>(null);
+  const [videoBusy, setVideoBusy] = useState(false);
 
   const reconcile = useCallback(async () => {
     if (!session || !consultationId) return;
@@ -141,6 +150,43 @@ export default function PatientConsultationPage() {
     await deletePatientConsultationMessage(session.access_token, consultationId, messageId);
   }
 
+  // ── Video handlers ──────────────────────────────────────────────────
+
+  async function handleJoinVideo() {
+    if (!session) return;
+    setVideoBusy(true);
+    try {
+      const tokenResp = await patientJoinVideo(session.access_token, consultationId);
+      setVideoToken(tokenResp);
+    } catch (videoError) {
+      setError(
+        videoError instanceof Error
+          ? videoError.message
+          : "Could not join the video call.",
+      );
+    } finally {
+      setVideoBusy(false);
+    }
+  }
+
+  function handleLeaveVideo() {
+    setVideoToken(null);
+  }
+
+  // Fetch video status once on load to reflect current state
+  useEffect(() => {
+    if (!session || !consultationId || consultation?.status !== "IN_PROGRESS") {
+      return;
+    }
+    async function fetchVideoStatus() {
+      try {
+        const status = await getPatientVideoStatus(session!.access_token, consultationId);
+        setVideoActive(status.active);
+      } catch { /* ignore */ }
+    }
+    void fetchVideoStatus();
+  }, [session, consultationId, consultation?.status]);
+
   if (loading && !consultation) {
     return (
       <ProtectedRoute roles={["PATIENT"]}>
@@ -219,6 +265,19 @@ export default function PatientConsultationPage() {
         <Alert tone="info" icon={Info}>
           Consultation in progress.
         </Alert>
+      )}
+
+      {/* Video Call Section */}
+      {consultation.status === "IN_PROGRESS" && (
+        <SectionCard className="border-teal-200 bg-linear-to-br from-teal-50 to-emerald-50">
+          <h3 className="font-semibold text-teal-900 mb-3">Video Consultation</h3>
+          <PatientVideoButton
+            consultationStatus={consultation.status}
+            videoActive={videoActive}
+            busy={videoBusy ? "video" : null}
+            onJoin={() => void handleJoinVideo()}
+          />
+        </SectionCard>
       )}
       {consultation.status === "COMPLETED" && (
         <Alert tone="neutral" icon={Info}>
@@ -432,6 +491,15 @@ export default function PatientConsultationPage() {
           {detailsContent}
         </div>
       </Dialog>
+
+      {/* Video Room Overlay */}
+      {videoToken && (
+        <VideoRoom
+          token={videoToken.token}
+          serverUrl={videoToken.serverUrl}
+          onLeave={handleLeaveVideo}
+        />
+      )}
     </ProtectedRoute>
   );
 }

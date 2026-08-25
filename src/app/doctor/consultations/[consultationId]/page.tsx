@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { ConsultationCancellationPanel } from "@/components/consultation-cancellation-panel";
@@ -13,6 +13,7 @@ import {
   formatAppointmentTime,
 } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
+import { VideoRoom, DoctorVideoButton } from "@/components/video-room";
 import { useConsultationEvents } from "@/hooks/use-consultation-events";
 import {
   completeDoctorConsultation,
@@ -24,7 +25,11 @@ import {
   startDoctorConsultation,
   updateDoctorClinicalNote,
   deleteDoctorConsultationMessage,
+  doctorStartVideo,
+  doctorRejoinVideo,
+  getDoctorVideoStatus,
 } from "@/lib/api";
+import type { VideoTokenResponse } from "@/lib/api";
 import { mergeConsultationMessages } from "@/lib/consultation-messages";
 import type {
   ClinicalNote,
@@ -53,6 +58,10 @@ function DoctorConsultationContent() {
   const [message, setMessage] = useState<string | null>(null);
   const [workspaceTab, setWorkspaceTab] = useState<WorkspaceTab>("info");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
+  // Video state
+  const [videoActive, setVideoActive] = useState(false);
+  const [videoToken, setVideoToken] = useState<VideoTokenResponse | null>(null);
 
   const reconcile = useCallback(async () => {
     if (!session || !consultationId) return;
@@ -275,6 +284,66 @@ function DoctorConsultationContent() {
     }
   }
 
+  // ── Video handlers ──────────────────────────────────────────────────
+
+  async function handleStartVideo() {
+    if (!session) return;
+    setBusy("video");
+    setError(null);
+    setMessage(null);
+    try {
+      const tokenResp = await doctorStartVideo(session.access_token, consultationId);
+      setVideoActive(true);
+      setVideoToken(tokenResp);
+    } catch (videoError) {
+      setError(
+        videoError instanceof Error
+          ? videoError.message
+          : "Could not start the video call.",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function handleRejoinVideo() {
+    if (!session) return;
+    setBusy("video");
+    setError(null);
+    setMessage(null);
+    try {
+      const tokenResp = await doctorRejoinVideo(session.access_token, consultationId);
+      setVideoToken(tokenResp);
+    } catch (videoError) {
+      setError(
+        videoError instanceof Error
+          ? videoError.message
+          : "Could not rejoin the video call.",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  function handleLeaveVideo() {
+    setVideoToken(null);
+    // Don't end the room — just leave it. Patient may still be connected.
+  }
+
+  // Fetch video status once on load to reflect current state
+  useEffect(() => {
+    if (!session || !consultationId || consultation?.status !== "IN_PROGRESS") {
+      return;
+    }
+    async function fetchVideoStatus() {
+      try {
+        const status = await getDoctorVideoStatus(session!.access_token, consultationId);
+        setVideoActive(status.active);
+      } catch { /* ignore */ }
+    }
+    void fetchVideoStatus();
+  }, [session, consultationId, consultation?.status]);
+
   if (loading && !consultation)
     return <LoadingPanel label="Loading the online consultation..." />;
     
@@ -423,6 +492,21 @@ function DoctorConsultationContent() {
                   ) : null}
                 </div>
               </section>
+
+              {/* Video Call Section */}
+              {consultation.status === "IN_PROGRESS" && (
+                <section className="rounded-2xl border border-teal-200 bg-linear-to-br from-teal-50 to-emerald-50 p-5 shadow-sm">
+                  <h2 className="font-semibold text-teal-900 mb-3">Video Consultation</h2>
+                  <DoctorVideoButton
+                    consultationStatus={consultation.status}
+                    videoActive={videoActive}
+                    busy={busy}
+                    onStart={() => void handleStartVideo()}
+                    onRejoin={() => void handleRejoinVideo()}
+                  />
+
+                </section>
+              )}
 
               {consultation.status === "CANCELLED" ? (
                 <ConsultationCancellationPanel
@@ -593,6 +677,14 @@ function DoctorConsultationContent() {
           )}
         </div>
       </div>
+      {/* Video Room Overlay */}
+      {videoToken && (
+        <VideoRoom
+          token={videoToken.token}
+          serverUrl={videoToken.serverUrl}
+          onLeave={handleLeaveVideo}
+        />
+      )}
     </main>
   );
 }

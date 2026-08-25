@@ -162,14 +162,6 @@ export function ConsultationChat({
     <div className="flex flex-col h-full bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex-1 min-h-0">
       <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
         <h2 className="font-semibold text-slate-900">Consultation Chat</h2>
-        <div className="flex items-center gap-2">
-          <div
-            className={`size-2 rounded-full ${liveStatus === "connected" ? "bg-emerald-500" : "bg-amber-500 animate-pulse"}`}
-          />
-          <span className="text-xs font-medium text-slate-600">
-            {liveStatus === "connected" ? "Connected" : "Reconnecting..."}
-          </span>
-        </div>
       </div>
 
       <div

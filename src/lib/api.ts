@@ -989,3 +989,54 @@ export const updateAdminProfile = (
     method: "PATCH",
     body: JSON.stringify(data),
   });
+
+// ── Video Consultation ──────────────────────────────────────────────
+
+export interface VideoTokenResponse {
+  token: string;
+  serverUrl: string;
+}
+
+export interface VideoStatusResponse {
+  active: boolean;
+}
+
+export const doctorStartVideo = (accessToken: string, consultationId: string) =>
+  apiRequest<VideoTokenResponse>(
+    `/api/doctor/consultations/${consultationId}/video/start`,
+    accessToken,
+    { method: "POST" },
+  );
+
+export const doctorRejoinVideo = (accessToken: string, consultationId: string) =>
+  apiRequest<VideoTokenResponse>(
+    `/api/doctor/consultations/${consultationId}/video/rejoin`,
+    accessToken,
+    { method: "POST" },
+  );
+
+export const doctorEndVideo = (accessToken: string, consultationId: string) =>
+  apiRequest<void>(
+    `/api/doctor/consultations/${consultationId}/video/end`,
+    accessToken,
+    { method: "POST" },
+  );
+
+export const getDoctorVideoStatus = (accessToken: string, consultationId: string) =>
+  apiRequest<VideoStatusResponse>(
+    `/api/doctor/consultations/${consultationId}/video/status`,
+    accessToken,
+  );
+
+export const patientJoinVideo = (accessToken: string, consultationId: string) =>
+  apiRequest<VideoTokenResponse>(
+    `/api/patient/consultations/${consultationId}/video/join`,
+    accessToken,
+    { method: "POST" },
+  );
+
+export const getPatientVideoStatus = (accessToken: string, consultationId: string) =>
+  apiRequest<VideoStatusResponse>(
+    `/api/patient/consultations/${consultationId}/video/status`,
+    accessToken,
+  );

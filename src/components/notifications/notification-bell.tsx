@@ -78,7 +78,7 @@ export function NotificationBell({ viewAllRoute }: { viewAllRoute: string }) {
             ref={dropdownRef}
             role="dialog"
             aria-label="Notifications panel"
-            className={`absolute z-50 overflow-hidden bg-white shadow-lg ring-1 ring-slate-900/5 sm:rounded-2xl fixed top-16 left-4 right-4 sm:static sm:w-[380px] sm:mt-2 sm:right-0 sm:left-auto`}
+            className="fixed inset-x-4 top-16 z-50 overflow-hidden bg-white shadow-lg ring-1 ring-slate-900/5 sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[380px] sm:rounded-2xl"
           >
             <NotificationPanel onClose={() => setIsOpen(false)} viewAllRoute={viewAllRoute} />
           </div>
