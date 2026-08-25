@@ -40,7 +40,7 @@ export function MediSyncBrand({
       aria-label="MediSync home"
     >
       <Image
-        src="/brand/medisync-mark.png?v=2"
+        src="/brand/medisync-mark-v2.png"
         alt=""
         width={markSize}
         height={markSize}
@@ -49,7 +49,7 @@ export function MediSyncBrand({
       />
       {!iconOnly && (
         <Image
-          src="/brand/medisync-wordmark.png?v=2"
+          src="/brand/medisync-wordmark-v2.png"
           alt="MediSync"
           width={wordmarkWidth}
           height={wordmarkHeight}
