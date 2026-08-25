@@ -8,6 +8,7 @@ import { useAuth } from "@/components/auth-provider";
 import { MobileNavigation } from "./mobile-navigation";
 import { MediSyncBrand } from "@/components/branding/medisync-brand";
 import { formatDoctorName } from "@/lib/formatters";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 function roleLabel(role: string) {
   switch (role) {
@@ -85,7 +86,8 @@ export function TopBar() {
           <MediSyncBrand size="compact" href={`/${profile.role.toLowerCase()}/dashboard`} />
         </div>
 
-        <div className="flex flex-1 justify-end items-center gap-x-4 lg:gap-x-6">
+        <div className="flex flex-1 justify-end items-center gap-x-2 sm:gap-x-4 lg:gap-x-6">
+          <NotificationBell viewAllRoute={`/${profile.role.toLowerCase()}/notifications`} />
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen(!menuOpen)}

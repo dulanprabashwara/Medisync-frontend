@@ -93,7 +93,7 @@ export function getConsultationWebSocketUrl() {
   return url.toString();
 }
 
-async function apiRequest<T>(
+export async function apiRequest<T>(
   path: string,
   accessToken: string,
   init: RequestInit = {},

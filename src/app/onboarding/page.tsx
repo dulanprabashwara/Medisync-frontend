@@ -79,7 +79,6 @@ export default function OnboardingPage() {
       });
       await refreshProfile();
       router.replace(dashboardPath(created.role));
-      router.refresh();
     } catch (onboardingError) {
       if (onboardingError instanceof ApiError) {
         setFieldErrors(onboardingError.fieldErrors);

@@ -7,6 +7,7 @@ import { TopBar } from "./top-bar";
 import { PublicNavbar } from "@/components/public/public-navbar";
 import { PublicFooter } from "@/components/public/public-footer";
 import { usePathname } from "next/navigation";
+import { NotificationProvider } from "@/components/notifications/notification-provider";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { profile, loading } = useAuth();
@@ -32,17 +33,19 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isConsultationRoom = pathname?.includes("/consultations/");
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-4 focus:left-4 focus:rounded-xl focus:bg-white focus:px-4 focus:py-2 focus:text-teal-700 focus:shadow-md font-semibold">Skip to main content</a>
-      <Sidebar />
-      <div className="flex flex-1 flex-col min-w-0 h-screen">
-        <TopBar />
-        <main id="main-content" tabIndex={-1} className={`flex-1 relative outline-none ${isConsultationRoom ? "overflow-hidden" : "overflow-y-auto pb-10"}`}>
-          <div className={isConsultationRoom ? "h-full flex flex-col" : "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8"}>
-            {children}
-          </div>
-        </main>
+    <NotificationProvider>
+      <div className="flex h-screen overflow-hidden">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-4 focus:left-4 focus:rounded-xl focus:bg-white focus:px-4 focus:py-2 focus:text-teal-700 focus:shadow-md font-semibold">Skip to main content</a>
+        <Sidebar />
+        <div className="flex flex-1 flex-col min-w-0 h-screen">
+          <TopBar />
+          <main id="main-content" tabIndex={-1} className={`flex-1 relative outline-none ${isConsultationRoom ? "overflow-hidden" : "overflow-y-auto pb-10"}`}>
+            <div className={isConsultationRoom ? "h-full flex flex-col" : "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8"}>
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </NotificationProvider>
   );
 }

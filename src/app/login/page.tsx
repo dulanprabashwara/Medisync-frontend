@@ -52,7 +52,6 @@ export default function LoginPage() {
           throw profileError;
         }
       }
-      router.refresh();
     } catch (loginError) {
       setMessage(
         loginError instanceof Error
