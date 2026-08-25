@@ -82,7 +82,7 @@ export function TopBar() {
       <div className="flex flex-1 items-center gap-x-4 self-stretch lg:gap-x-6">
         <div className="flex items-center gap-2 lg:hidden">
           <MobileNavigation />
-          <MediSyncBrand size="compact" />
+          <MediSyncBrand size="compact" href={`/${profile.role.toLowerCase()}/dashboard`} />
         </div>
 
         <div className="flex flex-1 justify-end items-center gap-x-4 lg:gap-x-6">

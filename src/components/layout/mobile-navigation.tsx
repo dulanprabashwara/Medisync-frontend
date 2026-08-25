@@ -57,7 +57,7 @@ export function MobileNavigation() {
         className="m-0 h-full w-full max-w-sm max-h-none bg-white p-0 backdrop:bg-slate-950/20 backdrop:backdrop-blur-sm open:flex flex-col border-r border-slate-200"
       >
         <div className="flex h-16 shrink-0 items-center justify-between px-4 border-b border-slate-200/60">
-          <MediSyncBrand size="compact" />
+          <MediSyncBrand size="compact" href={`/${profile.role.toLowerCase()}/dashboard`} />
           <button
             onClick={() => setOpen(false)}
             className="p-2 -mr-2 rounded-xl text-slate-500 hover:bg-slate-100"

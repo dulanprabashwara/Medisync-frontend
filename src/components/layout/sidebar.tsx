@@ -18,7 +18,7 @@ export function Sidebar() {
   return (
     <div className="hidden lg:flex w-[248px] flex-col border-r border-slate-200 bg-white h-screen sticky top-0">
       <div className="flex h-20 shrink-0 items-center px-6 border-b border-slate-200/60">
-        <MediSyncBrand />
+        <MediSyncBrand href={`/${profile.role.toLowerCase()}/dashboard`} />
       </div>
 
       <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
