@@ -29,11 +29,39 @@ function PatientDashboardContent() {
     PatientPrescriptionSummary[]
   >([]);
   const [loading, setLoading] = useState(true);
-
+  const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(0);
 
+  const handleRetry = () => {
+    if (!session) return;
+    setLoading(true);
+    setError(null);
+    Promise.all([
+      getPatientAppointments(session.access_token),
+      getPatientPrescriptions(session.access_token, 0, 50),
+    ])
+      .then(([apptsData, presData]) => {
+        setAppointments(apptsData.content);
+        setPrescriptions(presData.content);
+        setError(null);
+      })
+      .catch((err) => {
+        console.error("Failed to load dashboard data", err);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "The MediSync API did not respond in time. Check that the backend is running, then try again.",
+        );
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
+    let ignore = false;
     const timer = setTimeout(() => setNow(Date.now()), 0);
+
     async function loadData() {
       if (!session) return;
       try {
@@ -41,16 +69,33 @@ function PatientDashboardContent() {
           getPatientAppointments(session.access_token),
           getPatientPrescriptions(session.access_token, 0, 50),
         ]);
-        setAppointments(apptsData.content);
-        setPrescriptions(presData.content);
-      } catch (error) {
-        console.error("Failed to load dashboard data", error);
+        if (!ignore) {
+          setAppointments(apptsData.content);
+          setPrescriptions(presData.content);
+          setError(null);
+        }
+      } catch (err) {
+        if (!ignore) {
+          console.error("Failed to load dashboard data", err);
+          setError(
+            err instanceof Error
+              ? err.message
+              : "The MediSync API did not respond in time. Check that the backend is running, then try again.",
+          );
+        }
       } finally {
-        setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
     }
-    loadData();
-    return () => clearTimeout(timer);
+
+    void loadData();
+
+    return () => {
+      ignore = true;
+      clearTimeout(timer);
+    };
   }, [session]);
 
   const { upcoming, pendingRequests, history } = useMemo(() => {
@@ -129,6 +174,35 @@ function PatientDashboardContent() {
       : null;
 
   if (loading) return <LoadingPanel label="Loading your dashboard..." />;
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto space-y-8">
+        <PortalHeading
+          eyebrow="Patient Portal"
+          title={`Welcome back, ${profile?.firstName ?? "Patient"}`}
+          description="We encountered an issue loading your dashboard."
+          backHref=""
+        />
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-rose-950 shadow-sm">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="size-5 text-rose-600 mt-0.5 shrink-0" />
+            <div>
+              <h3 className="font-semibold text-rose-900">Dashboard Unavailable</h3>
+              <p className="mt-1 text-sm text-rose-800">{error}</p>
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="mt-4 rounded-xl bg-rose-700 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-800 transition-colors shadow-sm"
+              >
+                Retry Loading
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const isNewPatient = appointments.length === 0 && prescriptions.length === 0;
 
