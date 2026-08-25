@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { ChevronDown, LogOut, User } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { MobileNavigation } from "./mobile-navigation";
-import { Brand } from "./sidebar";
+import { MediSyncBrand } from "@/components/branding/medisync-brand";
 import { formatDoctorName } from "@/lib/formatters";
 
 function roleLabel(role: string) {
@@ -82,7 +82,7 @@ export function TopBar() {
       <div className="flex flex-1 items-center gap-x-4 self-stretch lg:gap-x-6">
         <div className="flex items-center gap-2 lg:hidden">
           <MobileNavigation />
-          <Brand />
+          <MediSyncBrand size="compact" />
         </div>
 
         <div className="flex flex-1 justify-end items-center gap-x-4 lg:gap-x-6">

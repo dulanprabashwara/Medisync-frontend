@@ -4,21 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { navigationByRole, getActiveRoute } from "@/lib/navigation";
-
-export function Brand() {
-  return (
-    <Link
-      href="/"
-      className="flex items-center gap-3 text-slate-950 px-2"
-      aria-label="MediSync home"
-    >
-      <span className="grid size-9 place-items-center rounded-xl bg-teal-700 text-lg font-semibold text-white shadow-sm">
-        +
-      </span>
-      <span className="text-lg font-semibold tracking-tight">MediSync</span>
-    </Link>
-  );
-}
+import { MediSyncBrand } from "@/components/branding/medisync-brand";
 
 export function Sidebar() {
   const { profile } = useAuth();
@@ -31,8 +17,8 @@ export function Sidebar() {
 
   return (
     <div className="hidden lg:flex w-[248px] flex-col border-r border-slate-200 bg-white h-screen sticky top-0">
-      <div className="flex h-16 shrink-0 items-center px-4 border-b border-slate-200/60">
-        <Brand />
+      <div className="flex h-20 shrink-0 items-center px-6 border-b border-slate-200/60">
+        <MediSyncBrand />
       </div>
 
       <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">

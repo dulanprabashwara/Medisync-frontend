@@ -5,21 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "./auth-provider";
 import { dashboardPath } from "@/types/user";
-
-export function Brand() {
-  return (
-    <Link
-      href="/"
-      className="flex items-center gap-3 text-slate-950"
-      aria-label="MediSync home"
-    >
-      <span className="grid size-10 place-items-center rounded-xl bg-teal-700 text-xl font-semibold text-white shadow-sm">
-        +
-      </span>
-      <span className="text-lg font-semibold tracking-tight">MediSync</span>
-    </Link>
-  );
-}
+import { MediSyncBrand } from "@/components/branding/medisync-brand";
 
 export function SiteHeader() {
   const { session, profile, signOut } = useAuth();
@@ -37,7 +23,7 @@ export function SiteHeader() {
   return (
     <header className="border-b border-slate-200/80 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-5 sm:px-8">
-        <Brand />
+        <MediSyncBrand />
         <nav className="flex items-center gap-2" aria-label="Main navigation">
           {session && profile ? (
             <>

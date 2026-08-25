@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Brand } from "@/components/site-header";
+import { MediSyncBrand } from "@/components/branding/medisync-brand";
 
 export function PublicFooter() {
   return (
@@ -7,7 +7,7 @@ export function PublicFooter() {
       <div className="mx-auto max-w-7xl px-6 py-12 md:py-16 lg:px-8">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           <div className="space-y-6">
-            <Brand />
+            <MediSyncBrand />
             <p className="text-sm leading-6 text-slate-600 max-w-xs">
               MediSync connects Patients, verified Doctors and Pharmacists through one secure digital healthcare workflow.
             </p>

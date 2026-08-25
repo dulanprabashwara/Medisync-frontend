@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { dashboardPath } from "@/types/user";
 import { Menu, X } from "lucide-react";
-import { Brand } from "@/components/site-header";
+import { MediSyncBrand } from "@/components/branding/medisync-brand";
 
 const LINKS = [
   { name: "Home", href: "/" },
@@ -26,7 +26,7 @@ export function PublicNavbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-5 sm:px-8">
-        <Brand />
+        <MediSyncBrand />
         
         <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
           {LINKS.map((link) => {
@@ -89,7 +89,7 @@ export function PublicNavbar() {
           <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
           <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-5 py-6 sm:max-w-sm sm:ring-1 sm:ring-slate-900/10">
             <div className="flex items-center justify-between">
-              <Brand />
+              <MediSyncBrand />
               <button
                 type="button"
                 className="-m-2.5 rounded-md p-2.5 text-slate-700"
