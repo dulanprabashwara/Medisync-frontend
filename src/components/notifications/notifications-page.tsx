@@ -21,7 +21,7 @@ export function NotificationsPage() {
   const { session } = useAuth();
   const token = session?.access_token || "";
 
-  const fetchNotifications = async (currentPage: number, currentFilter: "all" | "unread") => {
+  const fetchNotifications = React.useCallback(async (currentPage: number, currentFilter: "all" | "unread") => {
     setLoading(true);
     setError(null);
     try {
@@ -38,12 +38,12 @@ export function NotificationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchNotifications(page, filter);
-  }, [page, filter]);
+  }, [page, filter, fetchNotifications]);
 
   const handleFilterChange = (newFilter: "all" | "unread") => {
     if (filter === newFilter) return;

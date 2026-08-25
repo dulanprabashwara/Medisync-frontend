@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -20,6 +20,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { Dialog } from "@/components/ui/dialog";
 import { VideoRoom, PatientVideoButton } from "@/components/video-room";
+import { useNotifications } from "@/components/notifications/notification-provider";
 import { useConsultationEvents } from "@/hooks/use-consultation-events";
 import {
   getPatientConsultation,
@@ -59,6 +60,7 @@ export default function PatientConsultationPage() {
   const [videoActive, setVideoActive] = useState(false);
   const [videoToken, setVideoToken] = useState<VideoTokenResponse | null>(null);
   const [videoBusy, setVideoBusy] = useState(false);
+  const { latestNotifications } = useNotifications();
 
   const reconcile = useCallback(async () => {
     if (!session || !consultationId) return;
@@ -187,6 +189,25 @@ export default function PatientConsultationPage() {
     void fetchVideoStatus();
   }, [session, consultationId, consultation?.status]);
 
+  // Listen to the realtime notification for VIDEO_CALL_STARTED
+  useEffect(() => {
+    if (!session || !consultationId || consultation?.status !== "IN_PROGRESS") {
+      return;
+    }
+    const hasNewVideoStart = latestNotifications.some(
+      (n) => n.type === "VIDEO_CALL_STARTED" && !n.read && n.entityId === consultationId
+    );
+    if (hasNewVideoStart) {
+      async function fetchVideoStatus() {
+        try {
+          const status = await getPatientVideoStatus(session!.access_token, consultationId);
+          setVideoActive(status.active);
+        } catch { /* ignore */ }
+      }
+      void fetchVideoStatus();
+    }
+  }, [latestNotifications, session, consultationId, consultation?.status]);
+
   if (loading && !consultation) {
     return (
       <ProtectedRoute roles={["PATIENT"]}>
@@ -268,13 +289,14 @@ export default function PatientConsultationPage() {
       )}
 
       {/* Video Call Section */}
-      {consultation.status === "IN_PROGRESS" && (
+      {(consultation.status === "IN_PROGRESS" || consultation.status === "SCHEDULED") && (
         <SectionCard className="border-teal-200 bg-linear-to-br from-teal-50 to-emerald-50">
           <h3 className="font-semibold text-teal-900 mb-3">Video Consultation</h3>
           <PatientVideoButton
             consultationStatus={consultation.status}
             videoActive={videoActive}
             busy={videoBusy ? "video" : null}
+            scheduledStart={consultation.scheduledStart}
             onJoin={() => void handleJoinVideo()}
           />
         </SectionCard>

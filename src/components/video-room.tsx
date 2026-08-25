@@ -8,6 +8,8 @@ import {
   RoomAudioRenderer,
   ControlBar,
   useTracks,
+  PreJoin,
+  type LocalUserChoices,
 } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import "@livekit/components-styles";
@@ -28,6 +30,7 @@ interface VideoRoomProps {
  */
 export function VideoRoom({ token, serverUrl, onLeave }: VideoRoomProps) {
   const [hasLeft, setHasLeft] = useState(false);
+  const [preJoinChoices, setPreJoinChoices] = useState<LocalUserChoices | undefined>(undefined);
 
   const handleDisconnected = useCallback(() => {
     setHasLeft(true);
@@ -63,20 +66,35 @@ export function VideoRoom({ token, serverUrl, onLeave }: VideoRoomProps) {
         </button>
       </div>
 
-      {/* LiveKit Video Area */}
-      <div className="flex-1 min-h-0 [--lk-theme-color:var(--color-teal-600)]">
-        <LiveKitRoom
-          token={token}
-          serverUrl={serverUrl}
-          video={true}
-          audio={true}
-          onDisconnected={handleDisconnected}
-          style={{ height: "100%" }}
-          data-lk-theme="default"
-        >
-          <MinimalVideoInterface />
-          <RoomAudioRenderer />
-        </LiveKitRoom>
+      {/* LiveKit Video Area or PreJoin */}
+      <div className="flex-1 min-h-0 [--lk-theme-color:var(--color-teal-600)] bg-slate-950 flex items-center justify-center">
+        {!preJoinChoices ? (
+          <div className="max-w-2xl w-full p-6">
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-bold text-white mb-2">Ready to join?</h3>
+              <p className="text-slate-400 text-sm">Check your camera and microphone settings before joining the consultation.</p>
+            </div>
+            <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4 shadow-xl">
+              <PreJoin
+                onSubmit={(values) => setPreJoinChoices(values)}
+                onError={(err) => console.error("PreJoin error:", err)}
+              />
+            </div>
+          </div>
+        ) : (
+          <LiveKitRoom
+            token={token}
+            serverUrl={serverUrl}
+            video={preJoinChoices.videoEnabled}
+            audio={preJoinChoices.audioEnabled}
+            onDisconnected={handleDisconnected}
+            style={{ height: "100%", width: "100%" }}
+            data-lk-theme="default"
+          >
+            <MinimalVideoInterface />
+            <RoomAudioRenderer />
+          </LiveKitRoom>
+        )}
       </div>
     </div>
   );
@@ -114,16 +132,39 @@ export function DoctorVideoButton({
   consultationStatus,
   videoActive,
   busy,
+  scheduledStart,
   onStart,
   onRejoin,
 }: {
   consultationStatus: string;
   videoActive: boolean;
   busy: string | null;
+  scheduledStart?: string;
   onStart: () => void;
   onRejoin: () => void;
 }) {
-  if (consultationStatus !== "IN_PROGRESS") return null;
+  if (consultationStatus === "COMPLETED" || consultationStatus === "CANCELLED") return null;
+
+  const now = new Date();
+  const scheduledTime = scheduledStart ? new Date(scheduledStart) : now;
+  const isBeforeScheduled = now < scheduledTime && consultationStatus === "SCHEDULED";
+
+  if (isBeforeScheduled) {
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="text-sm text-teal-800">
+          You can start the video consultation once the scheduled time arrives.
+        </p>
+        <button
+          disabled
+          className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-500 cursor-not-allowed"
+        >
+          <VideoOff className="size-4" />
+          Start Video Consultation
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex gap-2">
@@ -134,7 +175,7 @@ export function DoctorVideoButton({
           className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60 transition-colors"
         >
           <Video className="size-4" />
-          {busy === "video" ? "Connecting..." : "Rejoin Video Call"}
+          {busy === "video" ? "Connecting..." : "Rejoin Video Consultation"}
         </button>
       ) : (
         <button
@@ -143,7 +184,7 @@ export function DoctorVideoButton({
           className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60 transition-all shadow-sm hover:shadow-md"
         >
           <Video className="size-4" />
-          {busy === "video" ? "Starting..." : "Start Video Call"}
+          {busy === "video" ? "Starting..." : "Start Video Consultation"}
         </button>
       )}
     </div>
@@ -157,20 +198,43 @@ export function PatientVideoButton({
   consultationStatus,
   videoActive,
   busy,
+  scheduledStart,
   onJoin,
 }: {
   consultationStatus: string;
   videoActive: boolean;
   busy: string | null;
+  scheduledStart?: string;
   onJoin: () => void;
 }) {
-  if (consultationStatus !== "IN_PROGRESS") return null;
+  if (consultationStatus === "COMPLETED" || consultationStatus === "CANCELLED") return null;
+
+  const now = new Date();
+  const scheduledTime = scheduledStart ? new Date(scheduledStart) : now;
+  const isBeforeScheduled = now < scheduledTime && consultationStatus === "SCHEDULED";
+
+  if (isBeforeScheduled) {
+    return (
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-medium text-slate-800">
+          Scheduled for {scheduledTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </p>
+        <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          <VideoOff className="size-4 shrink-0 text-slate-400" />
+          <span>The Doctor will start the video consultation at the scheduled time.</span>
+        </div>
+      </div>
+    );
+  }
 
   if (!videoActive) {
     return (
-      <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-        <VideoOff className="size-4 shrink-0 text-slate-400" />
-        <span>No active video call. Waiting for doctor to start...</span>
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-medium text-amber-700">Waiting for Doctor</p>
+        <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          <VideoOff className="size-4 shrink-0 text-slate-400" />
+          <span>The Doctor has not started the video consultation yet.</span>
+        </div>
       </div>
     );
   }
@@ -182,7 +246,7 @@ export function PatientVideoButton({
       className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60 transition-all shadow-sm hover:shadow-md animate-pulse hover:animate-none"
     >
       <Video className="size-4" />
-      {busy === "video" ? "Connecting..." : "Join Video Call"}
+      {busy === "video" ? "Connecting..." : "Join Video Consultation"}
     </button>
   );
 }

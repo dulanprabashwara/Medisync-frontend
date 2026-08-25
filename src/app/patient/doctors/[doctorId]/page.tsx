@@ -131,14 +131,7 @@ function PatientDoctorDetailsContent() {
   async function requestAppointment(event: FormEvent) {
     event.preventDefault();
     if (!session || !selectedSlot) return;
-    if (new Date(selectedSlot.startsAt).getTime() <= Date.now()) {
-      setSelectedSlot(null);
-      setError(
-        "This consultation time is no longer available. Please choose another available time.",
-      );
-      await loadSlots();
-      return;
-    }
+
     setSubmitting(true);
     setError(null);
     try {
@@ -153,7 +146,6 @@ function PatientDoctorDetailsContent() {
           ? bookingError.message
           : "The online consultation request could not be submitted.",
       );
-      await loadSlots();
     } finally {
       setSubmitting(false);
     }
@@ -323,7 +315,15 @@ function PatientDoctorDetailsContent() {
                           return (
                             <button
                               key={slot.id}
-                              onClick={() => setSelectedSlot(slot)}
+                              onClick={() => {
+                                setSelectedSlot(slot);
+                                setTimeout(() => {
+                                  window.scrollTo({
+                                    top: document.body.scrollHeight,
+                                    behavior: "smooth",
+                                  });
+                                }, 50);
+                              }}
                               aria-pressed={isSelected}
                               aria-label={`Select slot for ${new Date(slot.startsAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
                               className={`
@@ -352,7 +352,7 @@ function PatientDoctorDetailsContent() {
         </div>
       )}
 
-      {selectedSlot && new Date(selectedSlot.startsAt).getTime() > now && (
+      {selectedSlot && (
         <SectionCard>
           <div className="mb-6">
             <p className="text-xs font-bold uppercase tracking-wider text-teal-700 mb-2">

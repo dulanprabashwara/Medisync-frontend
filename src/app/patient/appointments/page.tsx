@@ -22,7 +22,7 @@ type Tab = "upcoming" | "requests" | "history";
 export default function PatientAppointmentsPage() {
   const { session } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [activeTab, setActiveTab] = useState<Tab>("upcoming");
+  const [activeTab, setActiveTab] = useState<Tab | null>(null);
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [cancelId, setCancelId] = useState<string | null>(null);
@@ -57,6 +57,7 @@ export default function PatientAppointmentsPage() {
         setMessage(
           "Your online consultation request was submitted. The doctor can now review it.",
         );
+        setActiveTab("requests");
       }
       setNow(Date.now());
       void load();
@@ -346,6 +347,11 @@ export default function PatientAppointmentsPage() {
     );
   }
 
+  const currentTab = activeTab || (groups.upcoming.length === 0 && groups.requests.length > 0 ? "requests" : "upcoming");
+
+  console.log("DEBUG FRONTEND APPOINTMENTS:", appointments);
+  console.log("DEBUG FRONTEND GROUPS:", groups);
+
   return (
     <ProtectedRoute roles={["PATIENT"]}>
       <div className="space-y-8">
@@ -373,7 +379,7 @@ export default function PatientAppointmentsPage() {
               onClick={() => setActiveTab("upcoming")}
               className={`
                 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-semibold transition-colors
-                ${activeTab === "upcoming" ? "border-teal-600 text-teal-700" : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"}
+                ${currentTab === "upcoming" ? "border-teal-600 text-teal-700" : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"}
               `}
             >
               <Calendar className="inline-block size-4 mr-2 mb-0.5" />
@@ -386,7 +392,7 @@ export default function PatientAppointmentsPage() {
               onClick={() => setActiveTab("requests")}
               className={`
                 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-semibold transition-colors
-                ${activeTab === "requests" ? "border-teal-600 text-teal-700" : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"}
+                ${currentTab === "requests" ? "border-teal-600 text-teal-700" : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"}
               `}
             >
               <Clock className="inline-block size-4 mr-2 mb-0.5" />
@@ -399,7 +405,7 @@ export default function PatientAppointmentsPage() {
               onClick={() => setActiveTab("history")}
               className={`
                 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-semibold transition-colors
-                ${activeTab === "history" ? "border-teal-600 text-teal-700" : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"}
+                ${currentTab === "history" ? "border-teal-600 text-teal-700" : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"}
               `}
             >
               <History className="inline-block size-4 mr-2 mb-0.5" />
@@ -409,7 +415,7 @@ export default function PatientAppointmentsPage() {
         </div>
 
         <div>
-          {activeTab === "upcoming" &&
+          {currentTab === "upcoming" &&
             renderList(
               groups.upcoming,
               "No upcoming consultations",
@@ -417,7 +423,7 @@ export default function PatientAppointmentsPage() {
               Calendar,
             )}
 
-          {activeTab === "requests" &&
+          {currentTab === "requests" &&
             renderList(
               groups.requests,
               "No pending requests",
@@ -425,7 +431,7 @@ export default function PatientAppointmentsPage() {
               Activity,
             )}
 
-          {activeTab === "history" &&
+          {currentTab === "history" &&
             renderList(
               groups.history,
               "No consultation history",

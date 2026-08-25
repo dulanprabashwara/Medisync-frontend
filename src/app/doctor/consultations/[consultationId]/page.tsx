@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { ConsultationCancellationPanel } from "@/components/consultation-cancellation-panel";
@@ -494,17 +494,17 @@ function DoctorConsultationContent() {
               </section>
 
               {/* Video Call Section */}
-              {consultation.status === "IN_PROGRESS" && (
+              {(consultation.status === "IN_PROGRESS" || consultation.status === "SCHEDULED") && (
                 <section className="rounded-2xl border border-teal-200 bg-linear-to-br from-teal-50 to-emerald-50 p-5 shadow-sm">
                   <h2 className="font-semibold text-teal-900 mb-3">Video Consultation</h2>
                   <DoctorVideoButton
                     consultationStatus={consultation.status}
                     videoActive={videoActive}
                     busy={busy}
+                    scheduledStart={consultation.scheduledStart}
                     onStart={() => void handleStartVideo()}
                     onRejoin={() => void handleRejoinVideo()}
                   />
-
                 </section>
               )}
 

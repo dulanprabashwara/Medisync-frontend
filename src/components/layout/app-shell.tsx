@@ -1,20 +1,27 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { Sidebar } from "./sidebar";
 import { TopBar } from "./top-bar";
 import { PublicNavbar } from "@/components/public/public-navbar";
 import { PublicFooter } from "@/components/public/public-footer";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { NotificationProvider } from "@/components/notifications/notification-provider";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { profile, loading } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
 
-  // Show nothing while auth resolves
-  if (loading) {
+  useEffect(() => {
+    if (profile && pathname === "/") {
+      router.replace(`/${profile.role.toLowerCase()}/dashboard`);
+    }
+  }, [profile, pathname, router]);
+
+  // Show nothing while auth resolves or while redirecting from root
+  if (loading || (profile && pathname === "/")) {
     return <div className="min-h-screen bg-slate-50" />;
   }
 

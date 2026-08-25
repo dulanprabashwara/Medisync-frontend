@@ -9,7 +9,6 @@ import {
   inputClassName,
   primaryButtonClassName,
 } from "@/components/auth-card";
-import { ApiError, getMyProfile } from "@/lib/api";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { useAuth } from "@/components/auth-provider";
 import { dashboardPath } from "@/types/user";
