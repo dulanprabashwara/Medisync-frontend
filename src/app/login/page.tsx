@@ -11,10 +11,12 @@ import {
 } from "@/components/auth-card";
 import { ApiError, getMyProfile } from "@/lib/api";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { useAuth } from "@/components/auth-provider";
 import { dashboardPath } from "@/types/user";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { refreshProfile } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -40,17 +42,14 @@ export default function LoginPage() {
         throw new Error("A session could not be created. Please try again.");
 
       try {
-        const profile = await getMyProfile(data.session.access_token);
-        router.replace(dashboardPath(profile.role));
-      } catch (profileError) {
-        if (
-          profileError instanceof ApiError &&
-          profileError.code === "ONBOARDING_REQUIRED"
-        ) {
-          router.replace("/onboarding");
+        const profile = await refreshProfile();
+        if (profile) {
+          router.replace(dashboardPath(profile.role));
         } else {
-          throw profileError;
+          router.replace("/onboarding");
         }
+      } catch (profileError) {
+        throw profileError;
       }
     } catch (loginError) {
       setMessage(
