@@ -1,147 +1,479 @@
-# MediSync Web
+# MediSync Frontend
 
-Next.js App Router frontend for the complete MediSync core workflow through Phase 5. Patients can move from verified-doctor discovery and consultation to a secure digital prescription; verified pharmacists can scan, verify, and dispense it exactly once. Supabase Auth handles credentials and sessions. The Spring Boot API remains the source of truth for role/account status, professional verification, scheduling, consultations, prescriptions, token hashing, and dispensing.
+MediSync is a full-stack digital healthcare management platform that connects Patients, verified Doctors, Pharmacists, and Administrators through a secure end-to-end workflow. 
 
-The frontend presents Phase 2 bookings as online consultations. Internal TypeScript names, backend routes, database records, and statuses retain the established `appointment` terminology.
+The frontend is a modern Next.js 16 (App Router) application written in TypeScript and styled with Tailwind CSS v4. It delivers role-specific portals for Patients, Doctors, Pharmacists, and Administrators, featuring realtime Patient–Doctor messaging, secure LiveKit WebRTC video consultations, digital prescription token generation (with printable PDF sheet support), external payment confirmation management, camera-based QR pharmacy scanning, and real-time notification popups.
 
-## Requirements
+---
 
-- Node.js 20.9 or newer
-- npm
-- The MediSync API running at `http://localhost:8080` by default
-- The Supabase publishable/anon key for the configured project
+## Technology Stack
 
-## Configuration
+| Category | Technology / Library | Version | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Framework** | Next.js (App Router) | `16.3.1` | React framework for SSR, static page generation, and optimized client routing |
+| **Language** | TypeScript | `6.0.3` | Type-safe application development across components, hooks, and API clients |
+| **UI Library** | React & React DOM | `19.2.8` | Core component framework with modern hooks and state management |
+| **Styling** | Tailwind CSS | `4.3.3` | Utility-first CSS framework with modern color tokens, grid, and flex layouts |
+| **Typography & Icons** | Geist & Lucide React | `1.7.2` / `1.33.0` | Custom variable typography and high-fidelity interface icons |
+| **Authentication** | `@supabase/supabase-js` / `@supabase/ssr` | `2.112.3` / `0.12.4` | Browser session management, JWT authentication, and OAuth/Email auth flow |
+| **Realtime WebSockets** | `@stomp/stompjs` | `7.2.1` | STOMP client over WebSockets for live consultation messaging and notifications |
+| **Video Consultation** | `@livekit/components-react` / `livekit-client` | `2.9.24` / `2.22.0` | High-definition WebRTC video/audio streaming components |
+| **QR Code Generation** | `qrcode.react` | `4.2.0` | Client-side vector SVG rendering of single-use prescription QR tokens |
+| **QR Code Scanning** | `html5-qrcode` | `2.3.8` | Device camera stream scanning and barcode processing for Pharmacists |
+| **UI Notifications** | `react-hot-toast` | `2.6.0` | Non-blocking realtime toast alerts for appointment and prescription events |
 
-Copy `.env.example` to `.env.local` and provide the publishable key:
+---
 
-| Variable | Purpose |
-| --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase publishable/anon key (required for authentication) |
-| `NEXT_PUBLIC_API_BASE_URL` | Spring Boot API base URL |
+## Key Features
 
-Only browser-safe values use the `NEXT_PUBLIC_` prefix. Never add database credentials or a Supabase service-role key to the frontend.
+- **Role-Based Healthcare Portals**: Dedicated, isolated workspaces for Patients, Doctors, Pharmacists, and Administrators.
+- **Doctor Discovery & Filtering**: Search active, verified medical practitioners by specialty, hospital, department, or doctor name.
+- **Appointment Slot Reservation**: Book online video consultations with real-time slot availability, minimum lead-time validation, and symptom intake submission.
+- **Doctor-Controlled LiveKit Video Consultations**: Secure, room-isolated WebRTC video calls initiated by Doctors only after scheduled consultation times.
+- **Realtime Patient–Doctor Chat**: Persistent consultation-scoped messaging supporting up to four private image/receipt attachments per message.
+- **Digital Prescriptions**: Structured medication drafting, issuance, and PDF rendering by verified medical professionals.
+- **Printable Prescription PDF**: Print physical paper prescriptions containing embedded QR codes for presentation at traditional pharmacy counters.
+- **Single-Use QR Tokens**: On-demand 256-bit cryptographically secure QR code generation for digital or printed presentation.
+- **Pharmacist Camera QR Scanner**: Camera-integrated barcode verification and single-click whole-prescription dispensing.
+- **External Payment Confirmation Flow**: Manual payment guidance and Doctor-managed payment verification for positive-fee consultations/prescriptions.
+- **Realtime STOMP Notification System**: Live header notification bell with unread badge counters and pop-up toasts for critical clinical events.
+- **Administrative Governance**: Professional doctor/pharmacist license verification, account access governance, append-only audit logging, and platform analytics.
 
-## Install and run
+---
 
+## Role Capabilities Matrix
+
+| Capability | Patient | Doctor | Pharmacist | Admin |
+| :--- | :---: | :---: | :---: | :---: |
+| Search Verified Doctors & View Slots | ✓ | — | — | — |
+| Book Consultation & Submit Symptoms | ✓ | — | — | — |
+| Accept / Reject / Cancel Booking | — | ✓ | — | — |
+| Start LiveKit Video Consultation | — | ✓ | — | — |
+| Join LiveKit Video Consultation | ✓ (if active) | ✓ | — | — |
+| Consultation Chat & Image Attachment | ✓ | ✓ | — | — |
+| Write Private Clinical Notes | — | ✓ | — | — |
+| Issue Digital Prescription | — | ✓ | — | — |
+| Confirm External Payment Receipt | — | ✓ | — | — |
+| Generate QR Code & Print PDF Sheet | ✓ | — | — | — |
+| Camera Scan & Verify QR Token | — | — | ✓ | — |
+| Dispense Whole Prescription | — | — | ✓ | — |
+| Verify Doctor / Pharmacist Licenses | — | — | — | ✓ |
+| View System Analytics & Audit Logs | — | — | — | ✓ |
+
+---
+
+## End-to-End Healthcare Workflow
+
+```
+Patient Registration & Onboarding
+       │
+       ▼
+Doctor Discovery (Search by Specialty / Department)
+       │
+       ▼
+Select Available Time Slot & Submit Symptom Form
+       │
+       ▼
+Doctor Accepts Appointment Request
+       │
+       ▼
+Scheduled Consultation Time Arrives
+       │
+       ▼
+Doctor Starts LiveKit Video Call ──► Patient Receives Realtime Notification & Joins
+       │
+       ▼
+Patient & Doctor Consult via WebRTC Video & Persistent Chat
+       │
+       ▼
+Doctor Drafts & Issues Digital Prescription
+       │
+       ├─────────────────────────────────┐
+       ▼                                 ▼
+ Fee Required (Positive Fee)         Zero-Fee Consultation
+       │                                 │
+ Patient Uploads Payment Receipt         │
+       │                                 │
+ Doctor Confirms Payment Receipt         │
+       │                                 │
+       └────────────────┬────────────────┘
+                        │
+                        ▼
+    Patient Generates Secure QR Code / Prints PDF Sheet
+                        │
+                        ▼
+ Patient Presents Mobile Phone Screen OR Printed PDF Sheet to Pharmacist
+                        │
+                        ▼
+ Verified Pharmacist Scans QR Code via Camera Scanner
+                        │
+                        ▼
+ Spring Boot API Validates Token Hash & Displays Safe Medication Details
+                        │
+                        ▼
+ Pharmacist Dispenses Prescription (Single-Use Token Voided Permanently)
+```
+
+---
+
+## Mermaid Workflow Diagram
+
+```mermaid
+flowchart TD
+    A[Patient searches verified Doctors] --> B[Selects slot & submits symptoms]
+    B --> C[Doctor reviews appointment request]
+    C -->|Reject| D[Appointment Closed]
+    C -->|Accept| E[Appointment Scheduled]
+    
+    E --> F[Scheduled time arrives]
+    F --> G[Doctor starts LiveKit video call]
+    G --> H[Patient receives STOMP notification]
+    H --> I[Patient joins LiveKit WebRTC call]
+    
+    I --> J[Consultation & persistent chat]
+    J --> K[Doctor drafts & issues digital prescription]
+    
+    K --> L{Fee required?}
+    L -->|Yes| M[Patient sends payment receipt via Chat]
+    M --> N[Doctor confirms payment]
+    N --> O[QR Code unlocked]
+    L -->|No / Zero-Fee| O
+    
+    O --> P[Patient views QR on phone OR prints paper PDF]
+    P --> Q[Verified Pharmacist scans QR via camera]
+    Q --> R[Backend validates token hash & displays medication]
+    R --> S[Pharmacist dispenses prescription]
+    S --> T[QR token invalidated / Double-dispensing blocked]
+```
+
+---
+
+## System Architecture
+
+```mermaid
+flowchart LR
+    subgraph Browser["User Browser (Client)"]
+        UI[Next.js App Shell & React Components]
+    end
+
+    subgraph External["External Services"]
+        AUTH[Supabase Auth - Identity & JWT]
+        LK[LiveKit Cloud - WebRTC Media]
+    end
+
+    subgraph Backend["MediSync Backend"]
+        API[Spring Boot REST API]
+        STOMP[Spring STOMP WebSocket Server]
+        DB[(PostgreSQL Database)]
+    end
+
+    UI <-->|Authentication & JWT Session| AUTH
+    UI -->|Bearer JWT REST Requests| API
+    UI <-->|STOMP WebSockets - Chat & Notifications| STOMP
+    UI <-->|WebRTC Video / Audio Streams| LK
+    
+    API -->|Validate JWT via JWKS| AUTH
+    API -->|Pessimistic Lock & SQL Transactions| DB
+    STOMP -->|Transaction-Bound Event Dispatch| UI
+    API -->|Issue Short-Lived Video Tokens| UI
+    API -->|Server-Side Room Operations| LK
+```
+
+---
+
+## Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor P as Patient
+    participant FE as Next.js Frontend
+    participant BE as Spring Boot API
+    participant DB as PostgreSQL DB
+    actor D as Doctor
+    participant LK as LiveKit Cloud
+    actor PH as Pharmacist
+
+    P->>FE: Book consultation slot
+    FE->>BE: POST /api/patient/appointments
+    BE->>DB: Atomic slot reservation (PESSIMISTIC_WRITE)
+    
+    D->>BE: Accept appointment
+    BE->>DB: Update status to CONFIRMED
+    BE-->>P: Send STOMP notification
+    
+    D->>BE: POST /api/doctor/consultations/{id}/start
+    BE->>DB: Create ACTIVE video session
+    BE->>BE: Generate short-lived LiveKit token
+    BE-->>D: Return Doctor LiveKit Token
+    BE-->>P: Push VIDEO_CALL_STARTED notification
+    
+    D->>LK: Join video room as Host
+    
+    P->>BE: GET /api/patient/consultations/{id}
+    BE-->>P: Return Patient LiveKit Token
+    P->>LK: Join video room as Participant
+    
+    D->>BE: POST /api/doctor/prescriptions/{id}/issue
+    BE->>DB: Save immutable prescription
+    BE-->>P: Push PRESCRIPTION_ISSUED notification
+    
+    P->>FE: Click Generate QR Code
+    FE->>BE: POST /api/patient/prescriptions/{id}/qr
+    BE->>DB: Store SHA-256 token hash & return raw token
+    FE->>FE: Render QR SVG & display Print PDF button
+    
+    PH->>FE: Scan QR via device camera
+    FE->>BE: POST /api/pharmacist/prescriptions/verify (body: qrPayload)
+    BE->>DB: SHA-256 lookup & return medication details
+    
+    PH->>BE: POST /api/pharmacist/prescriptions/dispense
+    BE->>DB: Lock prescription & insert single dispensation record
+    BE-->>P: Push DISPENSED notification
+    BE-->>PH: Return successful dispensation confirmation
+```
+
+---
+
+## LiveKit Video Consultation Architecture
+
+- **WebRTC Cloud Infrastructure**: Audio and video media flows directly between user browsers and LiveKit Cloud via encrypted WebRTC connections.
+- **Backend-Only Security**: LiveKit API keys and secrets remain strictly on the Spring Boot backend server; they are never exposed to client-side code.
+- **Doctor Access Control**: Only the assigned Doctor can start a video session, and only after the scheduled appointment start time.
+- **Patient Join Permission**: Patients cannot create or start video calls. A Patient receives a short-lived token to join only after the Doctor has started the video room.
+- **Opaque Identifiers**: Room names and identity tokens use non-PII opaque identifiers.
+- **Independent Messaging**: LiveKit native chat is disabled. Consultation communication takes place through MediSync's persistent, database-backed chat system.
+- **No Video Recording**: In accordance with medical privacy guidelines, video sessions are live-only and are neither recorded nor stored.
+
+---
+
+## Real-Time Communication Architecture
+
+MediSync uses a STOMP-over-WebSocket protocol (`/ws`) for instant interactive messaging and system notifications.
+
+1. **Consultation Chat**: 
+   - Patient and Doctor subscribe to `/user/queue/consultation-events`.
+   - Message delivery is transaction-bound: messages are saved to PostgreSQL via REST API before STOMP events are dispatched, ensuring zero message loss.
+   - Image and receipt attachments use short-lived pre-signed URLs generated by the API.
+2. **System Notifications**:
+   - Authenticated clients subscribe to `/user/queue/notifications`.
+   - real-time notifications update the top navigation bar Bell badge and trigger interactive pop-up toasts via `react-hot-toast`.
+   - Unread counts and notification state are persisted in PostgreSQL, enabling offline users to view unread notifications upon logging in.
+
+```mermaid
+sequenceDiagram
+    participant Business as Backend Business Logic
+    participant DB as PostgreSQL Database
+    participant Event as Spring Event Publisher
+    participant WS as STOMP WebSocket Server
+    participant Toast as Frontend (React-Hot-Toast)
+
+    Business->>DB: Save notification entity
+    DB-->>Business: Transaction committed
+    Business->>Event: Publish notification event (AFTER_COMMIT)
+    Event->>WS: Dispatch to user destination
+    WS-->>Toast: Receive STOMP frame
+    Toast->>Toast: Increment unread counter & show notification toast
+```
+
+---
+
+## Digital Prescription & QR Workflow
+
+1. **Prescription Issuance**: Verified Doctors create structured digital prescriptions containing medication names, dosages, frequencies, durations, and special instructions.
+2. **Printable PDF & Digital QR**: Patients can access their issued prescription in two formats:
+   - **Digital QR Code**: Generated on-demand as a 256-bit cryptographically random token rendered into a clean QR barcode using `qrcode.react`.
+   - **Printable PDF Sheet**: A clean, printable document layout including prescription details and the embedded QR code for presentation at traditional pharmacies.
+3. **Token Hash Security**: The raw QR payload exists only in memory during the session. PostgreSQL stores only the SHA-256 hash of the token.
+4. **Single-Use Dispensing**: Scanning the QR code at a partner pharmacy invokes the backend verification endpoint. Once dispensed, the single-use token is voided permanently, preventing re-dispensing or QR reuse.
+
+---
+
+## External Payment Workflow
+
+MediSync provides a transparent external payment verification flow for positive-fee consultations:
+
+1. **Payment Instructions**: The Doctor sets the consultation/prescription fee and provides payment guidance (e.g., bank transfer details).
+2. **Receipt Submission**: The Patient completes payment externally and uploads the receipt image directly within the consultation chat.
+3. **Doctor Confirmation**: The assigned Doctor reviews the receipt and clicks **Confirm Payment** (`POST /api/doctor/prescriptions/{id}/confirm-payment`).
+4. **QR Unlocking**: Upon payment confirmation, the prescription status updates and the **Generate QR Code** and **Print PDF** buttons are unlocked for the Patient.
+5. **Zero-Fee Exception**: Prescriptions marked with a zero fee automatically bypass payment confirmation and are instantly eligible for QR generation.
+
+---
+
+## Complete Application Screens & Route Directory
+
+### Public & Authentication Routes
+| Route | Screen / Purpose |
+| :--- | :--- |
+| `/` | Modernized MediSync Homepage (Hero, Features, Workflows, FAQ Accordion) |
+| `/about` | Platform mission, clinical standards, trust pillars, and team values |
+| `/features` | Core feature showcase for Patients, Doctors, Pharmacists, and Administrators |
+| `/guides` | Step-by-step user manuals and workflow guides |
+| `/login` | User login screen supporting Supabase Email/Password authentication |
+| `/register` | User account registration |
+| `/onboarding` | Role selection (Patient, Doctor, Pharmacist) and profile initialization |
+
+### Patient Workspace (`/patient/*`)
+| Route | Screen / Purpose |
+| :--- | :--- |
+| `/patient/dashboard` | Care summary, upcoming appointments, and quick action cards |
+| `/patient/doctors` | Search verified Doctors with specialty and hospital filters |
+| `/patient/doctors/[doctorId]` | View Doctor profile, select available time slots, and submit symptoms |
+| `/patient/appointments` | List of requested, confirmed, and past consultation bookings |
+| `/patient/consultations/[id]` | Consultation workspace: LiveKit video room, real-time chat, and history |
+| `/patient/prescriptions` | Issued digital prescriptions and dispensing status |
+| `/patient/prescriptions/[id]` | Prescription detail view, QR code generator, and printable PDF view |
+| `/patient/notifications` | Persistent notification history and unread message center |
+| `/patient/profile` | Personal profile management and phone number updates |
+
+### Doctor Workspace (`/doctor/*`)
+| Route | Screen / Purpose |
+| :--- | :--- |
+| `/doctor/dashboard` | Clinical overview, daily schedule, and urgent patient requests |
+| `/doctor/availability` | Create date-based availability windows, block/unblock time slots |
+| `/doctor/appointments` | Review pending consultation requests (Accept, Reject, Cancel) |
+| `/doctor/consultations/[id]` | Clinical workspace: Video controls, chat, symptom intake, and private notes |
+| `/doctor/prescriptions` | Digital prescription history and active draft manager |
+| `/doctor/prescriptions/[id]` | Prescription editor, medication item builder, and issue confirmation |
+| `/doctor/notifications` | Real-time appointment and payment notifications |
+| `/doctor/profile` | Professional verification profile, license details, and status review |
+
+### Pharmacist Workspace (`/pharmacist/*`)
+| Route | Screen / Purpose |
+| :--- | :--- |
+| `/pharmacist/dashboard` | Pharmacy operational dashboard and dispensing statistics |
+| `/pharmacist/scan` | Live camera QR code scanner, payload verification, and dispensing confirmation |
+| `/pharmacist/dispensing-history` | Audit log of past dispensations executed by the pharmacist |
+| `/pharmacist/notifications` | Account status and platform notifications |
+| `/pharmacist/profile` | Pharmacy license submission and verification status management |
+
+### Administrator Workspace (`/admin/*`)
+| Route | Screen / Purpose |
+| :--- | :--- |
+| `/admin/dashboard` | Governance dashboard, pending verifications, and system health metrics |
+| `/admin/users` | User directory with account status controls (Ban / Unban) |
+| `/admin/verifications` | Professional verification queue for Doctor and Pharmacist applications |
+| `/admin/hospitals` | Master directory of affiliated hospitals and clinical institutions |
+| `/admin/departments` | Master directory of medical departments |
+| `/admin/specializations` | Master directory of medical specialties |
+| `/admin/analytics` | Platform utilization metrics, consultation trends, and user activity |
+| `/admin/audit-logs` | Filterable append-only system audit log |
+
+---
+
+## Project Structure
+
+```text
+d:/MediSync/frontend/
+├── public/                     # Static public assets and branding graphics
+├── src/
+│   ├── app/                    # Next.js 16 App Router pages and layouts
+│   │   ├── (auth)/             # Authentication routes (login, register, onboarding)
+│   │   ├── about/              # About MediSync page
+│   │   ├── admin/              # Administrator portal pages
+│   │   ├── doctor/             # Doctor clinical portal pages
+│   │   ├── features/           # Platform features overview page
+│   │   ├── guides/             # End-to-end user manuals page
+│   │   ├── patient/            # Patient care portal pages
+│   │   ├── pharmacist/         # Pharmacist dispensing portal pages
+│   │   ├── globals.css         # Tailwind CSS v4 design tokens and global styles
+│   │   ├── layout.tsx          # Root application layout wrapper
+│   │   └── page.tsx            # Modernized public homepage
+│   ├── components/             # Reusable UI components
+│   │   ├── auth-card.tsx       # Standardized authentication container styles
+│   │   ├── auth-provider.tsx   # React Auth context and Supabase session listener
+│   │   ├── faq-accordion.tsx   # Smooth height-animated light-box FAQ accordion
+│   │   ├── loading-panel.tsx   # Animated loading indicators
+│   │   ├── layout/             # App shell, top navigation bar, and sidebar
+│   │   ├── notifications/      # Realtime notification context, bell, and toast UI
+│   │   └── public/             # Navbar, footer, and marketing components
+│   ├── hooks/                  # Custom React hooks (STOMP WebSocket, media queries)
+│   ├── lib/                    # API client, Supabase browser client, and utils
+│   └── types/                  # TypeScript domain interfaces and DTO declarations
+├── .env.example                # Safe environment variable configuration template
+├── package.json                # Frontend dependencies and npm scripts
+├── tsconfig.json               # TypeScript compiler configuration
+└── next.config.ts              # Next.js runtime configuration
+```
+
+---
+
+## Environment Variables
+
+Create `.env.local` in `D:\MediSync\frontend\` using the template below. **Do not include actual production secrets.**
+
+```env
+# Supabase Authentication (Client-Safe Public Keys)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+
+# Backend Spring Boot API Endpoint
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+```
+
+> **Security Note**: Only variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. Database credentials, LiveKit API secrets, and Supabase service-role keys must **never** be placed in the frontend configuration.
+
+---
+
+## Installation & Running Locally
+
+### Prerequisites
+- **Node.js**: v20.9.0 or newer
+- **npm**: v10.0.0 or newer
+- **MediSync API**: Running locally on `http://localhost:8080` (or configured API URL)
+
+### 1. Clone & Install
 ```powershell
+cd D:\MediSync\frontend
 npm install
+```
+
+### 2. Configure Environment
+```powershell
+copy .env.example .env.local
+```
+Fill in your `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+
+### 3. Start Development Server
+```powershell
 npm run dev
 ```
+Open `http://localhost:3000` in your web browser.
 
-Open `http://localhost:3000`.
+---
 
-## Authentication setup
-
-In Supabase Auth, enable email/password authentication and configure the local site/redirect URLs, including:
-
-```text
-http://localhost:3000/auth/callback
-```
-
-Registration creates only a Supabase Auth account. Once authenticated, the frontend calls `GET /api/users/me` with the Supabase access token. A missing application profile routes the user to `/onboarding`; the backend creates and returns the trusted role, and the frontend routes to the matching protected dashboard.
-
-Public onboarding offers Patient, Doctor, and Pharmacist only. There is no public Admin choice or Admin registration endpoint.
-
-Phase 2A adds an administrator portal for hospital, department, specialization, and doctor-verification management. Pending doctors complete a database-backed professional profile, submit it for review, and become active only after an administrator approves it.
-
-## Phase 2B online consultation pages
-
-| Route | Purpose |
-| --- | --- |
-| `/doctor/availability` | Create online consultation availability, inspect generated times, block/unblock open times, and safely deactivate windows |
-| `/doctor/appointments` | Review consultation requests and accept, decline, or doctor-cancel online consultations |
-| `/patient/doctors` | Search ACTIVE VERIFIED doctors by name and professional reference filters |
-| `/patient/doctors/[doctorId]` | View a patient-safe profile, select an AVAILABLE future online consultation time, and submit symptoms |
-| `/patient/appointments` | View pending, confirmed, declined, and cancelled online consultations and cancel eligible consultations |
-
-All calls use the centralized authenticated API client. The booking UI sends `slotId` plus the symptom form only; it never treats browser-supplied doctor or schedule values as authoritative. Loading, empty, validation, conflict, and duplicate-submission states are represented on each workflow page.
-
-## Phase 3 online consultation pages
-
-| Route | Purpose |
-| --- | --- |
-| `/patient/consultations/[consultationId]` | Patient-safe details, lifecycle status, persistent history, and consultation-scoped chat |
-| `/doctor/consultations/[consultationId]` | Lifecycle controls, consultation chat, symptoms, and the assigned doctor's private clinical note |
-
-The patient and doctor appointment lists expose consultation links and the `SCHEDULED`, `IN_PROGRESS`, `COMPLETED`, or `CANCELLED` status after an appointment is confirmed. The doctor may start and complete the session. Completed chat remains available for related communication; cancelled chat retains its history but is read-only. Patient screens never request or render clinical-note data.
-
-Messages are saved through authenticated REST before they appear as durable history. A single STOMP client for the open consultation subscribes to `/user/queue/consultation-events` for live message and status delivery. Before every initial connection or reconnect, the client retrieves the latest Supabase session and puts its access token in the STOMP `Authorization` header, never in the WebSocket URL. On connection it reloads REST details and history, deduplicating by message ID, so missed live events do not cause data loss.
-
-## Phase 4 digital prescription pages
-
-| Route | Purpose |
-| --- | --- |
-| `/doctor/prescriptions` | Doctor prescription and draft history |
-| `/doctor/prescriptions/[prescriptionId]` | Lifecycle-aware draft editor, explicit draft discard, issue confirmation, immutable details, and cancellation |
-| `/patient/prescriptions` | Patient list of issued and cancelled prescriptions |
-| `/patient/prescriptions/[prescriptionId]` | Medication details, status, print view, and on-demand secure QR generation |
-
-The doctor consultation room exposes prescription history and a create/continue-draft action only while the consultation is scheduled or in progress. Issuance is shown only in progress. Completed consultations keep existing prescriptions viewable and chat writable, but hide prescribing controls; a legacy completed draft is read-only and can only be discarded.
-
-Patient list responses contain no QR material. An eligible detail page provides a **Generate QR** action; the raw opaque payload exists only in browser component state for that response, disappears on refresh, and regeneration invalidates the earlier QR. Cancelled prescription screens show status, date, and reason without medicine items, general instructions, QR controls, or an internal prescription UUID. All prescription UUIDs remain routing details only and are not rendered as labels.
-
-Availability forms reject obvious past starts before submission. Doctor and patient scheduling screens remove elapsed windows/slots on a lightweight one-minute clock refresh, while the backend remains authoritative for future and lead-time checks.
-
-## Phase 5 pharmacist and dispensing pages
-
-| Route | Purpose |
-| --- | --- |
-| `/pharmacist/profile` | Complete, submit, correct, and review pharmacist professional verification status |
-| `/pharmacist/scan` | Browser-camera QR scanning, manual development fallback, safe prescription review, and explicit dispensing confirmation |
-| `/pharmacist/dispensing-history` | Newest-first owned dispensing history with immutable medication detail |
-| `/admin/dashboard` | Adds pending pharmacist review, approval, and rejection alongside doctor verification |
-
-The scanner dynamically imports `html5-qrcode` only in the browser, prefers the rear camera, stops camera resources after detection/unmount, and suppresses duplicate detections. The raw payload remains only in React component state, is sent in an authenticated POST body, and is cleared after successful dispensing. It is never placed in a URL, browser storage, cookie, or console log. Manual paste provides the same backend verification path without persisting the value.
-
-Patient prescription pages derive **Active**, **Dispensed**, **Expired**, and **Cancelled** display state. Dispensed details show date/pharmacy and remove QR generation. Doctor lists/details show fulfillment status and remove cancellation after dispensing. Pharmacist screens never request symptoms, consultation chat, or private clinical notes.
-
-```text
-Patient generates QR → verified pharmacist scans → authenticated Spring Boot POST
-→ SHA-256 token lookup → safe medicine review → explicit confirmation
-→ single dispensing record + QR revocation → patient/doctor Dispensed status
-```
-
-## Final expansion
-
-The administrator portal now includes `/admin/users`, user details with ban/unban history, `/admin/audit-logs`,
-and `/admin/analytics`. User and audit tables are paginated; doctor accounts can be filtered by hospital,
-department, and specialization. Operational views intentionally omit chat text/images, symptoms, clinical notes,
-medicine details, QR material, and authentication secrets.
-
-Patients, doctors, and pharmacists can upload, replace, or remove an optional profile photo. Consultation chat
-supports up to four private JPEG, PNG, or WebP images per message, including image-only messages. Completed
-consultations remain writable for receipt communication; cancelled consultations remain read-only. Images use
-short-lived URLs issued by the API, and the Supabase service-role key is never a frontend variable.
-
-Positive-fee prescriptions display manual external-payment guidance and keep QR generation locked. The patient
-can open the consultation chat and send a receipt; the assigned verified doctor reviews it and confirms receipt.
-Only then does the Generate QR action become available. MediSync does not process payments or store bank details.
-
-The shared authentication lifecycle keeps the current portal rendered during same-user token/profile refreshes.
-The API client enforces a 15-second timeout, caller cancellation, and one controlled session-refresh retry after a
-401. WebSocket reconnects obtain the current Supabase token immediately before connecting.
-
-## Product roadmap
-
-- Phase 1: authentication, roles, and security (complete)
-- Phase 2A: reference data, professional profiles, and administrator verification (complete)
-- Phase 2B: availability, doctor discovery, online consultation booking, symptom submission, and booking transitions (complete)
-- Phase 3: online consultation session, secure doctor-patient chat, private clinical notes, and consultation status (complete)
-- Phase 4: digital prescriptions, patient prescription view, and hashed on-demand QR support (complete)
-- Phase 5: pharmacist verification, QR scanning and verification, dispensing, reuse prevention, and dispensing history (complete)
-
-**MEDISYNC CORE PROJECT COMPLETE** after authenticated browser acceptance succeeds.
-
-Remote monitoring and formal follow-up scheduling are outside the core roadmap.
-
-## Quality checks
+## Quality Commands
 
 ```powershell
+# Run ESLint validation
 npm run lint
+
+# Run TypeScript type check
 npm run typecheck
+
+# Execute Next.js production build verification
 npm run build
 ```
 
-The app can be built without a real anon key. Authentication screens then show a clear configuration error until `NEXT_PUBLIC_SUPABASE_ANON_KEY` is supplied in `.env.local`.
+---
+
+## Security & Privacy Safeguards
+
+- **JWT Session Tokens**: Authenticated requests attach Supabase Bearer tokens in the `Authorization` header.
+- **Client-Side Authorization Enforcement**: Route middleware and component checks restrict portal access to matching verified roles (`PATIENT`, `DOCTOR`, `PHARMACIST`, `ADMIN`).
+- **Memory-Only QR Token Storage**: Raw prescription QR token payloads exist solely in component state during active display and are cleared immediately after rendering or dispensing.
+- **Transient Media Links**: Consultation chat attachments and profile photos use short-lived pre-signed URLs; raw storage buckets remain private.
+- **Admin Clinical Privacy**: System administrators can manage user accounts and verifications but have no access to clinical consultation notes, patient–doctor chat messages, or prescription QR secrets.
+
+---
+
+## Companion Backend Repository
+
+The backend source code is located in the companion repository:  
+📁 [`D:\MediSync\backend`](../backend/README.md) — Spring Boot 3.5 API with PostgreSQL, STOMP WebSockets, and LiveKit Java Server SDK.
+
+---
+
+## License & Project Context
+
+MediSync was designed and built as a full-stack digital healthcare platform for modern remote healthcare delivery. All core features including professional verification, video consultations, persistent chat, digital prescribing, external payment confirmation, and single-use QR dispensing are implemented.

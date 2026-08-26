@@ -71,9 +71,9 @@ export default function FeaturesPage() {
               <FeatureItem title="HD Video Consultations" description="Face-to-face appointments directly in your browser" />
               <FeatureItem title="Real-Time Doctor Chat" description="Instant text & photo messaging during active care" />
               <FeatureItem title="Verified Doctor Search" description="Filter by specialty, availability, and rating" />
-              <FeatureItem title="Symptom Submission" description="Provide history before your consultation starts" />
-              <FeatureItem title="Digital QR Tokens" description="Scan at any partner pharmacy for instant pickup" />
-              <FeatureItem title="Prescription History" description="Access past digital records anytime" />
+              <FeatureItem title="Printable PDF Prescriptions" description="Print physical paper prescriptions with embedded QR code" />
+              <FeatureItem title="Digital QR Tokens" description="Present on phone screen or printed sheet at pharmacy" />
+              <FeatureItem title="Prescription History" description="Access past digital records & printed copies anytime" />
             </ul>
           </div>
 
@@ -116,22 +116,27 @@ export default function FeaturesPage() {
                 </div>
                 <div className="bg-teal-950/70 border border-teal-800/50 rounded-xl p-3 text-xs text-slate-200">
                   <p className="font-medium text-teal-300 mb-1">Dr. Aruni Perera:</p>
-                  &quot;I have reviewed your symptoms and issued a digital prescription. Present your QR code at the pharmacy.&quot;
+                  &quot;I have issued your prescription. You can view the QR code on your phone or print out the PDF sheet for your pharmacist.&quot;
                 </div>
               </div>
 
-              {/* QR Code Bar Mock */}
-              <div className="flex items-center justify-between rounded-xl bg-slate-800 p-3.5 border border-slate-700">
+              {/* QR Code & Print Prescription Bar Mock */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl bg-slate-800 p-3.5 border border-slate-700">
                 <div className="flex items-center gap-3">
-                  <QrCode className="size-7 text-teal-400" />
+                  <QrCode className="size-7 text-teal-400 shrink-0" />
                   <div>
                     <p className="text-xs font-bold text-slate-100">Prescription Token Ready</p>
-                    <p className="text-[11px] text-slate-400">Valid for 1-time pharmacy scan</p>
+                    <p className="text-[11px] text-slate-400">Digital phone QR or Printable paper PDF</p>
                   </div>
                 </div>
-                <span className="text-xs font-semibold text-teal-400 bg-teal-950 px-3 py-1.5 rounded-lg border border-teal-800">
-                  View QR
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-teal-300 bg-teal-950 px-2.5 py-1.5 rounded-lg border border-teal-800 text-center">
+                    Print PDF
+                  </span>
+                  <span className="text-xs font-semibold text-teal-400 bg-teal-950 px-2.5 py-1.5 rounded-lg border border-teal-800 text-center">
+                    View QR
+                  </span>
+                </div>
               </div>
             </div>
           </div>

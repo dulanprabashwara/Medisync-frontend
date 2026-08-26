@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FaqAccordion } from "@/components/public/faq-accordion";
 import {
   ChevronRight,
   FileText,
@@ -13,17 +14,21 @@ import {
   CheckCircle2,
   Video,
   MessageSquare,
+  Sparkles,
+  Lock,
+  Calendar,
+  Check,
 } from "lucide-react";
 
 export const metadata = {
   title: "MediSync | Connected Digital Healthcare",
   description:
-    "MediSync connects Patients, verified Doctors and Pharmacists through one secure digital healthcare workflow with HD Video Consultations and Real-Time Chat.",
+    "MediSync connects Patients, verified Doctors, and Pharmacists through one secure digital healthcare workflow with HD Video Consultations and Real-Time Chat.",
 };
 
 export default function HomePage() {
   return (
-    <main className="flex flex-col min-h-screen">
+    <main className="flex flex-col min-h-screen bg-white">
       <HeroSection />
       <ValueStrip />
       <WhatIsMediSync />
@@ -42,51 +47,54 @@ export default function HomePage() {
 
 function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-slate-50/80 via-slate-50/50 to-white pt-10 pb-16 lg:pt-16 lg:pb-28">
+    <section className="relative overflow-hidden bg-linear-to-b from-slate-50 via-slate-50/50 to-white pt-12 pb-16 lg:pt-20 lg:pb-28 border-b border-slate-100">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
           
           {/* Left Column: Text & CTAs */}
           <div className="lg:col-span-6 space-y-6 text-left">
-            <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 border border-teal-200/80 px-3.5 py-1 text-xs font-semibold tracking-wider text-[#0b6e61] uppercase">
-              <Video className="size-3.5 text-teal-600" /> Live Video & Real-Time Chat
+            <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 border border-teal-200/80 px-4 py-1.5 text-xs font-bold tracking-wider text-[#0b6e61] uppercase shadow-xs">
+              <Sparkles className="size-4 text-teal-600 animate-pulse" /> Live HD Video & Real-Time Chat
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-[1.12]">
+            
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.12]">
               Healthcare,<br />
               connected from<br />
               consultation to<br />
-              pharmacy.
+              <span className="text-[#0b6e61]">pharmacy.</span>
             </h1>
+
             <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-lg">
-              Seamlessly connecting Patients, Doctors, and Pharmacists in one unified, secure ecosystem featuring HD Video Consultations, real-time messaging, and digital prescriptions.
+              Seamlessly connecting Patients, Doctors, and Pharmacists in one unified, secure ecosystem featuring HD Video Consultations, real-time messaging, and paperless QR prescriptions.
             </p>
+
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <Link
                 href="/register"
-                className="rounded-xl bg-[#0b6e61] px-6 py-3.5 text-base font-semibold text-white shadow-sm hover:bg-[#095b50] transition-all"
+                className="rounded-xl bg-[#0b6e61] px-7 py-4 text-base font-semibold text-white shadow-md hover:bg-[#095b50] hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
               >
                 Create Account
               </Link>
               <Link
                 href="/login"
-                className="rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-base font-medium text-slate-800 hover:bg-slate-50 transition-all"
+                className="rounded-xl border border-slate-300 bg-white px-7 py-4 text-base font-medium text-slate-800 hover:bg-slate-50 hover:border-slate-400 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
               >
                 Sign In
               </Link>
             </div>
           </div>
 
-          {/* Right Column: 3D Doctor & Floating Virus Graphics */}
+          {/* Right Column: Doctor & Virus Graphics */}
           <div className="lg:col-span-6 relative flex justify-center items-center mt-6 lg:mt-0">
             {/* Soft Radial Glow */}
-            <div className="absolute w-[350px] h-[350px] sm:w-[450px] sm:h-[450px] bg-teal-100/50 rounded-full blur-3xl -z-10" />
+            <div className="absolute w-87.5 h-87.5 sm:w-112.5 sm:h-112.5 bg-teal-200/40 rounded-full blur-3xl -z-10" />
 
             <div className="relative flex items-center justify-center w-full max-w-lg">
               {/* Doctor Character */}
               <img
                 src="/landing/doctor-front.png"
                 alt="MediSync Doctor"
-                className="w-full max-w-md object-contain z-10 relative drop-shadow-md"
+                className="w-full max-w-md object-contain z-10 relative drop-shadow-xl hover:scale-[1.01] transition-transform duration-500"
               />
 
               {/* Pixel Divider Accent */}
@@ -113,28 +121,28 @@ function HeroSection() {
 
 function ValueStrip() {
   return (
-    <section className="border-y border-slate-200 bg-white py-8">
+    <section className="border-b border-slate-200/80 bg-white py-8">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-y-6 sm:grid-cols-3 lg:grid-cols-5 sm:gap-x-6 text-center sm:text-left">
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <BadgeCheck className="size-8 text-teal-600 shrink-0" />
-            <span className="text-base font-semibold text-slate-900">Verified Doctors</span>
+          <div className="group flex flex-col sm:flex-row items-center gap-3 p-2 rounded-xl hover:bg-teal-50/50 transition-colors">
+            <BadgeCheck className="size-8 text-teal-600 group-hover:scale-110 transition-transform shrink-0" />
+            <span className="text-sm font-bold text-slate-900">Verified Doctors</span>
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <Video className="size-8 text-teal-600 shrink-0" />
-            <span className="text-base font-semibold text-slate-900">HD Video Calls</span>
+          <div className="group flex flex-col sm:flex-row items-center gap-3 p-2 rounded-xl hover:bg-teal-50/50 transition-colors">
+            <Video className="size-8 text-teal-600 group-hover:scale-110 transition-transform shrink-0" />
+            <span className="text-sm font-bold text-slate-900">HD Video Calls</span>
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <MessageSquare className="size-8 text-teal-600 shrink-0" />
-            <span className="text-base font-semibold text-slate-900">Real-Time Chat</span>
+          <div className="group flex flex-col sm:flex-row items-center gap-3 p-2 rounded-xl hover:bg-teal-50/50 transition-colors">
+            <MessageSquare className="size-8 text-teal-600 group-hover:scale-110 transition-transform shrink-0" />
+            <span className="text-sm font-bold text-slate-900">Real-Time Chat</span>
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <FileText className="size-8 text-teal-600 shrink-0" />
-            <span className="text-base font-semibold text-slate-900">Digital Prescriptions</span>
+          <div className="group flex flex-col sm:flex-row items-center gap-3 p-2 rounded-xl hover:bg-teal-50/50 transition-colors">
+            <FileText className="size-8 text-teal-600 group-hover:scale-110 transition-transform shrink-0" />
+            <span className="text-sm font-bold text-slate-900">Digital Prescriptions</span>
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <QrCode className="size-8 text-teal-600 shrink-0" />
-            <span className="text-base font-semibold text-slate-900">Secure QR Dispensing</span>
+          <div className="group flex flex-col sm:flex-row items-center gap-3 p-2 rounded-xl hover:bg-teal-50/50 transition-colors">
+            <QrCode className="size-8 text-teal-600 group-hover:scale-110 transition-transform shrink-0" />
+            <span className="text-sm font-bold text-slate-900">Secure QR Dispensing</span>
           </div>
         </div>
       </div>
@@ -144,17 +152,17 @@ function ValueStrip() {
 
 function WhatIsMediSync() {
   return (
-    <section className="bg-slate-50 py-20 sm:py-24">
+    <section className="bg-slate-50/60 py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:text-center">
-          <h2 className="text-base font-semibold leading-7 text-teal-700">
-            One connected healthcare journey
+        <div className="mx-auto max-w-3xl text-center space-y-4">
+          <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 border border-teal-200/80 px-4 py-1.5 text-xs font-bold text-[#0b6e61] uppercase tracking-wider">
+            Connected Care Paradigm
+          </div>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+            Bringing Patients, Doctors, and Pharmacists together
           </h2>
-          <p className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            Bringing Patients, Doctors, and Pharmacists together.
-          </p>
-          <p className="mt-6 text-lg leading-8 text-slate-600">
-            MediSync reduces the fragmented steps between finding care, joining a face-to-face HD Video consultation, chatting with your doctor, receiving a digital prescription, confirming payment, and dispensing medicine at the pharmacy. It all happens securely in one place.
+          <p className="text-base sm:text-lg leading-relaxed text-slate-600 pt-2">
+            MediSync eliminates fragmented healthcare steps. From finding verified specialists and attending face-to-face HD Video consultations to sharing symptom images, receiving digital prescriptions, and presenting single-use QR tokens at the pharmacy—everything operates in one encrypted ecosystem.
           </p>
         </div>
       </div>
@@ -166,66 +174,63 @@ function HowItWorks() {
   const steps = [
     {
       name: "1. Find a Doctor",
-      description:
-        "Browse active, verified Doctors by professional information.",
+      description: "Browse verified Doctor profiles by specialty and qualification.",
     },
     {
-      name: "2. Request a Consultation",
-      description: "Choose an available time and describe your symptoms.",
+      name: "2. Request Consultation",
+      description: "Choose an open time slot and submit your initial symptom notes.",
     },
     {
-      name: "3. HD Video & Chat Consultation",
-      description:
-        "Join a live face-to-face HD video call and chat securely with your Doctor during your scheduled time.",
+      name: "3. HD Video & Chat",
+      description: "Join a face-to-face video session and exchange messages in real-time.",
     },
     {
-      name: "4. Receive a Prescription",
-      description:
-        "Your Doctor can issue a structured digital prescription when medically appropriate.",
+      name: "4. Receive Prescription",
+      description: "Your Doctor drafts a structured digital prescription attached to your file.",
     },
     {
-      name: "5. Complete Payment",
-      description:
-        "If a consultation fee applies, follow instructions and share the receipt in Chat.",
+      name: "5. Complete Fee Payment",
+      description: "Upload your receipt in Chat for quick Doctor confirmation.",
     },
     {
-      name: "6. Generate QR",
-      description:
-        "After payment confirmation (or immediately if free), generate your prescription QR.",
+      name: "6. Generate Prescription QR",
+      description: "Unlock a single-use QR token once payment is confirmed or zero-fee.",
     },
     {
-      name: "7. Visit Pharmacist",
-      description: "Present the QR code to a verified Pharmacist in person.",
+      name: "7. Visit Pharmacy",
+      description: "Present the QR code on your phone screen to any partner Pharmacist.",
     },
     {
       name: "8. Medicine Dispensed",
-      description:
-        "The Pharmacist securely verifies and records the dispensing.",
+      description: "Pharmacist scans the QR code to safely dispense and void the token.",
     },
   ];
 
   return (
     <section className="bg-white py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:max-w-none">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl text-center mb-16">
+        <div className="mx-auto max-w-3xl text-center mb-16 space-y-3">
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             How MediSync Works
           </h2>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-            {steps.map((step, index) => (
-              <div key={step.name} className="relative pl-9">
-                <div className="absolute left-0 top-1 size-6 flex items-center justify-center rounded-full bg-teal-100 text-teal-700 font-bold text-xs">
-                  {index + 1}
-                </div>
-                <h3 className="text-base font-semibold leading-7 text-slate-900">
-                  {step.name.split(". ")[1]}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  {step.description}
-                </p>
+          <p className="text-slate-600 text-base sm:text-lg">A simple 8-step journey from booking to medicine pickup</p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {steps.map((step, index) => (
+            <div
+              key={step.name}
+              className="group rounded-2xl bg-slate-50/70 border border-slate-200/70 p-6 hover:-translate-y-1 hover:border-teal-400 hover:bg-white hover:shadow-xl transition-all duration-300 space-y-3"
+            >
+              <div className="size-9 rounded-xl bg-[#0b6e61] text-white font-bold text-sm flex items-center justify-center shadow-md group-hover:bg-teal-600 group-hover:scale-110 transition-all">
+                {index + 1}
               </div>
-            ))}
-          </div>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-teal-800 transition-colors">
+                {step.name.split(". ")[1]}
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed">{step.description}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -234,119 +239,121 @@ function HowItWorks() {
 
 function RolesSection() {
   return (
-    <section className="bg-slate-900 py-20 sm:py-24 text-white">
+    <section className="bg-slate-950 py-20 sm:py-28 text-white">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center mb-16">
+        <div className="mx-auto max-w-2xl text-center mb-16 space-y-3">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Built for every part of the care journey
           </h2>
+          <p className="text-slate-400 text-base">Tailored workspaces for Patients, Doctors, and Pharmacists</p>
         </div>
+
         <div className="grid gap-8 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-700 bg-slate-800 p-8 flex flex-col">
-            <Users className="size-10 text-teal-400 mb-6" />
-            <h3 className="text-xl font-bold mb-4">Patients</h3>
-            <ul className="space-y-3 text-sm text-slate-300 flex-1 mb-8">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Find verified
-                Doctors
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Book
-                consultation slots
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Join live HD
-                Video calls
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Real-time Chat
-                & symptom sharing
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Receive
-                digital prescriptions
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Generate
-                prescription QR
-              </li>
-            </ul>
+          {/* Patient Card */}
+          <div className="group rounded-3xl border border-slate-800 bg-slate-900/90 p-8 flex flex-col justify-between space-y-6 shadow-xl hover:-translate-y-2 hover:border-teal-500 hover:shadow-2xl hover:shadow-teal-950/50 transition-all duration-300">
+            <div className="space-y-4">
+              <div className="size-14 rounded-2xl bg-teal-500/10 border border-teal-400/20 flex items-center justify-center text-teal-400 group-hover:bg-teal-500 group-hover:text-white transition-all duration-300">
+                <Users className="size-7" />
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold text-white">Patients</h3>
+              <ul className="space-y-3.5 text-sm text-slate-300">
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Find verified Doctors
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Book consultation slots
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Join live HD Video calls
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Real-time Chat & symptom sharing
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Receive digital prescriptions
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Generate prescription QR
+                </li>
+              </ul>
+            </div>
             <Link
               href="/guides#patient"
-              className="text-teal-400 font-medium hover:text-teal-300 flex items-center gap-1"
+              className="inline-flex items-center gap-2 text-sm font-bold text-teal-400 group-hover:text-teal-300 group-hover:translate-x-1 transition-all pt-2"
             >
               Explore Patient Guide <ArrowRight className="size-4" />
             </Link>
           </div>
-          <div className="rounded-2xl border border-slate-700 bg-slate-800 p-8 flex flex-col">
-            <HeartHandshake className="size-10 text-teal-400 mb-6" />
-            <h3 className="text-xl font-bold mb-4">Doctors</h3>
-            <ul className="space-y-3 text-sm text-slate-300 flex-1 mb-8">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Manage
-                availability
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Host HD Video
-                consultations
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Real-time Chat
-                with Patients
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Maintain
-                private clinical notes
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Create digital
-                prescriptions
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Confirm
-                consultation payments
-              </li>
-            </ul>
+
+          {/* Doctor Card */}
+          <div className="group rounded-3xl border border-slate-800 bg-slate-900/90 p-8 flex flex-col justify-between space-y-6 shadow-xl hover:-translate-y-2 hover:border-teal-500 hover:shadow-2xl hover:shadow-teal-950/50 transition-all duration-300">
+            <div className="space-y-4">
+              <div className="size-14 rounded-2xl bg-teal-500/10 border border-teal-400/20 flex items-center justify-center text-teal-400 group-hover:bg-teal-500 group-hover:text-white transition-all duration-300">
+                <HeartHandshake className="size-7" />
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold text-white">Doctors</h3>
+              <ul className="space-y-3.5 text-sm text-slate-300">
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Manage availability
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Host HD Video consultations
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Real-time Chat with Patients
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Maintain private clinical notes
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Create digital prescriptions
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Confirm consultation payments
+                </li>
+              </ul>
+            </div>
             <Link
               href="/guides#doctor"
-              className="text-teal-400 font-medium hover:text-teal-300 flex items-center gap-1"
+              className="inline-flex items-center gap-2 text-sm font-bold text-teal-400 group-hover:text-teal-300 group-hover:translate-x-1 transition-all pt-2"
             >
               Explore Doctor Guide <ArrowRight className="size-4" />
             </Link>
           </div>
-          <div className="rounded-2xl border border-slate-700 bg-slate-800 p-8 flex flex-col">
-            <Pill className="size-10 text-teal-400 mb-6" />
-            <h3 className="text-xl font-bold mb-4">Pharmacists</h3>
-            <ul className="space-y-3 text-sm text-slate-300 flex-1 mb-8">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Verify
-                prescription QR
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Review
-                authorized medicine
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Confirm
-                whole-prescription dispensing
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> View
-                dispensing history
-              </li>
-            </ul>
+
+          {/* Pharmacist Card */}
+          <div className="group rounded-3xl border border-slate-800 bg-slate-900/90 p-8 flex flex-col justify-between space-y-6 shadow-xl hover:-translate-y-2 hover:border-teal-500 hover:shadow-2xl hover:shadow-teal-950/50 transition-all duration-300">
+            <div className="space-y-4">
+              <div className="size-14 rounded-2xl bg-teal-500/10 border border-teal-400/20 flex items-center justify-center text-teal-400 group-hover:bg-teal-500 group-hover:text-white transition-all duration-300">
+                <Pill className="size-7" />
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold text-white">Pharmacists</h3>
+              <ul className="space-y-3.5 text-sm text-slate-300">
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Instant QR scanner
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Safe dispensing view
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> One-click prescription voiding
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Dispensing audit logs
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle2 className="size-4 text-teal-400 shrink-0" /> Duplicate code protection
+                </li>
+              </ul>
+            </div>
             <Link
               href="/guides#pharmacist"
-              className="text-teal-400 font-medium hover:text-teal-300 flex items-center gap-1"
+              className="inline-flex items-center gap-2 text-sm font-bold text-teal-400 group-hover:text-teal-300 group-hover:translate-x-1 transition-all pt-2"
             >
               Explore Pharmacist Guide <ArrowRight className="size-4" />
             </Link>
           </div>
         </div>
-        <p className="text-center text-slate-400 text-sm mt-12">
-          MediSync administrators support professional verification and system
-          governance behind the scenes.
-        </p>
       </div>
     </section>
   );
@@ -357,83 +364,73 @@ function FeaturesSection() {
     {
       name: "Verified Doctor Discovery",
       icon: Activity,
-      description:
-        "Patients can browse a directory of Doctors who have undergone professional verification.",
+      description: "Patients browse active Doctors verified by platform administrators.",
     },
     {
       name: "Appointment Scheduling",
-      icon: Activity,
-      description:
-        "Available consultation times are safely reserved when a Patient requests a booking.",
+      icon: Calendar,
+      description: "Available consultation slots are securely reserved upon request.",
     },
     {
       name: "HD Video Consultations",
       icon: Video,
-      description:
-        "High-definition face-to-face video sessions built right into the consultation workspace.",
+      description: "High-definition face-to-face video sessions built into the workspace.",
     },
     {
       name: "Real-Time Patient Chat",
       icon: MessageSquare,
-      description:
-        "Exchange instant text messages, symptom details, and payment receipts securely.",
+      description: "Exchange instant text messages, symptom details, and payment slips.",
     },
     {
       name: "Private Clinical Notes",
-      icon: Activity,
-      description:
-        "Doctors can maintain private internal notes on consultations that remain completely hidden from Patients.",
+      icon: Lock,
+      description: "Doctors maintain encrypted internal notes invisible to patients.",
     },
     {
       name: "Digital Prescriptions",
       icon: FileText,
-      description:
-        "Doctors easily structure and issue clear, digital prescriptions that attach directly to the consultation.",
+      description: "Structured digital prescriptions attached directly to the appointment.",
     },
     {
-      name: "Consultation Payment Confirmation",
-      icon: Activity,
-      description:
-        "Doctors set transparent fees and can securely confirm payment receipt directly in the workspace.",
+      name: "Payment Confirmation",
+      icon: Check,
+      description: "Doctors set transparent fees and confirm receipt directly in chat.",
     },
     {
       name: "Secure Prescription QR",
       icon: QrCode,
-      description:
-        "Patients receive an opaque, securely generated QR token representing their valid prescription.",
+      description: "Single-use QR code generated for safe pharmacy dispensing.",
     },
   ];
 
   return (
-    <section className="bg-slate-50 py-20 sm:py-24">
+    <section className="bg-slate-50/60 py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:text-center mb-16">
+        <div className="mx-auto max-w-2xl text-center mb-16 space-y-3">
           <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            Everything needed for a connected consultation
+            Everything needed for connected telehealth
           </h2>
+          <p className="text-slate-600 text-base">Engineered for security, privacy, and clinical efficiency</p>
         </div>
-        <div className="mx-auto max-w-2xl lg:max-w-none">
-          <div className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-4 md:grid-cols-2">
-            {features.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <div
-                  key={feature.name}
-                  className="relative rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 hover:shadow-md transition-shadow"
-                >
-                  <div className="mb-4 flex size-10 items-center justify-center rounded-lg bg-teal-600">
-                    <Icon className="size-6 text-white" />
-                  </div>
-                  <h3 className="text-base font-semibold leading-7 text-slate-900">
-                    {feature.name}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    {feature.description}
-                  </p>
+
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {features.map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <div
+                key={feature.name}
+                className="group rounded-2xl bg-white p-6 shadow-sm border border-slate-200/80 hover:-translate-y-1 hover:border-teal-400 hover:shadow-xl transition-all duration-300 space-y-3"
+              >
+                <div className="size-11 rounded-xl bg-teal-50 border border-teal-200/60 flex items-center justify-center text-teal-700 group-hover:bg-[#0b6e61] group-hover:text-white transition-colors duration-300">
+                  <Icon className="size-6" />
                 </div>
-              );
-            })}
-          </div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-teal-800 transition-colors">
+                  {feature.name}
+                </h3>
+                <p className="text-sm text-slate-600 leading-relaxed">{feature.description}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -444,65 +441,62 @@ function ConsultationJourney() {
   return (
     <section className="bg-white py-20 sm:py-24 overflow-hidden">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-y-16 lg:grid-cols-2 lg:gap-x-16 lg:items-center">
-          <div>
+        <div className="grid grid-cols-1 gap-y-12 lg:grid-cols-12 lg:gap-x-16 lg:items-center">
+          <div className="lg:col-span-6 space-y-5">
+            <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 border border-teal-200/80 px-4 py-1.5 text-xs font-bold text-[#0b6e61] uppercase tracking-wider">
+              Unified Telehealth Workspace
+            </div>
             <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
               Your consultation, all in one place
             </h2>
-            <p className="mt-6 text-lg leading-8 text-slate-600">
-              The Consultation Workspace brings together everything required for
-              a successful online appointment: interactive HD Video Calls,
-              real-time Patient-Doctor Chat messaging, private clinical notes for Doctors, and instant digital prescription generation.
+            <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
+              The Consultation Workspace combines interactive HD Video Calls, real-time Patient-Doctor Chat, private doctor clinical notes, and digital prescription generation inside a single secure browser window.
             </p>
+            <div className="pt-2">
+              <Link
+                href="/features"
+                className="inline-flex items-center gap-2 text-base font-bold text-teal-700 hover:text-teal-800 hover:translate-x-1 transition-all"
+              >
+                Explore Full Feature Breakdown <ArrowRight className="size-5" />
+              </Link>
+            </div>
           </div>
-          <div className="relative">
-            <div className="rounded-2xl bg-slate-50 p-6 sm:p-8 ring-1 ring-slate-200 shadow-xl">
-              <div className="space-y-6">
-                {/* Live Video Indicator Mock */}
-                <div className="flex items-center justify-between rounded-xl bg-slate-900 p-4 text-white">
-                  <div className="flex items-center gap-3">
-                    <div className="flex size-3 rounded-full bg-red-500 animate-pulse" />
-                    <span className="text-xs font-semibold tracking-wider uppercase text-slate-200">
-                      Live HD Video Session
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-1 text-xs font-medium">
-                    <Video className="size-3.5" /> Active Call
-                  </div>
-                </div>
 
-                {/* Chat Bubbles */}
-                <div className="flex items-start gap-4">
-                  <div className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 text-xs font-bold shrink-0">
-                    PT
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <span className="text-xs font-medium text-slate-500">Patient</span>
-                    <div className="rounded-2xl rounded-tl-none bg-white p-3 text-xs text-slate-700 shadow-sm border border-slate-200">
-                      Hello Doctor, I have uploaded my symptoms and joined the video session.
-                    </div>
+          {/* Consultation Mock Card */}
+          <div className="lg:col-span-6">
+            <div className="rounded-3xl bg-slate-900 p-6 text-white shadow-2xl border border-slate-800 space-y-4 hover:shadow-teal-900/20 hover:border-teal-500/50 transition-all duration-300">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="size-3 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-sm font-bold text-slate-200">Live HD Video Session</span>
+                </div>
+                <span className="text-xs font-mono text-slate-300 bg-slate-800 px-2.5 py-1 rounded-md">Encrypted</span>
+              </div>
+
+              {/* Chat Message Snippets */}
+              <div className="space-y-3 text-sm">
+                <div className="bg-slate-800 p-3.5 rounded-xl border border-slate-700/80 text-slate-200">
+                  <span className="font-semibold text-teal-300 block mb-1">Patient:</span>
+                  &quot;Doctor, I have uploaded my symptoms and joined the video session.&quot;
+                </div>
+                <div className="bg-teal-950/80 p-3.5 rounded-xl border border-teal-800/60 text-slate-200">
+                  <span className="font-semibold text-teal-300 block mb-1">Dr. Aruni Perera:</span>
+                  &quot;Welcome! I can see you clearly on video. I have drafted your prescription below.&quot;
+                </div>
+              </div>
+
+              {/* Prescription Attachment Preview */}
+              <div className="rounded-xl border border-slate-700 bg-slate-800 p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FileText className="size-6 text-teal-400 shrink-0" />
+                  <div>
+                    <p className="text-sm font-bold text-white">Digital Prescription Issued</p>
+                    <p className="text-xs text-slate-400">Includes prescribed medicines & QR token</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-4 flex-row-reverse">
-                  <div className="size-10 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                    DR
-                  </div>
-                  <div className="flex-1 space-y-1 flex flex-col items-end">
-                    <span className="text-xs font-medium text-slate-500">Doctor</span>
-                    <div className="rounded-2xl rounded-tr-none bg-teal-700 p-3 text-xs text-white shadow-sm">
-                      Welcome! I can see you clearly on video. I have drafted your prescription below.
-                    </div>
-                  </div>
-                </div>
-                <div className="rounded-xl border border-slate-200 bg-white p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <FileText className="size-4 text-teal-600" />
-                    <span className="text-sm font-semibold text-slate-800">
-                      Digital Prescription Attached
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500">Includes prescribed medicines & digital QR token</p>
-                </div>
+                <span className="text-xs font-bold text-teal-400 bg-teal-950 px-3 py-1.5 rounded-lg border border-teal-800">
+                  Ready
+                </span>
               </div>
             </div>
           </div>
@@ -511,108 +505,40 @@ function ConsultationJourney() {
     </section>
   );
 }
-
 function PrescriptionToPharmacy() {
   return (
-    <section className="bg-slate-50 py-20 sm:py-24">
+    <section className="bg-slate-50/60 py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:text-center mb-16">
+        <div className="mx-auto max-w-2xl text-center mb-16 space-y-3">
           <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            From prescription to pharmacy â€” safely connected
+            From prescription to pharmacy — safely connected
           </h2>
-          <p className="mt-6 text-lg leading-8 text-slate-600">
-            MediSync&apos;s secure QR workflow ensures that digital
-            prescriptions are safely transferred to verified Pharmacists for
-            dispensing.
+          <p className="text-slate-600 text-base sm:text-lg">
+            MediSync&apos;s QR workflow ensures digital prescriptions are safely transferred to verified Pharmacists.
           </p>
         </div>
 
-        <div className="mx-auto max-w-4xl relative">
-          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-slate-200 -translate-x-1/2" />
-          <div className="space-y-8 md:space-y-0 relative">
-            <div className="md:grid md:grid-cols-2 md:gap-8 items-center md:pb-12">
-              <div className="md:text-right pr-0 md:pr-8">
-                <h4 className="text-lg font-bold text-slate-900">
-                  1. Doctor issues prescription
-                </h4>
-                <p className="mt-2 text-sm text-slate-600">
-                  During or after the consultation, the Doctor writes and issues
-                  a structured digital prescription.
-                </p>
-              </div>
-              <div className="hidden md:flex justify-center absolute left-1/2 -translate-x-1/2 mt-1">
-                <div className="size-4 rounded-full bg-teal-600 ring-4 ring-slate-50" />
-              </div>
-              <div className="hidden md:block pl-8"></div>
-            </div>
-
-            <div className="md:grid md:grid-cols-2 md:gap-8 items-center md:pb-12">
-              <div className="hidden md:block pr-8"></div>
-              <div className="hidden md:flex justify-center absolute left-1/2 -translate-x-1/2 mt-1">
-                <div className="size-4 rounded-full bg-teal-600 ring-4 ring-slate-50" />
-              </div>
-              <div className="pl-0 md:pl-8 mt-6 md:mt-0">
-                <h4 className="text-lg font-bold text-slate-900">
-                  2. Payment confirmation
-                </h4>
-                <p className="mt-2 text-sm text-slate-600">
-                  If required, the Patient completes payment and the Doctor
-                  confirms receipt.
-                </p>
-              </div>
-            </div>
-
-            <div className="md:grid md:grid-cols-2 md:gap-8 items-center md:pb-12">
-              <div className="md:text-right pr-0 md:pr-8 mt-6 md:mt-0">
-                <h4 className="text-lg font-bold text-slate-900">
-                  3. Patient generates QR
-                </h4>
-                <p className="mt-2 text-sm text-slate-600">
-                  The Patient generates a secure QR token representing their
-                  prescription.
-                </p>
-              </div>
-              <div className="hidden md:flex justify-center absolute left-1/2 -translate-x-1/2 mt-1">
-                <div className="size-4 rounded-full bg-teal-600 ring-4 ring-slate-50" />
-              </div>
-              <div className="hidden md:block pl-8"></div>
-            </div>
-
-            <div className="md:grid md:grid-cols-2 md:gap-8 items-center md:pb-12">
-              <div className="hidden md:block pr-8"></div>
-              <div className="hidden md:flex justify-center absolute left-1/2 -translate-x-1/2 mt-1">
-                <div className="size-4 rounded-full bg-teal-600 ring-4 ring-slate-50" />
-              </div>
-              <div className="pl-0 md:pl-8 mt-6 md:mt-0">
-                <h4 className="text-lg font-bold text-slate-900">
-                  4. Verified Pharmacist scans
-                </h4>
-                <p className="mt-2 text-sm text-slate-600">
-                  The Patient visits a verified Pharmacist who scans the QR to
-                  retrieve dispensing instructions safely.
-                </p>
-              </div>
-            </div>
-
-            <div className="md:grid md:grid-cols-2 md:gap-8 items-center">
-              <div className="md:text-right pr-0 md:pr-8 mt-6 md:mt-0">
-                <h4 className="text-lg font-bold text-slate-900">
-                  5. Prescription dispensed
-                </h4>
-                <p className="mt-2 text-sm text-slate-600">
-                  The Pharmacist dispenses the medicine. The QR is securely
-                  marked as dispensed and cannot be reused.
-                </p>
-              </div>
-              <div className="hidden md:flex justify-center absolute left-1/2 -translate-x-1/2 mt-1">
-                <div className="size-4 rounded-full bg-teal-600 ring-4 ring-slate-50" />
-              </div>
-              <div className="hidden md:block pl-8"></div>
-            </div>
-          </div>
+        <div className="mx-auto max-w-6xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 text-center">
+          <WorkflowStep number={1} title="Doctor Issues RX" description="Drafted during video consultation" />
+          <WorkflowStep number={2} title="Payment Confirmed" description="Receipt verified by Doctor" />
+          <WorkflowStep number={3} title="Patient Gets QR" description="Single-use token unlocked" />
+          <WorkflowStep number={4} title="Pharmacist Scans" description="QR code read by device camera" />
+          <WorkflowStep number={5} title="Medicine Dispensed" description="Token voided permanently" />
         </div>
       </div>
     </section>
+  );
+}
+
+function WorkflowStep({ number, title, description }: { number: number; title: string; description: string }) {
+  return (
+    <div className="group rounded-2xl bg-white p-6 border border-slate-200/80 shadow-sm hover:-translate-y-1.5 hover:border-teal-400 hover:shadow-xl transition-all duration-300 space-y-3 flex flex-col items-center justify-center">
+      <div className="size-11 rounded-full bg-teal-50 border border-teal-200 text-teal-700 text-base font-extrabold flex items-center justify-center group-hover:bg-[#0b6e61] group-hover:text-white transition-colors">
+        {number}
+      </div>
+      <h4 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-teal-800 transition-colors">{title}</h4>
+      <p className="text-sm text-slate-600 leading-normal">{description}</p>
+    </div>
   );
 }
 
@@ -620,50 +546,42 @@ function PrivacySection() {
   return (
     <section className="bg-white py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:text-center mb-16">
+        <div className="mx-auto max-w-2xl text-center mb-16 space-y-3">
           <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            Designed with privacy boundaries in mind
+            Designed with strict privacy boundaries
           </h2>
-          <p className="mt-6 text-lg leading-8 text-slate-600">
-            MediSync uses strict role-based access to ensure everyone sees only
-            what they absolutely need to see.
+          <p className="text-slate-600 text-base">
+            Server-enforced authorization ensures users only access data relevant to their role.
           </p>
         </div>
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-slate-200 p-6">
-            <h3 className="font-bold text-slate-900 flex items-center gap-2">
-              <Users className="size-5 text-teal-600" /> Patients
-            </h3>
-            <p className="mt-4 text-sm text-slate-600">
-              See strictly their own healthcare journey, consultations, and
-              prescriptions.
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="group rounded-2xl border border-slate-200/80 bg-slate-50/50 p-6 hover:-translate-y-1 hover:border-teal-400 hover:bg-white hover:shadow-xl transition-all duration-300 space-y-3">
+            <Users className="size-7 text-teal-600 group-hover:scale-110 transition-transform" />
+            <h3 className="font-bold text-slate-900 text-base">Patients</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Access strictly their own healthcare records, consultations, and prescriptions.
             </p>
           </div>
-          <div className="rounded-2xl border border-slate-200 p-6">
-            <h3 className="font-bold text-slate-900 flex items-center gap-2">
-              <HeartHandshake className="size-5 text-teal-600" /> Doctors
-            </h3>
-            <p className="mt-4 text-sm text-slate-600">
-              Access information required to care for their assigned Patients
-              and keep private clinical notes.
+          <div className="group rounded-2xl border border-slate-200/80 bg-slate-50/50 p-6 hover:-translate-y-1 hover:border-teal-400 hover:bg-white hover:shadow-xl transition-all duration-300 space-y-3">
+            <HeartHandshake className="size-7 text-teal-600 group-hover:scale-110 transition-transform" />
+            <h3 className="font-bold text-slate-900 text-base">Doctors</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Manage assigned patients, conduct appointments, and write private clinical notes.
             </p>
           </div>
-          <div className="rounded-2xl border border-slate-200 p-6">
-            <h3 className="font-bold text-slate-900 flex items-center gap-2">
-              <Pill className="size-5 text-teal-600" /> Pharmacists
-            </h3>
-            <p className="mt-4 text-sm text-slate-600">
-              Receive only the information necessary to verify and dispense a
-              prescription. No chat or clinical notes.
+          <div className="group rounded-2xl border border-slate-200/80 bg-slate-50/50 p-6 hover:-translate-y-1 hover:border-teal-400 hover:bg-white hover:shadow-xl transition-all duration-300 space-y-3">
+            <Pill className="size-7 text-teal-600 group-hover:scale-110 transition-transform" />
+            <h3 className="font-bold text-slate-900 text-base">Pharmacists</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Receive only medicine dispensing details. No consultation chat or doctor notes.
             </p>
           </div>
-          <div className="rounded-2xl border border-slate-200 p-6">
-            <h3 className="font-bold text-slate-900 flex items-center gap-2">
-              <ShieldCheck className="size-5 text-teal-600" /> Administrators
-            </h3>
-            <p className="mt-4 text-sm text-slate-600">
-              Manage professional verification and system governance rather than
-              ordinary clinical conversations.
+          <div className="group rounded-2xl border border-slate-200/80 bg-slate-50/50 p-6 hover:-translate-y-1 hover:border-teal-400 hover:bg-white hover:shadow-xl transition-all duration-300 space-y-3">
+            <ShieldCheck className="size-7 text-teal-600 group-hover:scale-110 transition-transform" />
+            <h3 className="font-bold text-slate-900 text-base">Administrators</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Manage user account verification and system logs without viewing clinical notes.
             </p>
           </div>
         </div>
@@ -674,63 +592,57 @@ function PrivacySection() {
 
 function GuidesPreview() {
   return (
-    <section className="bg-slate-50 py-20 sm:py-24">
+    <section className="bg-slate-50/60 py-20 sm:py-24 border-t border-slate-100">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-12">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            Need help getting started?
-          </h2>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-12 gap-4">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+              Need help getting started?
+            </h2>
+            <p className="text-sm text-slate-500 mt-1">Detailed documentation for all user roles</p>
+          </div>
           <Link
             href="/guides"
-            className="mt-4 md:mt-0 font-medium text-teal-700 hover:text-teal-800 flex items-center gap-1"
+            className="font-bold text-sm text-teal-700 hover:text-teal-800 flex items-center gap-1.5"
           >
             View All Guides <ArrowRight className="size-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200 hover:shadow-md transition-shadow flex flex-col">
-            <h3 className="text-xl font-bold text-slate-900 mb-4">
-              Patient Guide
-            </h3>
-            <p className="text-sm text-slate-600 flex-1 mb-6">
-              How to find a Doctor, request a consultation, communicate with
-              your Doctor and receive medicine.
-            </p>
-            <Link
-              href="/guides#patient"
-              className="text-teal-700 font-medium text-sm"
-            >
-              Read Patient Guide &rarr;
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="group rounded-2xl bg-white p-6 border border-slate-200/80 shadow-sm hover:-translate-y-1 hover:border-teal-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold text-slate-900 group-hover:text-teal-800 transition-colors">Patient Guide</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Step-by-step instructions for booking appointments, joining HD video calls, and generating prescription QR codes.
+              </p>
+            </div>
+            <Link href="/guides#patient" className="text-sm font-bold text-teal-700 group-hover:text-teal-800 group-hover:translate-x-1 transition-all flex items-center gap-1">
+              Read Patient Guide <ArrowRight className="size-4" />
             </Link>
           </div>
-          <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200 hover:shadow-md transition-shadow flex flex-col">
-            <h3 className="text-xl font-bold text-slate-900 mb-4">
-              Doctor Guide
-            </h3>
-            <p className="text-sm text-slate-600 flex-1 mb-6">
-              How to complete professional verification, manage availability,
-              conduct consultations and issue prescriptions.
-            </p>
-            <Link
-              href="/guides#doctor"
-              className="text-teal-700 font-medium text-sm"
-            >
-              Read Doctor Guide &rarr;
+
+          <div className="group rounded-2xl bg-white p-6 border border-slate-200/80 shadow-sm hover:-translate-y-1 hover:border-teal-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold text-slate-900 group-hover:text-teal-800 transition-colors">Doctor Guide</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Learn how to submit registration details, configure availability slots, host telehealth calls, and write prescriptions.
+              </p>
+            </div>
+            <Link href="/guides#doctor" className="text-sm font-bold text-teal-700 group-hover:text-teal-800 group-hover:translate-x-1 transition-all flex items-center gap-1">
+              Read Doctor Guide <ArrowRight className="size-4" />
             </Link>
           </div>
-          <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200 hover:shadow-md transition-shadow flex flex-col">
-            <h3 className="text-xl font-bold text-slate-900 mb-4">
-              Pharmacist Guide
-            </h3>
-            <p className="text-sm text-slate-600 flex-1 mb-6">
-              How professional verification, prescription scanning and
-              dispensing work.
-            </p>
-            <Link
-              href="/guides#pharmacist"
-              className="text-teal-700 font-medium text-sm"
-            >
-              Read Pharmacist Guide &rarr;
+
+          <div className="group rounded-2xl bg-white p-6 border border-slate-200/80 shadow-sm hover:-translate-y-1 hover:border-teal-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold text-slate-900 group-hover:text-teal-800 transition-colors">Pharmacist Guide</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Instructions on QR scanning, manual code entry fallbacks, safe prescription viewing, and dispensing confirmation.
+              </p>
+            </div>
+            <Link href="/guides#pharmacist" className="text-sm font-bold text-teal-700 group-hover:text-teal-800 group-hover:translate-x-1 transition-all flex items-center gap-1">
+              Read Pharmacist Guide <ArrowRight className="size-4" />
             </Link>
           </div>
         </div>
@@ -740,110 +652,13 @@ function GuidesPreview() {
 }
 
 function FaqSection() {
-  const faqs = [
-    {
-      question: "What is MediSync?",
-      answer:
-        "MediSync is a secure digital healthcare platform connecting Patients, verified Doctors, and Pharmacists in a streamlined workflow.",
-    },
-    {
-      question: "Who can use MediSync?",
-      answer:
-        "Patients looking for online consultations, verified Doctors providing care, and verified Pharmacists dispensing medication.",
-    },
-    {
-      question: "How do I find a Doctor?",
-      answer:
-        "Patients can search the directory of professionally verified Doctors, filtering by specialization, department, and hospital.",
-    },
-    {
-      question: "Can I book consultations online?",
-      answer:
-        "Yes. Patients can request bookings for a Doctor's available time slots. The Doctor reviews and accepts the request.",
-    },
-    {
-      question: "How does the consultation work?",
-      answer:
-        "Once accepted and scheduled, Patients and Doctors use a secure online chat workspace to discuss symptoms and treatment.",
-    },
-    {
-      question: "How do prescriptions work?",
-      answer:
-        "Doctors can write structured digital prescriptions during the consultation, which are instantly available to the Patient.",
-    },
-    {
-      question: "Why do I need a QR code?",
-      answer:
-        "The QR code securely transfers your prescription details to a Pharmacist without needing paper, ensuring it hasn't been altered.",
-    },
-    {
-      question: "When can I generate my prescription QR?",
-      answer:
-        "You can generate your QR code once the Doctor issues the prescription and confirms receipt of payment (if a fee applies).",
-    },
-    {
-      question: "What if my consultation has no fee?",
-      answer:
-        "If the Doctor sets the fee to zero, no payment confirmation is required, and you can generate the QR immediately after issuance.",
-    },
-    {
-      question: "How does a Pharmacist verify my prescription?",
-      answer:
-        "A verified Pharmacist uses the MediSync scanner to scan your QR code, viewing exactly the medicines and instructions needed for dispensing.",
-    },
-    {
-      question: "Can the same QR be used more than once?",
-      answer:
-        "No. Once a Pharmacist confirms the prescription is dispensed, the QR code cannot be reused.",
-    },
-    {
-      question: "Can Pharmacists see my consultation chat?",
-      answer:
-        "Absolutely not. Pharmacists only see the medicines, instructions, and basic details necessary to dispense safely.",
-    },
-    {
-      question: "Can Administrators see private clinical notes?",
-      answer:
-        "No. Private clinical notes are visible exclusively to the Doctor who wrote them.",
-    },
-    {
-      question: "How are Doctors and Pharmacists verified?",
-      answer:
-        "Administrators manually review professional registration and credentials submitted during onboarding before granting verified status.",
-    },
-    {
-      question: "Can I cancel a consultation?",
-      answer:
-        "Yes, you can cancel a consultation if it meets the platform's cancellation eligibility rules (e.g. before it is completed or paid).",
-    },
-    {
-      question: "Can I delete my MediSync account?",
-      answer:
-        "Yes. Eligible accounts can be self-deleted, which anonymizes personal data while preserving necessary medical history for connected professionals.",
-    },
-  ];
-
   return (
-    <section id="faq" className="bg-white py-20 sm:py-24 scroll-mt-18">
+    <section id="faq" className="bg-white py-20 sm:py-24 scroll-mt-20">
       <div className="mx-auto max-w-4xl px-6 lg:px-8">
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl text-center mb-16">
+        <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl text-center mb-12">
           Frequently Asked Questions
         </h2>
-        <div className="divide-y divide-slate-200">
-          {faqs.map((faq, idx) => (
-            <details key={idx} className="group py-6">
-              <summary className="flex cursor-pointer items-center justify-between font-semibold text-slate-900 outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 rounded-md">
-                {faq.question}
-                <span className="ml-6 flex h-7 items-center">
-                  <ChevronRight className="size-5 text-slate-400 group-open:rotate-90 transition-transform" />
-                </span>
-              </summary>
-              <p className="mt-4 pr-12 text-slate-600 leading-7">
-                {faq.answer}
-              </p>
-            </details>
-          ))}
-        </div>
+        <FaqAccordion />
       </div>
     </section>
   );
@@ -851,28 +666,32 @@ function FaqSection() {
 
 function FinalCta() {
   return (
-    <section className="bg-teal-700 py-20 sm:py-24">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
-        <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-          Ready to get started with MediSync?
-        </h2>
-        <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-teal-100">
-          Create your account and connect with the right healthcare workflow for
-          your role.
-        </p>
-        <div className="mt-10 flex items-center justify-center gap-x-6">
-          <Link
-            href="/register"
-            className="rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-teal-800 shadow-sm hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            Get Started
-          </Link>
-          <Link
-            href="/login"
-            className="text-sm font-semibold leading-6 text-white hover:text-teal-50"
-          >
-            Sign In <span aria-hidden="true">â†’</span>
-          </Link>
+    <section className="py-20 sm:py-24 bg-white border-t border-slate-100">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="relative rounded-3xl bg-linear-to-r from-slate-900 via-teal-950 to-slate-900 p-10 sm:p-16 text-center text-white shadow-2xl overflow-hidden hover:shadow-teal-950/40 transition-shadow">
+          <div className="relative z-10 max-w-2xl mx-auto space-y-6">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
+              Ready to experience connected healthcare?
+            </h2>
+            <p className="text-slate-300 text-base sm:text-lg">
+              Join thousands of Patients, Doctors, and Pharmacists using MediSync.
+            </p>
+
+            <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
+              <Link
+                href="/register"
+                className="rounded-xl bg-[#0b6e61] px-7 py-4 text-base font-semibold text-white shadow-md hover:bg-[#095b50] hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
+              >
+                Create Account
+              </Link>
+              <Link
+                href="/login"
+                className="rounded-xl border border-slate-700 bg-slate-800/80 px-7 py-4 text-base font-medium text-slate-200 hover:bg-slate-800 hover:border-slate-500 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 flex items-center gap-2"
+              >
+                Sign In <ArrowRight className="size-4" />
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </section>
