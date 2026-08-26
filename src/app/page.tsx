@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { ChevronRight, FileText, QrCode, BadgeCheck, ShieldCheck, Pill, ArrowRight, Activity, Users, HeartHandshake, CheckCircle2 } from "lucide-react";
 
 export const metadata = {
@@ -27,88 +27,69 @@ export default function HomePage() {
 
 function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-slate-50 pt-16 md:pt-24 lg:pt-32 pb-16">
-      <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
-        <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-teal-200 to-teal-400 opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" style={{ clipPath: 'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)' }}></div>
-      </div>
+    <section className="relative overflow-hidden bg-gradient-to-b from-slate-50/80 via-slate-50/50 to-white pt-10 pb-16 lg:pt-16 lg:pb-28">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-6xl">
-            Healthcare, connected from consultation to prescription.
-          </h1>
-          <p className="mt-6 text-lg leading-8 text-slate-600">
-            MediSync connects Patients, verified Doctors, and Pharmacists through one secure digital healthcare workflow â€” from finding a Doctor and consulting online to receiving a prescription and safely dispensing it using a QR code.
-          </p>
-          <div className="mt-10 flex items-center justify-center gap-x-6">
-            <Link
-              href="/register"
-              className="rounded-xl bg-teal-700 px-6 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
-            >
-              Get Started
-            </Link>
-            <Link href="/features" className="text-sm font-semibold leading-6 text-slate-900 group">
-              See How It Works <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-1">â†’</span>
-            </Link>
-          </div>
-          <div className="mt-6">
-            <Link href="/login" className="text-sm font-medium text-slate-500 hover:text-slate-900">
-              Already have an account? Sign In
-            </Link>
-          </div>
-        </div>
-
-        <div className="mt-16 flow-root sm:mt-24">
-          <div className="-m-2 rounded-2xl bg-slate-900/5 p-2 ring-1 ring-inset ring-slate-900/10 lg:-m-4 lg:rounded-3xl lg:p-4">
-            <div className="relative overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-slate-900/10">
-              <div className="flex h-12 items-center gap-4 border-b border-slate-200 bg-slate-50 px-4">
-                <div className="flex gap-1.5">
-                  <div className="size-3 rounded-full bg-slate-300" />
-                  <div className="size-3 rounded-full bg-slate-300" />
-                  <div className="size-3 rounded-full bg-slate-300" />
-                </div>
-                <div className="flex-1 rounded-md bg-white px-3 py-1.5 text-center text-xs font-medium text-slate-500 ring-1 ring-inset ring-slate-200">
-                  medisync.app / consultation
-                </div>
-              </div>
-              <div className="p-6 sm:p-10 bg-slate-50">
-                <div className="mx-auto max-w-4xl rounded-2xl bg-white p-6 shadow-sm border border-slate-200 flex gap-6">
-                  <div className="flex-1 space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="size-12 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-lg">MP</div>
-                      <div>
-                        <h3 className="font-semibold text-slate-950">Dr. Maya Perera</h3>
-                        <p className="text-xs text-slate-500">General Medicine</p>
-                      </div>
-                      <div className="ml-auto rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
-                        In Progress
-                      </div>
-                    </div>
-                    <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
-                      <p className="text-sm text-slate-600">Patient: &quot;I&apos;ve been experiencing a mild fever and cough for the last two days.&quot;</p>
-                    </div>
-                    <div className="rounded-xl bg-teal-50 p-4 border border-teal-100">
-                      <p className="text-sm text-teal-800">Dr. Perera: &quot;Thank you for the details. I will issue a prescription for rest and some basic medication to ease the symptoms.&quot;</p>
-                    </div>
-                  </div>
-                  <div className="hidden sm:block w-72 space-y-4">
-                    <div className="rounded-xl border border-slate-200 p-4">
-                      <h4 className="text-sm font-semibold text-slate-950 flex items-center gap-2"><FileText className="size-4 text-slate-400" /> Digital Prescription</h4>
-                      <p className="mt-2 text-xs text-slate-500">Issued just now</p>
-                      <button className="mt-3 w-full rounded-lg bg-teal-50 py-2 text-xs font-semibold text-teal-700 hover:bg-teal-100">View Prescription</button>
-                    </div>
-                    <div className="rounded-xl border border-slate-200 p-4">
-                      <h4 className="text-sm font-semibold text-slate-950 flex items-center gap-2"><QrCode className="size-4 text-slate-400" /> Pharmacy QR</h4>
-                      <div className="mt-3 flex justify-center">
-                        <div className="size-24 bg-slate-100 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center">
-                          <QrCode className="size-8 text-slate-400" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
+          
+          {/* Left Column: Text & CTAs */}
+          <div className="lg:col-span-6 space-y-6 text-left">
+            <span className="text-xs sm:text-sm font-semibold tracking-wider text-[#0b6e61] uppercase">
+              HEALTHCARE PLATFORM
+            </span>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-[1.12]">
+              Healthcare,<br />
+              connected from<br />
+              consultation to<br />
+              pharmacy.
+            </h1>
+            <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-lg">
+              Seamlessly connecting Patients, Doctors, and Pharmacists in one unified, secure ecosystem designed for modern medical workflows.
+            </p>
+            <div className="pt-2 flex flex-wrap items-center gap-4">
+              <Link
+                href="/register"
+                className="rounded-xl bg-[#0b6e61] px-6 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-[#095b50] transition-all"
+              >
+                Create Account
+              </Link>
+              <Link
+                href="/login"
+                className="rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 transition-all"
+              >
+                Sign In
+              </Link>
             </div>
           </div>
+
+          {/* Right Column: 3D Doctor & Floating Virus Graphics */}
+          <div className="lg:col-span-6 relative flex justify-center items-center mt-6 lg:mt-0">
+            {/* Soft Radial Glow */}
+            <div className="absolute w-[350px] h-[350px] sm:w-[450px] sm:h-[450px] bg-teal-100/50 rounded-full blur-3xl -z-10" />
+
+            <div className="relative flex items-center justify-center w-full max-w-lg">
+              {/* Doctor Character */}
+              <img
+                src="/landing/doctor-front.png"
+                alt="MediSync Doctor"
+                className="w-full max-w-md object-contain z-10 relative drop-shadow-md"
+              />
+
+              {/* Pixel Divider Accent */}
+              <img
+                src="/landing/pixel-divider.png"
+                alt="Pixel Accent"
+                className="absolute top-12 right-20 sm:right-28 w-20 sm:w-28 object-contain z-0 pointer-events-none opacity-90"
+              />
+
+              {/* Green Virus 3D Sphere */}
+              <img
+                src="/landing/virus-green.png"
+                alt="Virus Graphic"
+                className="absolute -top-2 -right-2 sm:-right-6 w-40 sm:w-56 object-contain z-20 pointer-events-none drop-shadow-2xl"
+              />
+            </div>
+          </div>
+
         </div>
       </div>
     </section>

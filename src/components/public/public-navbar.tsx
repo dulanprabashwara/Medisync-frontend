@@ -30,15 +30,15 @@ export function PublicNavbar() {
         
         <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
           {LINKS.map((link) => {
-            const isActive = pathname === link.href || (link.href === "/#faq" && pathname === "/");
+            const isActive = (pathname === "/" && link.href === "/") || (link.href !== "/" && pathname.startsWith(link.href));
             return (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                className={`px-3 py-1.5 text-sm font-medium transition-all relative ${
                   isActive
-                    ? "bg-slate-100 text-teal-800"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    ? "text-teal-800 font-semibold border-b-2 border-teal-700"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 {link.name}
@@ -58,16 +58,16 @@ export function PublicNavbar() {
           ) : (
             <>
               <Link
-                className="rounded-xl px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                className="rounded-xl border border-slate-300 bg-white px-5 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 transition-all"
                 href="/login"
               >
                 Sign In
               </Link>
               <Link
-                className="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-800 shadow-sm"
+                className="rounded-xl bg-[#0b6e61] px-5 py-2 text-sm font-semibold text-white hover:bg-[#095b50] shadow-sm transition-all"
                 href="/register"
               >
-                Get Started
+                Create Account
               </Link>
             </>
           )}
