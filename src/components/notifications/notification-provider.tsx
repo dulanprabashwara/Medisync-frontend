@@ -5,6 +5,7 @@ import type { NotificationDTO } from "@/types/notification";
 import { getNotifications, getUnreadNotificationCount, markNotificationRead, markAllNotificationsRead } from "@/lib/api/notifications";
 import { useNotificationEvents } from "@/hooks/use-notification-events";
 import { useAuth } from "@/components/auth-provider";
+import { toast } from "react-hot-toast";
 
 interface NotificationContextValue {
   unreadCount: number;
@@ -72,6 +73,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     
     if (!notification.read) {
       setUnreadCount((prev) => prev + 1);
+      toast.success(`${notification.title}: ${notification.message}`);
     }
   }, []);
 
