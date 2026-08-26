@@ -1,11 +1,37 @@
+# Dependencies
 node_modules/
+.pnpm-store/
+
+# Next.js build output
 .next/
 out/
 coverage/
-*.log
-*.tsbuildinfo
+
+# Environment variables
 .env
 .env.local
 .env.*.local
 !.env.example
+
+# Development & OS files
+*.log
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
 .vercel/
+
+# Agent, AI, Audit & Scratch files
+[Cc][Ll][Aa][Uu][Dd][Ee].md
+claude.md
+CLAUDE.md
+[Aa][Gg][Ee][Nn][Tt]*.md
+agent.md
+AGENTS.md
+audit.md
+audit.txt
+audit*.txt
+lint-results*.txt
+lint_output.txt
+scratch/
+.scratch/
+temp/

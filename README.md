@@ -24,6 +24,199 @@ The frontend is a modern Next.js 16 (App Router) application written in TypeScri
 
 ---
 
+## Design System & Theme Specifications
+
+```yaml
+name: MediSync Premium Healthcare
+colors:
+  surface: '#f8f9ff'
+  surface-dim: '#cbdbf5'
+  surface-bright: '#f8f9ff'
+  surface-container-lowest: '#ffffff'
+  surface-container-low: '#eff4ff'
+  surface-container: '#e5eeff'
+  surface-container-high: '#dce9ff'
+  surface-container-highest: '#d3e4fe'
+  on-surface: '#0b1c30'
+  on-surface-variant: '#3e4947'
+  inverse-surface: '#213145'
+  inverse-on-surface: '#eaf1ff'
+  outline: '#6e7977'
+  outline-variant: '#bdc9c6'
+  surface-tint: '#006a63'
+  primary: '#005c55'
+  on-primary: '#ffffff'
+  primary-container: '#0f766e'
+  on-primary-container: '#a3faef'
+  inverse-primary: '#80d5cb'
+  secondary: '#006c49'
+  on-secondary: '#ffffff'
+  secondary-container: '#6cf8bb'
+  on-secondary-container: '#00714d'
+  tertiary: '#00577d'
+  on-tertiary: '#ffffff'
+  tertiary-container: '#0070a0'
+  on-tertiary-container: '#d8edff'
+  error: '#ba1a1a'
+  on-error: '#ffffff'
+  error-container: '#ffdad6'
+  on-error-container: '#93000a'
+  primary-fixed: '#9cf2e8'
+  primary-fixed-dim: '#80d5cb'
+  on-primary-fixed: '#00201d'
+  on-primary-fixed-variant: '#00504a'
+  secondary-fixed: '#6ffbbe'
+  secondary-fixed-dim: '#4edea3'
+  on-secondary-fixed: '#002113'
+  on-secondary-fixed-variant: '#005236'
+  tertiary-fixed: '#c9e6ff'
+  tertiary-fixed-dim: '#89ceff'
+  on-tertiary-fixed: '#001e2f'
+  on-tertiary-fixed-variant: '#004c6e'
+  background: '#f8f9ff'
+  on-background: '#0b1c30'
+  surface-variant: '#d3e4fe'
+typography:
+  hero:
+    fontFamily: Geist
+    fontSize: 64px
+    fontWeight: '600'
+    lineHeight: '1.1'
+    letterSpacing: -0.02em
+  headline-lg:
+    fontFamily: Geist
+    fontSize: 32px
+    fontWeight: '600'
+    lineHeight: '1.2'
+  headline-md:
+    fontFamily: Geist
+    fontSize: 22px
+    fontWeight: '500'
+    lineHeight: '1.3'
+  body-lg:
+    fontFamily: Hanken Grotesk
+    fontSize: 18px
+    fontWeight: '400'
+    lineHeight: '1.6'
+  body-md:
+    fontFamily: Hanken Grotesk
+    fontSize: 16px
+    fontWeight: '400'
+    lineHeight: '1.5'
+  label-sm:
+    fontFamily: Geist
+    fontSize: 12px
+    fontWeight: '600'
+    lineHeight: '1'
+    letterSpacing: 0.05em
+rounded:
+  sm: 0.25rem
+  DEFAULT: 0.5rem
+  md: 0.75rem
+  lg: 1rem
+  xl: 1.5rem
+  full: 9999px
+spacing:
+  base: 4px
+  xs: 4px
+  sm: 8px
+  md: 12px
+  lg: 16px
+  xl: 24px
+  2xl: 32px
+  3xl: 48px
+  gutter: 24px
+  margin: 32px
+```
+
+### Brand & Style Guidelines
+
+The design system is engineered for professional, enterprise-grade healthcare environments. It prioritizes clarity, technical precision, and a sense of calm reliability. The style is **Corporate / Modern**, leaning into high-end technical aesthetics that bridge the gap between clinical efficiency and software-driven innovation.
+
+The target audience includes clinicians, hospital administrators, and healthcare operators who require a distraction-free, high-performance interface. The visual language conveys trust through a light-slate foundation, technical typography, and a refined use of the teal primary palette. It avoids the clinical coldness of legacy systems while rejecting the ephemeral trends of consumer apps.
+
+### Colors & Palette Allocation
+
+The palette is centered on a deep, authoritative Primary Teal (`#0F766E`), reflecting the brand's medical-technical fusion. This design system utilizes a structured light mode where the canvas is a soft Slate-50/100 (`#F8FAFC`) to reduce eye strain over long shifts, while interactive surfaces are pure white to provide maximum contrast.
+
+Semantic colors are tuned for high-stress environments:
+- **Success:** Emerald tones for positive vitals or completed records.
+- **Warning:** Amber for cautionary notes or pending alerts.
+- **Danger:** Rose for critical health markers or emergency actions.
+- **Info:** Slate or primary teal for general system feedback.
+
+Borders utilize a subtle Slate-200 to define layout structure without adding visual noise.
+
+### Typography System
+
+This design system employs a dual-font strategy to balance technical precision with readability:
+
+- **Geist**: Used for headlines, data labels, and UI controls. Its monospaced-influenced proportions ensure that technical values and medical metrics are legible and perfectly aligned.
+- **Hanken Grotesk**: Used for body copy and long-form medical records. Its humanist qualities provide a refined, premium reading experience that minimizes cognitive load during data-heavy workflows.
+
+Hierarchy is strictly enforced: 32px page titles establish clear entry points, while 22px section headers organize complex dashboards.
+
+### Layout & Spacing Grid
+
+The design system follows a strict 4px base grid to ensure vertical rhythm across dense healthcare dashboards. 
+
+The layout philosophy uses a **Fluid Grid** for internal management screens, allowing clinical data to expand as needed, and a **Fixed Grid** (max-width 1440px) for administrative portals. 
+
+- **Desktop:** 12-column grid, 24px gutters, 32px side margins.
+- **Tablet:** 8-column grid, 16px gutters, 24px side margins.
+- **Mobile:** 4-column grid, 12px gutters, 16px side margins. 
+
+Dense information clusters (like lab results) utilize the `sm` (8px) and `md` (12px) increments, while structural separation between modules uses `xl` (24px) and above.
+
+### Elevation & Depth Layering
+
+To maintain a serious and technical tone, this design system rejects heavy shadows in favor of **Tonal Layers** and **Low-contrast Outlines**.
+
+Hierarchy is established through surface stacking:
+- **Level 0 (Background):** Light Slate-50/100 (`#F8FAFC`).
+- **Level 1 (Cards/Surfaces):** Pure white (`#FFFFFF`) with a 1px Slate-200 border.
+- **Level 2 (Popovers/Modals):** Pure white with a subtle, ultra-diffused shadow (10% opacity Slate-400) to distinguish it from the background without feeling "floaty."
+
+Interactive elements like buttons appear flat, only gaining a slight tonal shift or inner glow on hover to signal interactivity.
+
+### Shape & Radius Rules
+
+The shape language balances modern software aesthetics with an approachable feel:
+
+- **Large Containers (Cards):** 16px radius (`rounded-lg`) creates a soft, modern frame for medical data.
+- **Interactive Controls (Buttons):** 12px radius ensures buttons feel tactile and distinct from inputs.
+- **Utility Elements (Inputs/Chips):** 10px radius for inputs and 4px for small status indicators.
+
+### Component Design Specifications
+
+#### Buttons
+- **Primary:** Solid Teal (`#0F766E`) with white Geist Medium text. 12px radius.
+- **Secondary:** White background with Teal border and text.
+- **Ghost:** No border, Teal text. Used for less frequent actions like "Cancel."
+
+#### Input Fields
+- 10px radius. Slate-200 border. Hanken Grotesk 16px text.
+- On focus: 2px Primary Teal border with a soft teal outer glow (2px).
+
+#### Cards
+- 16px radius. Pure white background. 1px Slate-200 border. 
+- Headers within cards use Geist 16px SemiBold and are separated by a subtle horizontal rule.
+
+#### Status Chips
+- Pill-shaped (fully rounded).
+- Light-tinted backgrounds (e.g., Success Emerald-50) with high-contrast text (Emerald-900).
+
+#### Data Tables
+- Header row: Slate-50 background, Geist 12px Bold text, all-caps.
+- Rows: 1px Slate-100 bottom border. Hanken Grotesk 14px or 16px text.
+- Alternate row striping is discouraged to keep the UI clean; hover states are used instead.
+
+#### Navigational Sidebar
+- Persistent on desktop. Pure white or Slate-50.
+- Icons: 20px Stroke-based (1.5px weight) in Teal or Slate-500.
+
+---
+
 ## Key Features
 
 - **Role-Based Healthcare Portals**: Dedicated, isolated workspaces for Patients, Doctors, Pharmacists, and Administrators.
