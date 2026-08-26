@@ -177,8 +177,7 @@ export default function PatientAppointmentsPage() {
         {list.map((appointment) => {
           const expanded = expandedId === appointment.id;
           const cancellable =
-            (appointment.status === "REQUESTED" ||
-              appointment.status === "CONFIRMED") &&
+            appointment.status === "REQUESTED" &&
             new Date(appointment.scheduledStart).getTime() > now &&
             (!appointment.consultationStatus ||
               appointment.consultationStatus === "SCHEDULED");

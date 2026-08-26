@@ -9,6 +9,7 @@ import {
   ControlBar,
   useTracks,
   PreJoin,
+  VideoConference,
   type LocalUserChoices,
 } from "@livekit/components-react";
 import { Track } from "livekit-client";
@@ -40,7 +41,50 @@ export function VideoRoom({ token, serverUrl, onLeave }: VideoRoomProps) {
   if (hasLeft) return null;
 
   return (
-    <div className="fixed inset-0 z-100 bg-slate-950 flex flex-col">
+    <>
+      <style>{`
+        /* Hide the username input in PreJoin but keep the Join button visible */
+        .medisync-prejoin .lk-username-container input {
+          display: none !important;
+        }
+        .medisync-prejoin .lk-username-container {
+          display: flex;
+          justify-content: center;
+          margin-top: 0.5rem;
+        }
+        .medisync-prejoin .lk-username-container button {
+          width: 100%;
+          padding: 0.75rem 1.5rem;
+          font-weight: 600;
+        }
+        
+        /* Custom LiveKit Theme Overrides for MediSync */
+        .lk-room-container {
+          --lk-bg: #020617; /* slate-950 */
+          --lk-control-bg: #0f172a; /* slate-900 */
+          --lk-control-hover-bg: #1e293b; /* slate-800 */
+          --lk-control-active-bg: #0d9488; /* teal-600 */
+          --lk-control-active-hover-bg: #0f766e; /* teal-700 */
+          --lk-fg: #f8fafc; /* slate-50 */
+          --lk-border-color: #1e293b; /* slate-800 */
+          --lk-accent-color: #0d9488; /* teal-600 */
+          --lk-danger: #e11d48; /* rose-600 */
+          --lk-border-radius: 12px;
+        }
+        
+        /* Make the control bar look more like MediSync */
+        .lk-control-bar {
+          border-top: 1px solid var(--lk-border-color);
+          padding: 1rem;
+        }
+        
+        /* Style the chat window */
+        .lk-chat {
+          background-color: var(--lk-control-bg);
+          border-left: 1px solid var(--lk-border-color);
+        }
+      `}</style>
+      <div className="fixed inset-0 z-100 bg-slate-950 flex flex-col">
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3 bg-slate-900/80 backdrop-blur-sm border-b border-slate-800 shrink-0">
         <div className="flex items-center gap-2.5">
@@ -56,14 +100,16 @@ export function VideoRoom({ token, serverUrl, onLeave }: VideoRoomProps) {
             </p>
           </div>
         </div>
-        <button
-          onClick={handleDisconnected}
-          className="flex items-center gap-1.5 rounded-lg bg-rose-600/90 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-600 transition-colors"
-          aria-label="Leave video call"
-        >
-          <X className="size-3.5" />
-          Leave
-        </button>
+        {!preJoinChoices && (
+          <button
+            onClick={handleDisconnected}
+            className="flex items-center gap-1.5 rounded-lg bg-rose-600/90 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-600 transition-colors"
+            aria-label="Leave video call"
+          >
+            <X className="size-3.5" />
+            Leave
+          </button>
+        )}
       </div>
 
       {/* LiveKit Video Area or PreJoin */}
@@ -74,54 +120,44 @@ export function VideoRoom({ token, serverUrl, onLeave }: VideoRoomProps) {
               <h3 className="text-xl font-bold text-white mb-2">Ready to join?</h3>
               <p className="text-slate-400 text-sm">Check your camera and microphone settings before joining the consultation.</p>
             </div>
-            <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4 shadow-xl">
+            <div 
+              className="bg-slate-900 rounded-2xl border border-slate-800 p-4 shadow-xl medisync-prejoin"
+              data-lk-theme="default"
+            >
               <PreJoin
                 onSubmit={(values) => setPreJoinChoices(values)}
                 onError={(err) => console.error("PreJoin error:", err)}
+                defaults={{
+                  username: "MediSync User",
+                  videoEnabled: true,
+                  audioEnabled: true,
+                }}
               />
             </div>
           </div>
         ) : (
           <LiveKitRoom
             token={token}
-            serverUrl={serverUrl}
-            video={preJoinChoices.videoEnabled}
-            audio={preJoinChoices.audioEnabled}
+            serverUrl={serverUrl?.trim()}
+            video={preJoinChoices.videoEnabled ? (preJoinChoices.videoDeviceId ? { deviceId: preJoinChoices.videoDeviceId } : true) : false}
+            audio={preJoinChoices.audioEnabled ? (preJoinChoices.audioDeviceId ? { deviceId: preJoinChoices.audioDeviceId } : true) : false}
             onDisconnected={handleDisconnected}
+            onError={(e) => alert("Connection Error: " + e.message)}
+
+            onMediaDeviceFailure={(e) => {
+              console.error("Media device failure:", e);
+              alert("Could not access camera/microphone. Please ensure you have granted browser permissions and no other app is using them.");
+            }}
             style={{ height: "100%", width: "100%" }}
             data-lk-theme="default"
           >
-            <MinimalVideoInterface />
+            <VideoConference />
             <RoomAudioRenderer />
           </LiveKitRoom>
         )}
       </div>
     </div>
-  );
-}
-
-/**
- * Minimal LiveKit interface replacing VideoConference to strictly
- * disable chat and screen sharing.
- */
-function MinimalVideoInterface() {
-  const tracks = useTracks(
-    [
-      { source: Track.Source.Camera, withPlaceholder: true },
-      { source: Track.Source.Microphone, withPlaceholder: true },
-    ],
-    { onlySubscribed: false }
-  );
-
-  return (
-    <div className="flex flex-col h-full bg-slate-950">
-      <div className="flex-1 min-h-0">
-        <GridLayout tracks={tracks} style={{ height: "100%" }}>
-          <ParticipantTile />
-        </GridLayout>
-      </div>
-      <ControlBar controls={{ microphone: true, camera: true, screenShare: false, chat: false }} />
-    </div>
+    </>
   );
 }
 
