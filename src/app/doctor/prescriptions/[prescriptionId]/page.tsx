@@ -170,10 +170,11 @@ function Content() {
     ) {
       nextErrors.validityDays = "Validity must be between 1 and 90 days.";
     }
+    const feeAmount = Number(form.doctorFeeAmount);
     if (
-      !Number.isFinite(form.doctorFeeAmount) ||
-      form.doctorFeeAmount < 0 ||
-      form.doctorFeeAmount > 99999999.99
+      !Number.isFinite(feeAmount) ||
+      feeAmount < 0 ||
+      feeAmount > 99999999.99
     ) {
       nextErrors.doctorFeeAmount = "Enter a valid fee from 0 to 99,999,999.99.";
     }
@@ -209,11 +210,15 @@ function Content() {
     setError(null);
     setNotice(null);
     try {
+      const payload = {
+        ...form,
+        doctorFeeAmount: Number(form.doctorFeeAmount),
+      };
       apply(
         await updatePrescriptionDraft(
           session.access_token,
           prescriptionId,
-          form,
+          payload,
         ),
       );
       setNotice("Draft saved.");
@@ -233,11 +238,15 @@ function Content() {
     setBusy("issue");
     setError(null);
     try {
+      const payload = {
+        ...form,
+        doctorFeeAmount: Number(form.doctorFeeAmount),
+      };
       apply(
         await updatePrescriptionDraft(
           session.access_token,
           prescriptionId,
-          form,
+          payload,
         ),
       );
       apply(await issuePrescription(session.access_token, prescriptionId));
@@ -414,6 +423,11 @@ function Content() {
                     type="number"
                     value={form.doctorFeeAmount}
                     onChange={(e) => {
+                      let val = e.target.value;
+                      if (val.length > 1 && val.startsWith("0") && val[1] !== ".") {
+                        val = val.replace(/^0+/, "");
+                        if (val === "") val = "0";
+                      }
                       setDirty(true);
                       setValidationErrors((current) => {
                         const next = { ...current };
@@ -422,7 +436,7 @@ function Content() {
                       });
                       setForm({
                         ...form,
-                        doctorFeeAmount: Number(e.target.value),
+                        doctorFeeAmount: val as unknown as number,
                       });
                     }}
                   />

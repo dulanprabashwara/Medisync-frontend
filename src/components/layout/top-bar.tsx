@@ -79,7 +79,7 @@ export function TopBar() {
   const profileLink = getProfileLink();
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-x-4 border-b border-slate-200/80 bg-white/90 backdrop-blur px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-x-4 border-b border-slate-200/80 bg-white/90 backdrop-blur px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8 print:hidden">
       <div className="flex flex-1 items-center gap-x-4 self-stretch lg:gap-x-6">
         <div className="flex items-center gap-2 lg:hidden">
           <MobileNavigation />

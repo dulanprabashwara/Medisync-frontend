@@ -8,7 +8,7 @@ import { LoadingPanel } from "@/components/loading-panel";
 import { PortalHeading, formatAppointmentTime } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
 import { SectionCard } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -212,11 +212,12 @@ export default function PatientPrescriptionsPage() {
                 </div>
 
                 <div className="mt-6 pt-5 border-t border-slate-100">
-                  <Button asChild variant="secondary" className="w-full">
-                    <Link href={`/patient/prescriptions/${item.id}`}>
-                      View Prescription
-                    </Link>
-                  </Button>
+                  <Link 
+                    href={`/patient/prescriptions/${item.id}`}
+                    className={`${buttonVariants("secondary")} w-full`}
+                  >
+                    View Prescription
+                  </Link>
                 </div>
               </SectionCard>
             ))}

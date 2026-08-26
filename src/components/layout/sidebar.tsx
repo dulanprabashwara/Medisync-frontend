@@ -16,7 +16,7 @@ export function Sidebar() {
   const activeHref = getActiveRoute(pathname, profile.role);
 
   return (
-    <div className="hidden lg:flex w-[248px] flex-col border-r border-slate-200 bg-white h-screen sticky top-0">
+    <div className="hidden lg:flex w-[248px] flex-col border-r border-slate-200 bg-white h-screen sticky top-0 print:hidden">
       <div className="flex h-20 shrink-0 items-center px-6 border-b border-slate-200/60">
         <MediSyncBrand href={`/${profile.role.toLowerCase()}/dashboard`} />
       </div>

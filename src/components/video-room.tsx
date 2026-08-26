@@ -16,6 +16,7 @@ import { Track } from "livekit-client";
 import "@livekit/components-styles";
 import { Video, VideoOff, X } from "lucide-react";
 import { MediSyncBrand } from "@/components/branding/medisync-brand";
+import toast from "react-hot-toast";
 
 interface VideoRoomProps {
   token: string;
@@ -178,11 +179,11 @@ export function VideoRoom({ token, serverUrl, onLeave }: VideoRoomProps) {
             video={preJoinChoices.videoEnabled ? (preJoinChoices.videoDeviceId ? { deviceId: preJoinChoices.videoDeviceId } : true) : false}
             audio={preJoinChoices.audioEnabled ? (preJoinChoices.audioDeviceId ? { deviceId: preJoinChoices.audioDeviceId } : true) : false}
             onDisconnected={handleDisconnected}
-            onError={(e) => alert("Connection Error: " + e.message)}
+            onError={(e) => toast.error("Connection Error: " + e.message)}
 
             onMediaDeviceFailure={(e) => {
               console.error("Media device failure:", e);
-              alert("Could not access camera/microphone. Please ensure you have granted browser permissions and no other app is using them.");
+              toast.error("Could not access camera/microphone. Please ensure you have granted browser permissions and no other app is using them.", { duration: 6000 });
             }}
             style={{ height: "100%", width: "100%" }}
             data-lk-theme="default"
@@ -217,15 +218,13 @@ export function DoctorVideoButton({
 }) {
   if (consultationStatus === "COMPLETED" || consultationStatus === "CANCELLED") return null;
 
-  const now = new Date();
-  const scheduledTime = scheduledStart ? new Date(scheduledStart) : now;
-  const isBeforeScheduled = now < scheduledTime && consultationStatus === "SCHEDULED";
+  const isScheduled = consultationStatus === "SCHEDULED";
 
-  if (isBeforeScheduled) {
+  if (isScheduled) {
     return (
       <div className="flex flex-col gap-3">
         <p className="text-sm text-teal-800">
-          You can start the video consultation once the scheduled time arrives.
+          Click "Start Consultation" in the Info tab to begin this session and enable video.
         </p>
         <button
           disabled

@@ -29,7 +29,9 @@ import {
   deletePatientConsultationMessage,
   patientJoinVideo,
   getPatientVideoStatus,
+  notifyPaymentSent,
 } from "@/lib/api";
+import toast from "react-hot-toast";
 import type { VideoTokenResponse } from "@/lib/api";
 import { mergeConsultationMessages } from "@/lib/consultation-messages";
 import { formatDoctorName } from "@/lib/formatters";
@@ -60,6 +62,7 @@ export default function PatientConsultationPage() {
   const [videoActive, setVideoActive] = useState(false);
   const [videoToken, setVideoToken] = useState<VideoTokenResponse | null>(null);
   const [videoBusy, setVideoBusy] = useState(false);
+  const [notifyingPayment, setNotifyingPayment] = useState(false);
   const { latestNotifications } = useNotifications();
 
   const reconcile = useCallback(async () => {
@@ -120,6 +123,19 @@ export default function PatientConsultationPage() {
     handleEvent,
     reconcile,
   );
+
+  const handleNotifyPaymentSent = async () => {
+    if (!session || !consultationId) return;
+    setNotifyingPayment(true);
+    try {
+      await notifyPaymentSent(session.access_token, consultationId);
+      toast.success("Doctor has been notified that your payment was sent.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to notify doctor.");
+    } finally {
+      setNotifyingPayment(false);
+    }
+  };
 
   useEffect(() => {
     const timer = window.setTimeout(async () => {
@@ -391,10 +407,19 @@ export default function PatientConsultationPage() {
                     </Link>
                   </div>
                 ) : (
-                  <p className="mt-3 text-xs text-amber-700 font-medium text-center bg-amber-50 rounded-lg p-2 border border-amber-100">
-                    After making the payment, send your receipt through this
-                    consultation chat.
-                  </p>
+                  <div className="mt-3 bg-amber-50 rounded-xl p-3 border border-amber-100 space-y-3">
+                    <p className="text-xs text-amber-700 font-medium text-center">
+                      After making the payment, send your receipt through this
+                      consultation chat.
+                    </p>
+                    <button
+                      onClick={handleNotifyPaymentSent}
+                      disabled={notifyingPayment}
+                      className="w-full text-xs py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg shadow-sm disabled:opacity-50 transition-colors"
+                    >
+                      {notifyingPayment ? "Notifying..." : "Notify Doctor that Payment is Sent"}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

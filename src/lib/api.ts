@@ -709,6 +709,16 @@ export const updateDoctorClinicalNote = (
     { method: "PUT", body: JSON.stringify({ noteText }) },
   );
 
+export const notifyPaymentSent = (
+  accessToken: string,
+  consultationId: string,
+) =>
+  apiRequest<void>(
+    `/api/patient/consultations/${consultationId}/payment-sent`,
+    accessToken,
+    { method: "POST" },
+  );
+
 export const getDoctorPrescriptions = (
   accessToken: string,
   page = 0,

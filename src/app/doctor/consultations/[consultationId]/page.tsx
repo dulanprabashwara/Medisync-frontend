@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { useAuth } from "@/components/auth-provider";
 import { ConsultationCancellationPanel } from "@/components/consultation-cancellation-panel";
 import { ConsultationChat } from "@/components/consultation-chat";
@@ -260,21 +261,15 @@ function DoctorConsultationContent() {
 
   async function confirmPayment(prescriptionId: string) {
     if (!session || !consultation?.paymentSummaries) return;
-    const confirmed = window.confirm(
-      "Confirm that you received this consultation fee? This action is recorded in the audit log.",
-    );
-    if (!confirmed) return;
     setBusy("payment-" + prescriptionId);
     setError(null);
     setMessage(null);
     try {
       await confirmPrescriptionPayment(session.access_token, prescriptionId);
-      setMessage(
-        "Consultation fee confirmed. The patient can now generate the prescription QR.",
-      );
+      toast.success("Consultation fee confirmed. The patient can now generate the prescription QR.");
       await reconcile();
     } catch (paymentError) {
-      setError(
+      toast.error(
         paymentError instanceof Error
           ? paymentError.message
           : "Payment could not be confirmed.",

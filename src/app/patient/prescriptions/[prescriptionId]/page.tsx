@@ -14,7 +14,7 @@ import {
 } from "@/components/prescription-ui";
 import { ProtectedRoute } from "@/components/protected-route";
 import { SectionCard } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import {
   generatePatientPrescriptionQr,
@@ -232,6 +232,20 @@ export default function PatientPrescriptionDetailPage() {
                       </p>
                     </SectionCard>
                   )}
+
+                  {qrPayload && (
+                    <SectionCard
+                      title="Prescription QR Code"
+                      className="hidden print:block border-slate-200"
+                    >
+                      <div className="flex flex-col items-center justify-center p-4 text-center space-y-2">
+                        <PrescriptionQr payload={qrPayload} />
+                        <p className="text-xs text-slate-500 mt-2">
+                          Scan this QR code with the MediSync Pharmacist app to verify and dispense medication.
+                        </p>
+                      </div>
+                    </SectionCard>
+                  )}
                 </>
               )}
             </div>
@@ -260,13 +274,12 @@ export default function PatientPrescriptionDetailPage() {
                           payment is confirmed.
                         </p>
                       </div>
-                      <Button asChild variant="secondary" className="w-full">
-                        <Link
-                          href={`/patient/consultations/${value.consultationId}`}
-                        >
-                          Return to Consultation
-                        </Link>
-                      </Button>
+                      <Link
+                        href={`/patient/consultations/${value.consultationId}`}
+                        className={`${buttonVariants("secondary")} w-full`}
+                      >
+                        Return to Consultation
+                      </Link>
                     </div>
                   ) : qrPayload ? (
                     <div className="text-center space-y-6 py-2">
