@@ -78,14 +78,14 @@ function HeroSection() {
               <img
                 src="/landing/pixel-divider.png"
                 alt="Pixel Accent"
-                className="absolute top-12 right-20 sm:right-28 w-20 sm:w-28 object-contain z-0 pointer-events-none opacity-90"
+                className="absolute top-12 right-16 sm:right-24 w-20 sm:w-28 object-contain z-0 pointer-events-none opacity-90"
               />
 
               {/* Green Virus 3D Sphere */}
               <img
                 src="/landing/virus-green.png"
                 alt="Virus Graphic"
-                className="absolute -top-2 -right-2 sm:-right-6 w-40 sm:w-56 object-contain z-20 pointer-events-none drop-shadow-2xl"
+                className="absolute -top-6 -right-12 sm:-right-20 lg:-right-24 w-40 sm:w-52 object-contain z-20 pointer-events-none drop-shadow-2xl"
               />
             </div>
           </div>
