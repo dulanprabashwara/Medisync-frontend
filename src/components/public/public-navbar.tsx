@@ -30,15 +30,15 @@ export function PublicNavbar() {
         
         <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
           {LINKS.map((link) => {
-            const isActive = (pathname === "/" && link.href === "/") || (link.href !== "/" && pathname.startsWith(link.href));
+            const isActive = pathname === link.href || (link.href === "/#faq" && pathname === "/");
             return (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`px-3 py-1.5 text-sm font-medium transition-all relative ${
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                   isActive
-                    ? "text-teal-800 font-semibold border-b-2 border-teal-700"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-slate-100 text-teal-800"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 }`}
               >
                 {link.name}
@@ -58,16 +58,16 @@ export function PublicNavbar() {
           ) : (
             <>
               <Link
-                className="rounded-xl border border-slate-300 bg-white px-5 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 transition-all"
+                className="rounded-xl px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
                 href="/login"
               >
                 Sign In
               </Link>
               <Link
-                className="rounded-xl bg-[#0b6e61] px-5 py-2 text-sm font-semibold text-white hover:bg-[#095b50] shadow-sm transition-all"
+                className="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-800 shadow-sm"
                 href="/register"
               >
-                Create Account
+                Get Started
               </Link>
             </>
           )}
@@ -80,23 +80,25 @@ export function PublicNavbar() {
           aria-expanded={mobileMenuOpen}
         >
           <span className="sr-only">Open main menu</span>
-          <Menu className="size-6" aria-hidden="true" />
+          <Menu className="size-7" aria-hidden="true" />
         </button>
       </div>
 
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-50">
           <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
-          <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-5 py-6 sm:max-w-sm sm:ring-1 sm:ring-slate-900/10">
+          <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-slate-900/10">
             <div className="flex items-center justify-between">
-              <MediSyncBrand />
+              <div className="scale-110 origin-left">
+                <MediSyncBrand />
+              </div>
               <button
                 type="button"
                 className="-m-2.5 rounded-md p-2.5 text-slate-700"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <span className="sr-only">Close menu</span>
-                <X className="size-6" aria-hidden="true" />
+                <X className="size-7" aria-hidden="true" />
               </button>
             </div>
             <div className="mt-6 flow-root">
@@ -106,7 +108,7 @@ export function PublicNavbar() {
                     <Link
                       key={link.name}
                       href={link.href}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-slate-900 hover:bg-slate-50"
+                      className="-mx-3 block rounded-lg px-4 py-2.5 text-lg font-semibold leading-7 text-slate-900 hover:bg-slate-50"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {link.name}
@@ -116,7 +118,7 @@ export function PublicNavbar() {
                 <div className="py-6 flex flex-col gap-3">
                   {session && profile ? (
                     <Link
-                      className="rounded-xl bg-teal-700 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-teal-800"
+                      className="rounded-xl bg-teal-700 px-5 py-3 text-center text-base font-semibold text-white hover:bg-teal-800"
                       href={dashboardPath(profile.role)}
                     >
                       Open Dashboard
@@ -124,16 +126,16 @@ export function PublicNavbar() {
                   ) : (
                     <>
                       <Link
-                        className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                        className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-base font-medium text-slate-800 hover:bg-slate-50"
                         href="/login"
                       >
                         Sign In
                       </Link>
                       <Link
-                        className="rounded-xl bg-teal-700 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-teal-800 shadow-sm"
+                        className="rounded-xl bg-[#0b6e61] px-5 py-3 text-center text-base font-semibold text-white hover:bg-[#095b50] shadow-sm"
                         href="/register"
                       >
-                        Get Started
+                        Create Account
                       </Link>
                     </>
                   )}
