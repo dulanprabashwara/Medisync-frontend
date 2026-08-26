@@ -68,7 +68,7 @@ export default function RegisterPage() {
     >
       {errorMessage ? <FormAlert message={errorMessage} /> : null}
       {successMessage ? <FormAlert message={successMessage} success /> : null}
-      <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+      <form className="space-y-4" onSubmit={handleSubmit} noValidate>
         <div className="space-y-1">
           <label htmlFor="email" className="block text-sm font-medium text-slate-700">
             Email address

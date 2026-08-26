@@ -25,14 +25,16 @@ export function AppShell({ children }: { children: ReactNode }) {
     return <div className="min-h-screen bg-slate-50" />;
   }
 
+  const isAuthPage = pathname === "/login" || pathname === "/register" || pathname === "/onboarding";
+
   // If not authenticated or onboarding (no profile), show public layout
   if (!profile) {
     return (
-      <div className="flex min-h-screen flex-col">
+      <div className={`flex flex-col ${isAuthPage ? "h-screen overflow-hidden" : "min-h-screen"}`}>
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-4 focus:left-4 focus:rounded-xl focus:bg-white focus:px-4 focus:py-2 focus:text-teal-700 focus:shadow-md font-semibold">Skip to main content</a>
         <PublicNavbar />
         <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
-        <PublicFooter />
+        {!isAuthPage && <PublicFooter />}
       </div>
     );
   }

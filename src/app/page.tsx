@@ -11,12 +11,14 @@ import {
   Users,
   HeartHandshake,
   CheckCircle2,
+  Video,
+  MessageSquare,
 } from "lucide-react";
 
 export const metadata = {
   title: "MediSync | Connected Digital Healthcare",
   description:
-    "MediSync connects Patients, verified Doctors and Pharmacists through one secure digital healthcare workflow.",
+    "MediSync connects Patients, verified Doctors and Pharmacists through one secure digital healthcare workflow with HD Video Consultations and Real-Time Chat.",
 };
 
 export default function HomePage() {
@@ -46,9 +48,9 @@ function HeroSection() {
           
           {/* Left Column: Text & CTAs */}
           <div className="lg:col-span-6 space-y-6 text-left">
-            <span className="text-xs sm:text-sm font-semibold tracking-wider text-[#0b6e61] uppercase">
-              HEALTHCARE PLATFORM
-            </span>
+            <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 border border-teal-200/80 px-3.5 py-1 text-xs font-semibold tracking-wider text-[#0b6e61] uppercase">
+              <Video className="size-3.5 text-teal-600" /> Live Video & Real-Time Chat
+            </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-[1.12]">
               Healthcare,<br />
               connected from<br />
@@ -56,7 +58,7 @@ function HeroSection() {
               pharmacy.
             </h1>
             <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-lg">
-              Seamlessly connecting Patients, Doctors, and Pharmacists in one unified, secure ecosystem designed for modern medical workflows.
+              Seamlessly connecting Patients, Doctors, and Pharmacists in one unified, secure ecosystem featuring HD Video Consultations, real-time messaging, and digital prescriptions.
             </p>
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <Link
@@ -113,14 +115,18 @@ function ValueStrip() {
   return (
     <section className="border-y border-slate-200 bg-white py-8">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-y-6 sm:grid-cols-4 sm:gap-x-8 text-center sm:text-left">
+        <div className="grid grid-cols-2 gap-y-6 sm:grid-cols-3 lg:grid-cols-5 sm:gap-x-6 text-center sm:text-left">
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <BadgeCheck className="size-8 text-teal-600 shrink-0" />
-            <span className="text-base font-semibold text-slate-900">Verified Professionals</span>
+            <span className="text-base font-semibold text-slate-900">Verified Doctors</span>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-3">
-            <ShieldCheck className="size-8 text-teal-600 shrink-0" />
-            <span className="text-base font-semibold text-slate-900">Private Consultations</span>
+            <Video className="size-8 text-teal-600 shrink-0" />
+            <span className="text-base font-semibold text-slate-900">HD Video Calls</span>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <MessageSquare className="size-8 text-teal-600 shrink-0" />
+            <span className="text-base font-semibold text-slate-900">Real-Time Chat</span>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <FileText className="size-8 text-teal-600 shrink-0" />
@@ -148,10 +154,7 @@ function WhatIsMediSync() {
             Bringing Patients, Doctors, and Pharmacists together.
           </p>
           <p className="mt-6 text-lg leading-8 text-slate-600">
-            MediSync reduces the fragmented steps between finding care, having a
-            consultation, receiving a prescription, confirming payment, and
-            dispensing medicine at the pharmacy. It all happens securely in one
-            place.
+            MediSync reduces the fragmented steps between finding care, joining a face-to-face HD Video consultation, chatting with your doctor, receiving a digital prescription, confirming payment, and dispensing medicine at the pharmacy. It all happens securely in one place.
           </p>
         </div>
       </div>
@@ -171,9 +174,9 @@ function HowItWorks() {
       description: "Choose an available time and describe your symptoms.",
     },
     {
-      name: "3. Consult Online",
+      name: "3. HD Video & Chat Consultation",
       description:
-        "Communicate securely with your Doctor during the consultation.",
+        "Join a live face-to-face HD video call and chat securely with your Doctor during your scheduled time.",
     },
     {
       name: "4. Receive a Prescription",
@@ -183,7 +186,7 @@ function HowItWorks() {
     {
       name: "5. Complete Payment",
       description:
-        "If a consultation fee applies, follow instructions and share the receipt.",
+        "If a consultation fee applies, follow instructions and share the receipt in Chat.",
     },
     {
       name: "6. Generate QR",
@@ -249,11 +252,15 @@ function RolesSection() {
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="size-4 text-teal-500" /> Book
-                consultations
+                consultation slots
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Share symptoms
-                & Chat
+                <CheckCircle2 className="size-4 text-teal-500" /> Join live HD
+                Video calls
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="size-4 text-teal-500" /> Real-time Chat
+                & symptom sharing
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="size-4 text-teal-500" /> Receive
@@ -280,8 +287,12 @@ function RolesSection() {
                 availability
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-teal-500" /> Review
-                requests & Consult
+                <CheckCircle2 className="size-4 text-teal-500" /> Host HD Video
+                consultations
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="size-4 text-teal-500" /> Real-time Chat
+                with Patients
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="size-4 text-teal-500" /> Maintain
@@ -345,43 +356,51 @@ function FeaturesSection() {
   const features = [
     {
       name: "Verified Doctor Discovery",
+      icon: Activity,
       description:
         "Patients can browse a directory of Doctors who have undergone professional verification.",
     },
     {
       name: "Appointment Scheduling",
+      icon: Activity,
       description:
         "Available consultation times are safely reserved when a Patient requests a booking.",
     },
     {
-      name: "Secure Consultation Chat",
+      name: "HD Video Consultations",
+      icon: Video,
       description:
-        "Communicate securely during an active consultation without leaving the platform.",
+        "High-definition face-to-face video sessions built right into the consultation workspace.",
+    },
+    {
+      name: "Real-Time Patient Chat",
+      icon: MessageSquare,
+      description:
+        "Exchange instant text messages, symptom details, and payment receipts securely.",
     },
     {
       name: "Private Clinical Notes",
+      icon: Activity,
       description:
         "Doctors can maintain private internal notes on consultations that remain completely hidden from Patients.",
     },
     {
       name: "Digital Prescriptions",
+      icon: FileText,
       description:
         "Doctors easily structure and issue clear, digital prescriptions that attach directly to the consultation.",
     },
     {
       name: "Consultation Payment Confirmation",
+      icon: Activity,
       description:
         "Doctors set transparent fees and can securely confirm payment receipt directly in the workspace.",
     },
     {
       name: "Secure Prescription QR",
+      icon: QrCode,
       description:
         "Patients receive an opaque, securely generated QR token representing their valid prescription.",
-    },
-    {
-      name: "Verified Pharmacist Dispensing",
-      description:
-        "Verified Pharmacists scan the QR to safely dispense medication, completing the healthcare loop.",
     },
   ];
 
@@ -395,22 +414,25 @@ function FeaturesSection() {
         </div>
         <div className="mx-auto max-w-2xl lg:max-w-none">
           <div className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-4 md:grid-cols-2">
-            {features.map((feature) => (
-              <div
-                key={feature.name}
-                className="relative rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 hover:shadow-md transition-shadow"
-              >
-                <div className="mb-4 flex size-10 items-center justify-center rounded-lg bg-teal-600">
-                  <Activity className="size-6 text-white" />
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <div
+                  key={feature.name}
+                  className="relative rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 hover:shadow-md transition-shadow"
+                >
+                  <div className="mb-4 flex size-10 items-center justify-center rounded-lg bg-teal-600">
+                    <Icon className="size-6 text-white" />
+                  </div>
+                  <h3 className="text-base font-semibold leading-7 text-slate-900">
+                    {feature.name}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {feature.description}
+                  </p>
                 </div>
-                <h3 className="text-base font-semibold leading-7 text-slate-900">
-                  {feature.name}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -429,38 +451,57 @@ function ConsultationJourney() {
             </h2>
             <p className="mt-6 text-lg leading-8 text-slate-600">
               The Consultation Workspace brings together everything required for
-              a successful online appointment. Patients share symptoms, Doctors
-              maintain private clinical notes, and both parties communicate
-              through Secure Chat. Prescriptions and payment status are always
-              visible and up to date right where you need them.
+              a successful online appointment: interactive HD Video Calls,
+              real-time Patient-Doctor Chat messaging, private clinical notes for Doctors, and instant digital prescription generation.
             </p>
           </div>
           <div className="relative">
             <div className="rounded-2xl bg-slate-50 p-6 sm:p-8 ring-1 ring-slate-200 shadow-xl">
               <div className="space-y-6">
+                {/* Live Video Indicator Mock */}
+                <div className="flex items-center justify-between rounded-xl bg-slate-900 p-4 text-white">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-3 rounded-full bg-red-500 animate-pulse" />
+                    <span className="text-xs font-semibold tracking-wider uppercase text-slate-200">
+                      Live HD Video Session
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-1 text-xs font-medium">
+                    <Video className="size-3.5" /> Active Call
+                  </div>
+                </div>
+
+                {/* Chat Bubbles */}
                 <div className="flex items-start gap-4">
-                  <div className="size-10 rounded-full bg-slate-200 shrink-0" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 w-1/4 rounded bg-slate-200" />
-                    <div className="h-3 w-3/4 rounded bg-slate-100" />
-                    <div className="h-3 w-1/2 rounded bg-slate-100" />
+                  <div className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 text-xs font-bold shrink-0">
+                    PT
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <span className="text-xs font-medium text-slate-500">Patient</span>
+                    <div className="rounded-2xl rounded-tl-none bg-white p-3 text-xs text-slate-700 shadow-sm border border-slate-200">
+                      Hello Doctor, I have uploaded my symptoms and joined the video session.
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 flex-row-reverse">
-                  <div className="size-10 rounded-full bg-teal-200 shrink-0" />
-                  <div className="flex-1 space-y-2 flex flex-col items-end">
-                    <div className="h-4 w-1/4 rounded bg-teal-100" />
-                    <div className="h-3 w-2/3 rounded bg-teal-50" />
+                  <div className="size-10 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                    DR
+                  </div>
+                  <div className="flex-1 space-y-1 flex flex-col items-end">
+                    <span className="text-xs font-medium text-slate-500">Doctor</span>
+                    <div className="rounded-2xl rounded-tr-none bg-teal-700 p-3 text-xs text-white shadow-sm">
+                      Welcome! I can see you clearly on video. I have drafted your prescription below.
+                    </div>
                   </div>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-white p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <FileText className="size-4 text-slate-400" />
-                    <span className="text-sm font-medium text-slate-700">
+                  <div className="flex items-center gap-2 mb-1">
+                    <FileText className="size-4 text-teal-600" />
+                    <span className="text-sm font-semibold text-slate-800">
                       Digital Prescription Attached
                     </span>
                   </div>
-                  <div className="h-2 w-full rounded bg-slate-100" />
+                  <p className="text-xs text-slate-500">Includes prescribed medicines & digital QR token</p>
                 </div>
               </div>
             </div>

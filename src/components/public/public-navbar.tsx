@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { dashboardPath } from "@/types/user";
 import { Menu, X } from "lucide-react";
@@ -20,8 +20,28 @@ export function PublicNavbar() {
   const { session, profile } = useAuth();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [hash, setHash] = useState("");
 
-  // effect removed
+  useEffect(() => {
+    const updateHash = () => {
+      setHash(window.location.hash);
+    };
+    updateHash();
+    window.addEventListener("hashchange", updateHash);
+    window.addEventListener("popstate", updateHash);
+    return () => {
+      window.removeEventListener("hashchange", updateHash);
+      window.removeEventListener("popstate", updateHash);
+    };
+  }, [pathname]);
+
+  const handleLinkClick = (href: string) => {
+    if (href.includes("#")) {
+      setHash("#" + href.split("#")[1]);
+    } else {
+      setHash("");
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur">
@@ -30,11 +50,17 @@ export function PublicNavbar() {
         
         <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
           {LINKS.map((link) => {
-            const isActive = pathname === link.href || (link.href === "/#faq" && pathname === "/");
+            const isActive =
+              link.href === "/#faq"
+                ? pathname === "/" && hash === "#faq"
+                : link.href === "/"
+                ? pathname === "/" && hash !== "#faq"
+                : pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
             return (
               <Link
                 key={link.name}
                 href={link.href}
+                onClick={() => handleLinkClick(link.href)}
                 className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                   isActive
                     ? "bg-slate-100 text-teal-800"
