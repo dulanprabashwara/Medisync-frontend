@@ -51,6 +51,137 @@ select {
   display: none;
 }
 
+/* Authenticated portal design system. Public marketing pages intentionally do
+   not use these classes, so their existing visual treatment remains unchanged. */
+.portal-shell {
+  --portal-accent: #0f766e;
+  --portal-accent-strong: #115e59;
+  --portal-accent-soft: #ccfbf1;
+  --portal-accent-faint: rgba(15, 118, 110, 0.07);
+  --portal-accent-halo: rgba(20, 184, 166, 0.14);
+  background: #f4f7fb;
+}
+
+.portal-shell[data-portal-role="PATIENT"] {
+  --portal-accent: #0f766e;
+  --portal-accent-strong: #115e59;
+  --portal-accent-soft: #ccfbf1;
+  --portal-accent-faint: rgba(15, 118, 110, 0.07);
+  --portal-accent-halo: rgba(20, 184, 166, 0.14);
+}
+
+.portal-shell[data-portal-role="DOCTOR"] {
+  --portal-accent: #0369a1;
+  --portal-accent-strong: #075985;
+  --portal-accent-soft: #e0f2fe;
+  --portal-accent-faint: rgba(3, 105, 161, 0.07);
+  --portal-accent-halo: rgba(14, 165, 233, 0.13);
+}
+
+.portal-shell[data-portal-role="PHARMACIST"] {
+  --portal-accent: #047857;
+  --portal-accent-strong: #065f46;
+  --portal-accent-soft: #d1fae5;
+  --portal-accent-faint: rgba(4, 120, 87, 0.07);
+  --portal-accent-halo: rgba(16, 185, 129, 0.13);
+}
+
+.portal-shell[data-portal-role="ADMIN"] {
+  --portal-accent: #4f46a5;
+  --portal-accent-strong: #43388f;
+  --portal-accent-soft: #e8e7ff;
+  --portal-accent-faint: rgba(79, 70, 165, 0.07);
+  --portal-accent-halo: rgba(99, 102, 241, 0.13);
+}
+
+.portal-main {
+  background:
+    radial-gradient(circle at 92% 2%, var(--portal-accent-halo), transparent 22rem),
+    linear-gradient(180deg, #f8fafc 0%, #f4f7fb 55%, #f7f9fc 100%);
+}
+
+.portal-page {
+  animation: portal-page-enter 240ms ease-out both;
+}
+
+.portal-shell :is(input, select, textarea) {
+  border-color: #cbd5e1;
+  background-color: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.portal-shell :is(input, select, textarea):hover:not(:disabled) {
+  border-color: #94a3b8;
+}
+
+.portal-shell :is(input, select, textarea):focus {
+  border-color: var(--portal-accent);
+  box-shadow: 0 0 0 4px var(--portal-accent-faint);
+  outline: none;
+}
+
+.portal-shell table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.portal-shell thead {
+  background: #f8fafc;
+}
+
+.portal-shell tbody tr {
+  transition: background-color 150ms ease;
+}
+
+.portal-shell tbody tr:hover {
+  background-color: var(--portal-accent-faint);
+}
+
+.portal-shell * {
+  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-width: thin;
+}
+
+.portal-shell *::-webkit-scrollbar {
+  display: block;
+  width: 8px;
+  height: 8px;
+}
+
+.portal-shell *::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: #cbd5e1;
+  background-clip: padding-box;
+}
+
+.portal-shell *::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+  background-clip: padding-box;
+}
+
+.portal-shell ::selection {
+  background: var(--portal-accent-soft);
+  color: #0f172a;
+}
+
+@keyframes portal-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-page {
+    animation: none;
+  }
+}
+
 @media print {
   @page {
     margin: 10mm;

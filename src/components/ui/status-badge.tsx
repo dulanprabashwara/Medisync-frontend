@@ -12,16 +12,16 @@ export function StatusBadge({
   className?: string;
 }) {
   const tones = {
-    success: "bg-emerald-100 text-emerald-800",
-    warning: "bg-amber-100 text-amber-900",
-    error: "bg-rose-100 text-rose-800",
-    info: "bg-sky-100 text-sky-800",
-    neutral: "bg-slate-100 text-slate-700",
+    success: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    warning: "border-amber-200 bg-amber-50 text-amber-900",
+    error: "border-rose-200 bg-rose-50 text-rose-800",
+    info: "border-sky-200 bg-sky-50 text-sky-800",
+    neutral: "border-slate-200 bg-slate-50 text-slate-700",
   };
 
   return (
     <span
-      className={`inline-flex rounded-full px-3 py-1 text-xs font-bold tracking-wide ${tones[tone]} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold tracking-wide before:size-1.5 before:rounded-full before:bg-current before:opacity-70 ${tones[tone]} ${className}`}
     >
       {children}
     </span>

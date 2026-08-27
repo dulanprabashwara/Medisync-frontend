@@ -22,33 +22,36 @@ export function PortalHeading({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="mb-8">
+    <div className="relative mb-8 overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-[0_14px_40px_rgba(15,23,42,0.055)] sm:p-6 lg:p-7">
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-[var(--portal-accent)]" />
+      <div className="pointer-events-none absolute -right-16 -top-20 size-52 rounded-full bg-[var(--portal-accent-soft)] opacity-60 blur-3xl" />
       {backHref && (
         <Link
-          className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors mb-4"
+          className="relative inline-flex items-center gap-1.5 rounded-lg text-sm font-semibold text-slate-500 hover:text-[var(--portal-accent)] transition-colors mb-4"
           href={backHref}
         >
-          <ChevronLeft className="size-4" />
+          <ChevronLeft className="size-4 transition-transform group-hover:-translate-x-0.5" />
           {backLabel}
         </Link>
       )}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
+      <div className="relative flex flex-col sm:flex-row sm:items-end justify-between gap-5">
+        <div className="min-w-0">
           {eyebrow && (
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700 mb-2">
+            <p className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--portal-accent)]">
+              <span className="h-px w-6 bg-[var(--portal-accent)] opacity-70" />
               {eyebrow}
             </p>
           )}
-          <h1 className="text-[28px] font-semibold tracking-tight text-slate-950">
+          <h1 className="text-[28px] font-bold tracking-[-0.025em] text-slate-950 sm:text-[32px]">
             {title}
           </h1>
           {description && (
-            <p className="mt-2 max-w-2xl text-sm md:text-[15px] leading-relaxed text-slate-600">
+            <p className="mt-2 max-w-3xl text-sm md:text-[15px] leading-relaxed text-slate-600">
               {description}
             </p>
           )}
         </div>
-        {action && <div className="shrink-0">{action}</div>}
+        {action && <div className="shrink-0 sm:pb-0.5">{action}</div>}
       </div>
     </div>
   );
