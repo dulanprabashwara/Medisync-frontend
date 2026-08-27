@@ -7,7 +7,6 @@ import {
   ShieldCheck,
   Zap,
   Video,
-  MessageSquare,
   FileText,
   QrCode,
   HeartHandshake,

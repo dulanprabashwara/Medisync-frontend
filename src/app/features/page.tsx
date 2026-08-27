@@ -14,10 +14,8 @@ import {
   Calendar,
   FileSpreadsheet,
   Clock,
-  Send,
   Eye,
   Check,
-  Zap,
 } from "lucide-react";
 
 export const metadata = {

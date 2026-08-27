@@ -5,11 +5,6 @@ import {
   Pill,
   Sparkles,
   ArrowRight,
-  Video,
-  MessageSquare,
-  QrCode,
-  CheckCircle2,
-  HelpCircle,
   Lightbulb,
 } from "lucide-react";
 

@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ChevronDown, LogOut, User } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { MobileNavigation } from "./mobile-navigation";
@@ -27,7 +26,6 @@ function roleLabel(role: string) {
 
 export function TopBar() {
   const { profile, signOut } = useAuth();
-  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -53,10 +51,7 @@ export function TopBar() {
 
   async function handleLogout() {
     setBusy(true);
-    await signOut();
-    router.replace("/login");
-    router.refresh();
-    setBusy(false);
+    await signOut("/");
   }
 
   if (!profile) return null;

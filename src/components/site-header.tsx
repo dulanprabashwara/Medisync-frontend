@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "./auth-provider";
 import { dashboardPath } from "@/types/user";
@@ -9,15 +8,11 @@ import { MediSyncBrand } from "@/components/branding/medisync-brand";
 
 export function SiteHeader() {
   const { session, profile, signOut } = useAuth();
-  const router = useRouter();
   const [busy, setBusy] = useState(false);
 
   async function handleLogout() {
     setBusy(true);
-    await signOut();
-    router.replace("/login");
-    router.refresh();
-    setBusy(false);
+    await signOut("/");
   }
 
   return (

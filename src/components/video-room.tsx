@@ -3,18 +3,13 @@
 import { useCallback, useState } from "react";
 import {
   LiveKitRoom,
-  GridLayout,
-  ParticipantTile,
   RoomAudioRenderer,
-  ControlBar,
-  useTracks,
   PreJoin,
   VideoConference,
   type LocalUserChoices,
 } from "@livekit/components-react";
-import { Track } from "livekit-client";
 import "@livekit/components-styles";
-import { Video, VideoOff, X } from "lucide-react";
+import { Video, VideoOff } from "lucide-react";
 import { MediSyncBrand } from "@/components/branding/medisync-brand";
 import toast from "react-hot-toast";
 
@@ -205,7 +200,6 @@ export function DoctorVideoButton({
   consultationStatus,
   videoActive,
   busy,
-  scheduledStart,
   onStart,
   onRejoin,
 }: {
@@ -224,7 +218,7 @@ export function DoctorVideoButton({
     return (
       <div className="flex flex-col gap-3">
         <p className="text-sm text-teal-800">
-          Click "Start Consultation" in the Info tab to begin this session and enable video.
+          Click &quot;Start Consultation&quot; in the Info tab to begin this session and enable video.
         </p>
         <button
           disabled

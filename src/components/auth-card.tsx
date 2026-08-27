@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { Alert } from "@/components/ui/alert";
 
@@ -16,22 +17,26 @@ export function AuthCard({
   footer?: { text: string; label: string; href: string };
 }) {
   return (
-    <main className="relative mx-auto flex h-full w-full max-w-7xl items-center justify-center lg:justify-end px-4 py-4 sm:px-6 lg:px-12 overflow-hidden">
+    <div className="relative mx-auto flex flex-1 w-full max-w-7xl items-center justify-center lg:justify-end px-4 py-8 sm:px-6 lg:px-12 my-auto min-h-[calc(100vh-5rem)]">
       {/* Background Soft Glow */}
       <div className="absolute left-1/3 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-teal-100/40 rounded-full blur-3xl -z-10 pointer-events-none" />
 
       {/* Left Side: Doctor Character Illustration & Background Virus Shadow */}
       <div className="hidden lg:flex absolute left-0 xl:left-6 top-1/2 -translate-y-[54%] items-center justify-center pointer-events-none z-0">
         {/* Virus Shadow Graphic in Background of Doctor */}
-        <img
+        <Image
           src="/landing/virus-green.png"
           alt="Virus Shadow"
+          width={420}
+          height={420}
           className="absolute top-12 xl:top-16 -right-24 xl:-right-32 w-80 xl:w-[420px] object-contain opacity-25 filter blur-[1px] -z-10 transform scale-105 pointer-events-none"
         />
         {/* Doctor Character */}
-        <img
+        <Image
           src="/landing/doctor-side.png"
           alt="MediSync Doctor"
+          width={480}
+          height={680}
           className="w-[420px] xl:w-[480px] max-h-[82vh] object-contain drop-shadow-2xl z-10 relative"
         />
       </div>
@@ -58,7 +63,7 @@ export function AuthCard({
           </p>
         ) : null}
       </section>
-    </main>
+    </div>
   );
 }
 

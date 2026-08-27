@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import {
   AuthCard,
   FormAlert,
@@ -15,11 +15,17 @@ import { dashboardPath } from "@/types/user";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { refreshProfile } = useAuth();
+  const { session, profile, loading, refreshProfile } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!loading && session && profile) {
+      router.replace(dashboardPath(profile.role));
+    }
+  }, [loading, profile, router, session]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -40,15 +46,11 @@ export default function LoginPage() {
       if (!data.session)
         throw new Error("A session could not be created. Please try again.");
 
-      try {
-        const profile = await refreshProfile();
-        if (profile) {
-          router.replace(dashboardPath(profile.role));
-        } else {
-          router.replace("/onboarding");
-        }
-      } catch (profileError) {
-        throw profileError;
+      const userProfile = await refreshProfile();
+      if (userProfile) {
+        router.replace(dashboardPath(userProfile.role));
+      } else {
+        router.replace("/onboarding");
       }
     } catch (loginError) {
       setMessage(
@@ -56,7 +58,6 @@ export default function LoginPage() {
           ? loginError.message
           : "Sign in failed. Check your details and try again.",
       );
-    } finally {
       setBusy(false);
     }
   }

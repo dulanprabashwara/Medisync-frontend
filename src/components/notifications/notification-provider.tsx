@@ -37,7 +37,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       const count = await getUnreadNotificationCount(token);
       setUnreadCount(count);
     } catch (err) {
-      console.error("Failed to refresh unread count", err);
+      // Quietly log background notification refresh failures to avoid dev overlay popups during network timeouts
+      console.warn("Could not refresh notification count:", err instanceof Error ? err.message : err);
     }
   }, [token]);
 

@@ -1,7 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 import { FaqAccordion } from "@/components/public/faq-accordion";
 import {
-  ChevronRight,
   FileText,
   QrCode,
   BadgeCheck,
@@ -91,23 +91,29 @@ function HeroSection() {
 
             <div className="relative flex items-center justify-center w-full max-w-lg">
               {/* Doctor Character */}
-              <img
+              <Image
                 src="/landing/doctor-front.png"
                 alt="MediSync Doctor"
+                width={448}
+                height={560}
                 className="w-full max-w-md object-contain z-10 relative drop-shadow-xl hover:scale-[1.01] transition-transform duration-500"
               />
 
               {/* Pixel Divider Accent */}
-              <img
+              <Image
                 src="/landing/pixel-divider.png"
                 alt="Pixel Accent"
+                width={112}
+                height={112}
                 className="absolute top-12 right-16 sm:right-24 w-20 sm:w-28 object-contain z-0 pointer-events-none opacity-90"
               />
 
               {/* Green Virus 3D Sphere */}
-              <img
+              <Image
                 src="/landing/virus-green.png"
                 alt="Virus Graphic"
+                width={208}
+                height={208}
                 className="absolute -top-6 -right-12 sm:-right-20 lg:-right-24 w-40 sm:w-52 object-contain z-20 pointer-events-none drop-shadow-2xl"
               />
             </div>

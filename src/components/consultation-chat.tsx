@@ -47,6 +47,7 @@ export function ConsultationChat({
   onSend: (content: string, images: File[]) => Promise<void>;
   onDelete?: (messageId: string) => Promise<void>;
 }) {
+  void liveStatus;
   const [content, setContent] = useState("");
   const [images, setImages] = useState<SelectedImage[]>([]);
   const [openImage, setOpenImage] = useState<string | null>(null);

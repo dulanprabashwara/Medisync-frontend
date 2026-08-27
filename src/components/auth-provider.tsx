@@ -22,7 +22,7 @@ interface AuthContextValue {
   refreshing: boolean;
   error: string | null;
   refreshProfile: () => Promise<MediSyncProfile | null>;
-  signOut: () => Promise<void>;
+  signOut: (redirectTo?: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -163,7 +163,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        if (!profileRef.current || !sameUser) setLoading(true);
+        if (event === "SIGNED_OUT") {
+          sessionRef.current = null;
+          profileRef.current = null;
+          setSession(null);
+          setProfile(null);
+          setLoading(false);
+          return;
+        }
+
         window.setTimeout(() => void applySession(nextSession), 0);
       },
     );
@@ -246,7 +254,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       document.removeEventListener("visibilitychange", refreshWhenVisible);
   }, [refreshProfile]);
 
-  const signOut = useCallback(async () => {
+  const signOut = useCallback(async (redirectTo: string = "/") => {
     const client = getSupabaseBrowserClient();
     await client.auth.signOut();
     operationRef.current += 1;
@@ -258,6 +266,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
     setLoading(false);
     setRefreshing(false);
+    if (typeof window !== "undefined") {
+      window.location.href = redirectTo;
+    }
   }, []);
 
   const value = useMemo(

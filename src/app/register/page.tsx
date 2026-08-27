@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import {
   AuthCard,
   FormAlert,
@@ -9,15 +9,24 @@ import {
   primaryButtonClassName,
 } from "@/components/auth-card";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { useAuth } from "@/components/auth-provider";
+import { dashboardPath } from "@/types/user";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { session, profile, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!loading && session && profile) {
+      router.replace(dashboardPath(profile.role));
+    }
+  }, [loading, profile, router, session]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -47,6 +56,7 @@ export default function RegisterPage() {
         setSuccessMessage(
           "Check your email to confirm your account, then sign in to complete your MediSync profile.",
         );
+        setBusy(false);
       }
     } catch (registrationError) {
       setErrorMessage(
@@ -54,7 +64,6 @@ export default function RegisterPage() {
           ? registrationError.message
           : "Registration failed. Please try again.",
       );
-    } finally {
       setBusy(false);
     }
   }

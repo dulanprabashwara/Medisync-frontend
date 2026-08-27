@@ -20,12 +20,12 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
   }, [profile, pathname, router]);
 
-  // Show nothing while auth resolves or while redirecting from root
-  if (loading || (profile && pathname === "/")) {
+  const isAuthPage = pathname === "/login" || pathname === "/register" || pathname === "/onboarding";
+
+  // Show nothing while auth resolves on non-auth pages or while redirecting from root
+  if ((loading && !isAuthPage) || (profile && pathname === "/")) {
     return <div className="min-h-screen bg-slate-50" />;
   }
-
-  const isAuthPage = pathname === "/login" || pathname === "/register" || pathname === "/onboarding";
 
   // If not authenticated or onboarding (no profile), show public layout
   if (!profile) {
@@ -33,7 +33,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex flex-col min-h-screen">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-4 focus:left-4 focus:rounded-xl focus:bg-white focus:px-4 focus:py-2 focus:text-teal-700 focus:shadow-md font-semibold">Skip to main content</a>
         <PublicNavbar />
-        <main id="main-content" className="flex-1" tabIndex={-1}>{children}</main>
+        <main id="main-content" className="flex-1 flex flex-col" tabIndex={-1}>{children}</main>
         {!isAuthPage && <PublicFooter />}
       </div>
     );

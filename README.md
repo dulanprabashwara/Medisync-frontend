@@ -1,8 +1,10 @@
 # MediSync Frontend
 
-MediSync is a full-stack digital healthcare management platform that connects Patients, verified Doctors, Pharmacists, and Administrators through a secure end-to-end workflow. 
+MediSync is a full-stack healthcare workflow project for Patients, verified Doctors, verified Pharmacists, and Administrators. It addresses the fragmentation between appointment booking, remote consultation, prescriptions, external-payment evidence, and pharmacy fulfillment by presenting them as one role-aware journey.
 
-The frontend is a modern Next.js 16 (App Router) application written in TypeScript and styled with Tailwind CSS v4. It delivers role-specific portals for Patients, Doctors, Pharmacists, and Administrators, featuring realtime Patient–Doctor messaging, secure LiveKit WebRTC video consultations, digital prescription token generation (with printable PDF sheet support), external payment confirmation management, camera-based QR pharmacy scanning, and real-time notification popups.
+This repository contains the Next.js 16 App Router client. It combines Supabase browser authentication, typed Spring Boot API access, persistent STOMP updates, LiveKit WebRTC rooms, print-ready prescriptions, and camera-based QR verification across four responsive portals. The backend remains authoritative for identity, roles, ownership, verification, lifecycle rules, and sensitive token generation.
+
+> MediSync is an engineering portfolio project, not a certified medical product or a claim of deployment in a hospital environment.
 
 ---
 
@@ -24,196 +26,13 @@ The frontend is a modern Next.js 16 (App Router) application written in TypeScri
 
 ---
 
-## Design System & Theme Specifications
+## Design System & Themes
 
-```yaml
-name: MediSync Premium Healthcare
-colors:
-  surface: '#f8f9ff'
-  surface-dim: '#cbdbf5'
-  surface-bright: '#f8f9ff'
-  surface-container-lowest: '#ffffff'
-  surface-container-low: '#eff4ff'
-  surface-container: '#e5eeff'
-  surface-container-high: '#dce9ff'
-  surface-container-highest: '#d3e4fe'
-  on-surface: '#0b1c30'
-  on-surface-variant: '#3e4947'
-  inverse-surface: '#213145'
-  inverse-on-surface: '#eaf1ff'
-  outline: '#6e7977'
-  outline-variant: '#bdc9c6'
-  surface-tint: '#006a63'
-  primary: '#005c55'
-  on-primary: '#ffffff'
-  primary-container: '#0f766e'
-  on-primary-container: '#a3faef'
-  inverse-primary: '#80d5cb'
-  secondary: '#006c49'
-  on-secondary: '#ffffff'
-  secondary-container: '#6cf8bb'
-  on-secondary-container: '#00714d'
-  tertiary: '#00577d'
-  on-tertiary: '#ffffff'
-  tertiary-container: '#0070a0'
-  on-tertiary-container: '#d8edff'
-  error: '#ba1a1a'
-  on-error: '#ffffff'
-  error-container: '#ffdad6'
-  on-error-container: '#93000a'
-  primary-fixed: '#9cf2e8'
-  primary-fixed-dim: '#80d5cb'
-  on-primary-fixed: '#00201d'
-  on-primary-fixed-variant: '#00504a'
-  secondary-fixed: '#6ffbbe'
-  secondary-fixed-dim: '#4edea3'
-  on-secondary-fixed: '#002113'
-  on-secondary-fixed-variant: '#005236'
-  tertiary-fixed: '#c9e6ff'
-  tertiary-fixed-dim: '#89ceff'
-  on-tertiary-fixed: '#001e2f'
-  on-tertiary-fixed-variant: '#004c6e'
-  background: '#f8f9ff'
-  on-background: '#0b1c30'
-  surface-variant: '#d3e4fe'
-typography:
-  hero:
-    fontFamily: Geist
-    fontSize: 64px
-    fontWeight: '600'
-    lineHeight: '1.1'
-    letterSpacing: -0.02em
-  headline-lg:
-    fontFamily: Geist
-    fontSize: 32px
-    fontWeight: '600'
-    lineHeight: '1.2'
-  headline-md:
-    fontFamily: Geist
-    fontSize: 22px
-    fontWeight: '500'
-    lineHeight: '1.3'
-  body-lg:
-    fontFamily: Hanken Grotesk
-    fontSize: 18px
-    fontWeight: '400'
-    lineHeight: '1.6'
-  body-md:
-    fontFamily: Hanken Grotesk
-    fontSize: 16px
-    fontWeight: '400'
-    lineHeight: '1.5'
-  label-sm:
-    fontFamily: Geist
-    fontSize: 12px
-    fontWeight: '600'
-    lineHeight: '1'
-    letterSpacing: 0.05em
-rounded:
-  sm: 0.25rem
-  DEFAULT: 0.5rem
-  md: 0.75rem
-  lg: 1rem
-  xl: 1.5rem
-  full: 9999px
-spacing:
-  base: 4px
-  xs: 4px
-  sm: 8px
-  md: 12px
-  lg: 16px
-  xl: 24px
-  2xl: 32px
-  3xl: 48px
-  gutter: 24px
-  margin: 32px
-```
+![MediSync Design System & Theme Specifications](./public/design-system.png)
 
-### Brand & Style Guidelines
-
-The design system is engineered for professional, enterprise-grade healthcare environments. It prioritizes clarity, technical precision, and a sense of calm reliability. The style is **Corporate / Modern**, leaning into high-end technical aesthetics that bridge the gap between clinical efficiency and software-driven innovation.
-
-The target audience includes clinicians, hospital administrators, and healthcare operators who require a distraction-free, high-performance interface. The visual language conveys trust through a light-slate foundation, technical typography, and a refined use of the teal primary palette. It avoids the clinical coldness of legacy systems while rejecting the ephemeral trends of consumer apps.
-
-### Colors & Palette Allocation
-
-The palette is centered on a deep, authoritative Primary Teal (`#0F766E`), reflecting the brand's medical-technical fusion. This design system utilizes a structured light mode where the canvas is a soft Slate-50/100 (`#F8FAFC`) to reduce eye strain over long shifts, while interactive surfaces are pure white to provide maximum contrast.
-
-Semantic colors are tuned for high-stress environments:
-- **Success:** Emerald tones for positive vitals or completed records.
-- **Warning:** Amber for cautionary notes or pending alerts.
-- **Danger:** Rose for critical health markers or emergency actions.
-- **Info:** Slate or primary teal for general system feedback.
-
-Borders utilize a subtle Slate-200 to define layout structure without adding visual noise.
-
-### Typography System
-
-This design system employs a dual-font strategy to balance technical precision with readability:
-
-- **Geist**: Used for headlines, data labels, and UI controls. Its monospaced-influenced proportions ensure that technical values and medical metrics are legible and perfectly aligned.
-- **Hanken Grotesk**: Used for body copy and long-form medical records. Its humanist qualities provide a refined, premium reading experience that minimizes cognitive load during data-heavy workflows.
-
-Hierarchy is strictly enforced: 32px page titles establish clear entry points, while 22px section headers organize complex dashboards.
-
-### Layout & Spacing Grid
-
-The design system follows a strict 4px base grid to ensure vertical rhythm across dense healthcare dashboards. 
-
-The layout philosophy uses a **Fluid Grid** for internal management screens, allowing clinical data to expand as needed, and a **Fixed Grid** (max-width 1440px) for administrative portals. 
-
-- **Desktop:** 12-column grid, 24px gutters, 32px side margins.
-- **Tablet:** 8-column grid, 16px gutters, 24px side margins.
-- **Mobile:** 4-column grid, 12px gutters, 16px side margins. 
-
-Dense information clusters (like lab results) utilize the `sm` (8px) and `md` (12px) increments, while structural separation between modules uses `xl` (24px) and above.
-
-### Elevation & Depth Layering
-
-To maintain a serious and technical tone, this design system rejects heavy shadows in favor of **Tonal Layers** and **Low-contrast Outlines**.
-
-Hierarchy is established through surface stacking:
-- **Level 0 (Background):** Light Slate-50/100 (`#F8FAFC`).
-- **Level 1 (Cards/Surfaces):** Pure white (`#FFFFFF`) with a 1px Slate-200 border.
-- **Level 2 (Popovers/Modals):** Pure white with a subtle, ultra-diffused shadow (10% opacity Slate-400) to distinguish it from the background without feeling "floaty."
-
-Interactive elements like buttons appear flat, only gaining a slight tonal shift or inner glow on hover to signal interactivity.
-
-### Shape & Radius Rules
-
-The shape language balances modern software aesthetics with an approachable feel:
-
-- **Large Containers (Cards):** 16px radius (`rounded-lg`) creates a soft, modern frame for medical data.
-- **Interactive Controls (Buttons):** 12px radius ensures buttons feel tactile and distinct from inputs.
-- **Utility Elements (Inputs/Chips):** 10px radius for inputs and 4px for small status indicators.
-
-### Component Design Specifications
-
-#### Buttons
-- **Primary:** Solid Teal (`#0F766E`) with white Geist Medium text. 12px radius.
-- **Secondary:** White background with Teal border and text.
-- **Ghost:** No border, Teal text. Used for less frequent actions like "Cancel."
-
-#### Input Fields
-- 10px radius. Slate-200 border. Hanken Grotesk 16px text.
-- On focus: 2px Primary Teal border with a soft teal outer glow (2px).
-
-#### Cards
-- 16px radius. Pure white background. 1px Slate-200 border. 
-- Headers within cards use Geist 16px SemiBold and are separated by a subtle horizontal rule.
-
-#### Status Chips
-- Pill-shaped (fully rounded).
-- Light-tinted backgrounds (e.g., Success Emerald-50) with high-contrast text (Emerald-900).
-
-#### Data Tables
-- Header row: Slate-50 background, Geist 12px Bold text, all-caps.
-- Rows: 1px Slate-100 bottom border. Hanken Grotesk 14px or 16px text.
-- Alternate row striping is discouraged to keep the UI clean; hover states are used instead.
-
-#### Navigational Sidebar
-- Persistent on desktop. Pure white or Slate-50.
-- Icons: 20px Stroke-based (1.5px weight) in Teal or Slate-500.
+* **Color Palette**: Primary Teal (`#0F766E`), Secondary Emerald (`#10B981`), Tertiary Blue (`#0EA5E9`), and Neutral Slate (`#64748B`).
+* **Typography**: **Geist** for headlines, labels, and UI controls; **Hanken Grotesk** for body text and medical records.
+* **Component Styling**: High-contrast modern UI controls, rounded card containers, search bars, action buttons, and clean tonal depth.
 
 ---
 
@@ -224,8 +43,8 @@ The shape language balances modern software aesthetics with an approachable feel
 - **Appointment Slot Reservation**: Book online video consultations with real-time slot availability, minimum lead-time validation, and symptom intake submission.
 - **Doctor-Controlled LiveKit Video Consultations**: Secure, room-isolated WebRTC video calls initiated by Doctors only after scheduled consultation times.
 - **Realtime Patient–Doctor Chat**: Persistent consultation-scoped messaging supporting up to four private image/receipt attachments per message.
-- **Digital Prescriptions**: Structured medication drafting, issuance, and PDF rendering by verified medical professionals.
-- **Printable Prescription PDF**: Print physical paper prescriptions containing embedded QR codes for presentation at traditional pharmacy counters.
+- **Digital Prescriptions**: Structured medication drafting and issuance by verified medical professionals.
+- **Print-Ready Prescription**: Browser print layout containing prescription details and an embedded QR code for presentation at a pharmacy counter.
 - **Single-Use QR Tokens**: On-demand 256-bit cryptographically secure QR code generation for digital or printed presentation.
 - **Pharmacist Camera QR Scanner**: Camera-integrated barcode verification and single-click whole-prescription dispensing.
 - **External Payment Confirmation Flow**: Manual payment guidance and Doctor-managed payment verification for positive-fee consultations/prescriptions.
@@ -247,7 +66,8 @@ The shape language balances modern software aesthetics with an approachable feel
 | Write Private Clinical Notes | — | ✓ | — | — |
 | Issue Digital Prescription | — | ✓ | — | — |
 | Confirm External Payment Receipt | — | ✓ | — | — |
-| Generate QR Code & Print PDF Sheet | ✓ | — | — | — |
+| Mark External Payment Sent | ✓ | — | — | — |
+| Generate QR Code & Print Sheet | ✓ | — | — | — |
 | Camera Scan & Verify QR Token | — | — | ✓ | — |
 | Dispense Whole Prescription | — | — | ✓ | — |
 | Verify Doctor / Pharmacist Licenses | — | — | — | ✓ |
@@ -292,10 +112,10 @@ Doctor Drafts & Issues Digital Prescription
        └────────────────┬────────────────┘
                         │
                         ▼
-    Patient Generates Secure QR Code / Prints PDF Sheet
+    Patient Generates Secure QR Code / Prints Prescription Sheet
                         │
                         ▼
- Patient Presents Mobile Phone Screen OR Printed PDF Sheet to Pharmacist
+ Patient Presents Mobile Phone Screen OR Printed Sheet to Pharmacist
                         │
                         ▼
  Verified Pharmacist Scans QR Code via Camera Scanner
@@ -332,7 +152,7 @@ flowchart TD
     N --> O[QR Code unlocked]
     L -->|No / Zero-Fee| O
     
-    O --> P[Patient views QR on phone OR prints paper PDF]
+    O --> P[Patient views QR on phone or prints a sheet]
     P --> Q[Verified Pharmacist scans QR via camera]
     Q --> R[Backend validates token hash & displays medication]
     R --> S[Pharmacist dispenses prescription]
@@ -386,43 +206,44 @@ sequenceDiagram
     participant LK as LiveKit Cloud
     actor PH as Pharmacist
 
-    P->>FE: Book consultation slot
+    P->>FE: Select slot and submit symptoms
     FE->>BE: POST /api/patient/appointments
-    BE->>DB: Atomic slot reservation (PESSIMISTIC_WRITE)
-    
-    D->>BE: Accept appointment
-    BE->>DB: Update status to CONFIRMED
-    BE-->>P: Send STOMP notification
-    
+    BE->>DB: Lock Patient and slot; create request
+
+    D->>BE: POST /api/doctor/appointments/{id}/accept
+    BE->>DB: Confirm booking and create consultation
+    BE-->>P: Private appointment notification
+
     D->>BE: POST /api/doctor/consultations/{id}/start
-    BE->>DB: Create ACTIVE video session
-    BE->>BE: Generate short-lived LiveKit token
-    BE-->>D: Return Doctor LiveKit Token
-    BE-->>P: Push VIDEO_CALL_STARTED notification
-    
-    D->>LK: Join video room as Host
-    
-    P->>BE: GET /api/patient/consultations/{id}
-    BE-->>P: Return Patient LiveKit Token
-    P->>LK: Join video room as Participant
-    
+    D->>BE: POST /api/doctor/consultations/{id}/video/start
+    BE->>DB: Create one ACTIVE video session
+    BE-->>D: Short-lived token and LiveKit URL
+    D->>LK: Join opaque room
+    BE-->>P: VIDEO_CALL_STARTED notification
+    P->>BE: POST /api/patient/consultations/{id}/video/join
+    BE-->>P: Short-lived token and LiveKit URL
+    P->>LK: Join same opaque room
+
     D->>BE: POST /api/doctor/prescriptions/{id}/issue
-    BE->>DB: Save immutable prescription
-    BE-->>P: Push PRESCRIPTION_ISSUED notification
-    
-    P->>FE: Click Generate QR Code
+    BE->>DB: Persist issued prescription
+    alt Positive fee
+        P->>BE: POST /api/patient/consultations/{id}/payment-sent
+        BE-->>D: PAYMENT_SENT notification
+        D->>BE: POST /api/doctor/prescriptions/{id}/confirm-payment
+    else Zero fee
+        BE->>DB: Payment NOT_REQUIRED
+    end
+
+    P->>FE: Generate QR
     FE->>BE: POST /api/patient/prescriptions/{id}/qr
-    BE->>DB: Store SHA-256 token hash & return raw token
-    FE->>FE: Render QR SVG & display Print PDF button
-    
-    PH->>FE: Scan QR via device camera
-    FE->>BE: POST /api/pharmacist/prescriptions/verify (body: qrPayload)
-    BE->>DB: SHA-256 lookup & return medication details
-    
+    BE->>DB: Store SHA-256 token hash
+    BE-->>FE: Return raw token for in-memory QR rendering
+    PH->>FE: Scan QR with device camera
+    FE->>BE: POST /api/pharmacist/prescriptions/verify
+    BE->>DB: Hash lookup; return safe prescription view
     PH->>BE: POST /api/pharmacist/prescriptions/dispense
-    BE->>DB: Lock prescription & insert single dispensation record
-    BE-->>P: Push DISPENSED notification
-    BE-->>PH: Return successful dispensation confirmation
+    BE->>DB: Lock, dispense once, and revoke token
+    BE-->>P: DISPENSED notification
 ```
 
 ---
@@ -434,8 +255,9 @@ sequenceDiagram
 - **Doctor Access Control**: Only the assigned Doctor can start a video session, and only after the scheduled appointment start time.
 - **Patient Join Permission**: Patients cannot create or start video calls. A Patient receives a short-lived token to join only after the Doctor has started the video room.
 - **Opaque Identifiers**: Room names and identity tokens use non-PII opaque identifiers.
-- **Independent Messaging**: LiveKit native chat is disabled. Consultation communication takes place through MediSync's persistent, database-backed chat system.
-- **No Video Recording**: In accordance with medical privacy guidelines, video sessions are live-only and are neither recorded nor stored.
+- **Independent Messaging**: Durable clinical conversation remains in MediSync's persistent, database-backed chat rather than LiveKit room metadata.
+- **Lifecycle**: Completing or cancelling a consultation ends its video-session state and the backend requests room deletion.
+- **No Video Recording**: Video sessions are live-only; the project does not implement recording or storage.
 
 ---
 
@@ -473,9 +295,9 @@ sequenceDiagram
 ## Digital Prescription & QR Workflow
 
 1. **Prescription Issuance**: Verified Doctors create structured digital prescriptions containing medication names, dosages, frequencies, durations, and special instructions.
-2. **Printable PDF & Digital QR**: Patients can access their issued prescription in two formats:
+2. **Print Layout & Digital QR**: Patients can access their issued prescription in two formats:
    - **Digital QR Code**: Generated on-demand as a 256-bit cryptographically random token rendered into a clean QR barcode using `qrcode.react`.
-   - **Printable PDF Sheet**: A clean, printable document layout including prescription details and the embedded QR code for presentation at traditional pharmacies.
+   - **Printable Sheet**: A browser print layout including prescription details and the embedded QR code.
 3. **Token Hash Security**: The raw QR payload exists only in memory during the session. PostgreSQL stores only the SHA-256 hash of the token.
 4. **Single-Use Dispensing**: Scanning the QR code at a partner pharmacy invokes the backend verification endpoint. Once dispensed, the single-use token is voided permanently, preventing re-dispensing or QR reuse.
 
@@ -488,7 +310,7 @@ MediSync provides a transparent external payment verification flow for positive-
 1. **Payment Instructions**: The Doctor sets the consultation/prescription fee and provides payment guidance (e.g., bank transfer details).
 2. **Receipt Submission**: The Patient completes payment externally and uploads the receipt image directly within the consultation chat.
 3. **Doctor Confirmation**: The assigned Doctor reviews the receipt and clicks **Confirm Payment** (`POST /api/doctor/prescriptions/{id}/confirm-payment`).
-4. **QR Unlocking**: Upon payment confirmation, the prescription status updates and the **Generate QR Code** and **Print PDF** buttons are unlocked for the Patient.
+4. **QR Unlocking**: Upon payment confirmation, the prescription status updates and QR generation/printing becomes available to the Patient.
 5. **Zero-Fee Exception**: Prescriptions marked with a zero fee automatically bypass payment confirmation and are instantly eligible for QR generation.
 
 ---
@@ -505,6 +327,10 @@ MediSync provides a transparent external payment verification flow for positive-
 | `/login` | User login screen supporting Supabase Email/Password authentication |
 | `/register` | User account registration |
 | `/onboarding` | Role selection (Patient, Doctor, Pharmacist) and profile initialization |
+| `/forgot-password` | Password recovery request |
+| `/update-password` | Password reset completion |
+| `/account-restricted` | Pending, rejected, or banned account guidance |
+| `/account-deleted` | Deleted-account confirmation |
 
 ### Patient Workspace (`/patient/*`)
 | Route | Screen / Purpose |
@@ -515,7 +341,7 @@ MediSync provides a transparent external payment verification flow for positive-
 | `/patient/appointments` | List of requested, confirmed, and past consultation bookings |
 | `/patient/consultations/[id]` | Consultation workspace: LiveKit video room, real-time chat, and history |
 | `/patient/prescriptions` | Issued digital prescriptions and dispensing status |
-| `/patient/prescriptions/[id]` | Prescription detail view, QR code generator, and printable PDF view |
+| `/patient/prescriptions/[id]` | Prescription detail view, QR generator, and print-ready sheet |
 | `/patient/notifications` | Persistent notification history and unread message center |
 | `/patient/profile` | Personal profile management and phone number updates |
 
@@ -545,23 +371,30 @@ MediSync provides a transparent external payment verification flow for positive-
 | :--- | :--- |
 | `/admin/dashboard` | Governance dashboard, pending verifications, and system health metrics |
 | `/admin/users` | User directory with account status controls (Ban / Unban) |
-| `/admin/verifications` | Professional verification queue for Doctor and Pharmacist applications |
+| `/admin/verification` | Professional verification queue for Doctor and Pharmacist applications |
 | `/admin/hospitals` | Master directory of affiliated hospitals and clinical institutions |
 | `/admin/departments` | Master directory of medical departments |
 | `/admin/specializations` | Master directory of medical specialties |
 | `/admin/analytics` | Platform utilization metrics, consultation trends, and user activity |
-| `/admin/audit-logs` | Filterable append-only system audit log |
+| `/admin/audit` | Filterable append-only system audit log |
+| `/admin/notifications` | Persistent Admin notification history |
+| `/admin/profile` | Administrator profile editing |
+
+---
+
+## Screenshots and Design Reference
+
+The repository currently includes the design-system reference shown near the top of this README. Product screenshots have not yet been committed, so this documentation intentionally does not link to invented assets. Recommended future captures are the Patient dashboard, Doctor consultation workspace, LiveKit call, prescription/QR view, Pharmacist verification, and Admin dashboard.
 
 ---
 
 ## Project Structure
 
 ```text
-d:/MediSync/frontend/
+frontend/
 ├── public/                     # Static public assets and branding graphics
 ├── src/
 │   ├── app/                    # Next.js 16 App Router pages and layouts
-│   │   ├── (auth)/             # Authentication routes (login, register, onboarding)
 │   │   ├── about/              # About MediSync page
 │   │   ├── admin/              # Administrator portal pages
 │   │   ├── doctor/             # Doctor clinical portal pages
@@ -593,31 +426,30 @@ d:/MediSync/frontend/
 
 ## Environment Variables
 
-Create `.env.local` in `D:\MediSync\frontend\` using the template below. **Do not include actual production secrets.**
+Create `.env.local` in the repository root. The checked-in client reads these names; values are intentionally omitted here.
 
 ```env
-# Supabase Authentication (Client-Safe Public Keys)
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
-
-# Backend Spring Boot API Endpoint
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_API_BASE_URL=
+NEXT_PUBLIC_API_URL=
 ```
 
-> **Security Note**: Only variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. Database credentials, LiveKit API secrets, and Supabase service-role keys must **never** be placed in the frontend configuration.
+`NEXT_PUBLIC_API_BASE_URL` is the main API-client setting. `NEXT_PUBLIC_API_URL` is still referenced by the account-deletion request path. Every `NEXT_PUBLIC_*` value is browser-visible: database credentials, Supabase service-role keys, and LiveKit API secrets must never be frontend settings.
 
 ---
 
 ## Installation & Running Locally
 
 ### Prerequisites
-- **Node.js**: v20.9.0 or newer
-- **npm**: v10.0.0 or newer
-- **MediSync API**: Running locally on `http://localhost:8080` (or configured API URL)
+- A Node.js version supported by Next.js 16
+- npm
+- The MediSync backend at the configured API base URL
+- Supabase project URL and publishable/anonymous browser key
 
 ### 1. Clone & Install
 ```powershell
-cd D:\MediSync\frontend
+cd Medisync-frontend
 npm install
 ```
 
@@ -625,7 +457,7 @@ npm install
 ```powershell
 copy .env.example .env.local
 ```
-Fill in your `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+Fill in the Supabase browser settings and backend API URL.
 
 ### 3. Start Development Server
 ```powershell
@@ -653,20 +485,41 @@ npm run build
 ## Security & Privacy Safeguards
 
 - **JWT Session Tokens**: Authenticated requests attach Supabase Bearer tokens in the `Authorization` header.
-- **Client-Side Authorization Enforcement**: Route middleware and component checks restrict portal access to matching verified roles (`PATIENT`, `DOCTOR`, `PHARMACIST`, `ADMIN`).
-- **Memory-Only QR Token Storage**: Raw prescription QR token payloads exist solely in component state during active display and are cleared immediately after rendering or dispensing.
+- **Defense in Depth**: Client redirects and role-aware navigation improve UX, while the Spring Boot backend—not the browser—authoritatively enforces identity, account status, role, verification, ownership, and state transitions.
+- **Private User Realtime**: The STOMP connection uses the access token and subscribes to authenticated user destinations rather than public per-user topics.
+- **Backend-Only LiveKit Authority**: The browser receives a short-lived room token from the API; LiveKit API credentials are never frontend variables. Room identities are opaque and no clinical data is placed in provider metadata.
+- **Ephemeral QR Display**: The raw prescription QR payload is held in React state for display/printing and is not written to browser storage by this flow; the backend persists only its hash.
 - **Transient Media Links**: Consultation chat attachments and profile photos use short-lived pre-signed URLs; raw storage buckets remain private.
 - **Admin Clinical Privacy**: System administrators can manage user accounts and verifications but have no access to clinical consultation notes, patient–doctor chat messages, or prescription QR secrets.
 
 ---
 
-## Companion Backend Repository
+## Known Limitations
 
-The backend source code is located in the companion repository:  
-📁 [`D:\MediSync\backend`](../backend/README.md) — Spring Boot 3.5 API with PostgreSQL, STOMP WebSockets, and LiveKit Java Server SDK.
+- Video is live-only; recording, transcription, and stored call media are not implemented.
+- Payments happen outside MediSync; there is no internal card gateway, refund, or settlement workflow.
+- Pharmacy fulfillment is whole-prescription only; partial dispensing is not implemented.
+- Insurance, laboratory, and external electronic-health-record integrations are outside the current scope.
+- Supabase is required for authentication/private media, LiveKit Cloud for video, and the Spring Boot service for protected workflows.
+- No frontend unit or end-to-end test runner is configured in `package.json`; current automated frontend gates are TypeScript, ESLint, and the production build.
+- The project is not presented as formally certified for regulatory or clinical production use.
+
+## Future Improvements
+
+- Add Playwright coverage for the four role journeys and accessibility regression checks.
+- Add committed, anonymized product screenshots and a short architecture demo.
+- Add offline/reconnect UX tests for STOMP notifications and consultation events.
+- Consolidate the two API URL environment names into one setting.
+- Add CI that runs frontend gates and backend tests together.
 
 ---
 
-## License & Project Context
+## Companion Backend Repository
 
-MediSync was designed and built as a full-stack digital healthcare platform for modern remote healthcare delivery. All core features including professional verification, video consultations, persistent chat, digital prescribing, external payment confirmation, and single-use QR dispensing are implemented.
+[MediSync Backend](https://github.com/dulanprabashwara/MediSync-backend) contains the Spring Boot API, PostgreSQL/Flyway schema, authorization and lifecycle rules, STOMP delivery, LiveKit token service, and QR/dispensing transactions.
+
+---
+
+## Project Context
+
+MediSync is a serious full-stack engineering and portfolio project demonstrating role-specific product design, typed API integration, realtime state, WebRTC media, and a connected prescription-to-dispensing journey. It is not represented as a real hospital deployment, regulatory certification, or substitute for clinical governance.

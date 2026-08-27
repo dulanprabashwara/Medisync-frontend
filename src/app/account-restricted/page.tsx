@@ -63,7 +63,7 @@ export default function AccountRestrictedPage() {
         </p>
         <button
           type="button"
-          onClick={() => void signOut().then(() => router.replace("/login"))}
+          onClick={() => void signOut("/")}
           className="mt-6 rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white"
         >
           Sign out

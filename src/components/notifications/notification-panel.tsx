@@ -26,16 +26,23 @@ export function NotificationPanel({
     }
   }, [notificationsLoaded, loadLatestNotifications]);
 
+  const hasUnread = unreadCount > 0 || latestNotifications.some((n) => !n.read);
+
   return (
     <div className="flex flex-col h-full sm:max-h-[520px]">
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 shrink-0">
         <h3 className="font-semibold text-slate-900">Notifications</h3>
-        {unreadCount > 0 && (
+        {latestNotifications.length > 0 && (
           <button
             onClick={() => void markAllRead()}
-            className="text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors"
+            disabled={!hasUnread}
+            className={`text-xs font-medium transition-colors ${
+              hasUnread
+                ? "text-teal-600 hover:text-teal-700 cursor-pointer"
+                : "text-slate-400 cursor-default"
+            }`}
           >
-            Mark all read
+            Mark all as read
           </button>
         )}
       </div>
