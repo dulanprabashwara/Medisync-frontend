@@ -21,9 +21,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [profile, pathname, router]);
 
   const isAuthPage = pathname === "/login" || pathname === "/register" || pathname === "/onboarding";
+  const isResolvingAuthenticatedRedirect = Boolean(
+    profile && (pathname === "/" || isAuthPage),
+  );
 
-  // Show nothing while auth resolves on non-auth pages or while redirecting from root
-  if ((loading && !isAuthPage) || (profile && pathname === "/")) {
+  // Do not render public/auth pages until session restoration finishes, and do
+  // not place an authenticated AppShell around a public entry page while that
+  // page's redirect to the role dashboard is pending.
+  if (loading || isResolvingAuthenticatedRedirect) {
     return <div className="min-h-screen bg-slate-50" />;
   }
 

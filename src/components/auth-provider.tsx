@@ -65,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const sessionRef = useRef<Session | null>(null);
   const profileRef = useRef<MediSyncProfile | null>(null);
   const operationRef = useRef(0);
+  const signOutInProgressRef = useRef(false);
 
   const applySession = useCallback(async (nextSession: Session | null) => {
     const operation = ++operationRef.current;
@@ -164,6 +165,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         if (event === "SIGNED_OUT") {
+          // A user-initiated sign-out keeps the current authenticated screen
+          // mounted until the final destination replaces the document. Clearing
+          // auth state here would make protected routes briefly redirect to Login.
+          if (signOutInProgressRef.current) return;
           sessionRef.current = null;
           profileRef.current = null;
           setSession(null);
@@ -256,18 +261,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async (redirectTo: string = "/") => {
     const client = getSupabaseBrowserClient();
-    await client.auth.signOut();
-    operationRef.current += 1;
-    sessionRef.current = null;
-    setLatestApiAccessToken(null);
-    profileRef.current = null;
-    setSession(null);
-    setProfile(null);
-    setError(null);
-    setLoading(false);
-    setRefreshing(false);
-    if (typeof window !== "undefined") {
-      window.location.href = redirectTo;
+    signOutInProgressRef.current = true;
+    try {
+      const { error: signOutError } = await client.auth.signOut();
+      if (signOutError) throw signOutError;
+
+      if (typeof window !== "undefined") {
+        window.location.replace(redirectTo);
+        return;
+      }
+
+      operationRef.current += 1;
+      sessionRef.current = null;
+      setLatestApiAccessToken(null);
+      profileRef.current = null;
+      setSession(null);
+      setProfile(null);
+      setError(null);
+      setLoading(false);
+      setRefreshing(false);
+      signOutInProgressRef.current = false;
+    } catch (signOutError) {
+      signOutInProgressRef.current = false;
+      throw signOutError;
     }
   }, []);
 
