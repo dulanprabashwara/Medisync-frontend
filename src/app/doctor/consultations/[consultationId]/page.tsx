@@ -11,7 +11,7 @@ import { LoadingPanel } from "@/components/loading-panel";
 import {
   ConsultationStatusBadge,
   InlineError,
-  formatAppointmentTime,
+  formatAppointmentRange,
 } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
 import { VideoRoom, DoctorVideoButton } from "@/components/video-room";
@@ -376,7 +376,7 @@ function DoctorConsultationContent() {
               Patient: {consultation.patientName}
             </h1>
             <p className="text-xs text-slate-500 line-clamp-1">
-              {consultation.specializationName} · Scheduled {formatAppointmentTime(consultation.scheduledStart)}
+              {consultation.specializationName} · Scheduled {formatAppointmentRange(consultation.scheduledStart, consultation.scheduledEnd)}
             </p>
           </div>
           <button
@@ -514,6 +514,10 @@ function DoctorConsultationContent() {
               <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h2 className="font-semibold text-slate-900 mb-4">Patient Information</h2>
                 <dl className="space-y-4 text-sm">
+                  <Detail
+                    label="Patient age"
+                    value={consultation.symptoms.patientAge?.toString() ?? null}
+                  />
                   <Detail
                     label="Reason for consultation"
                     value={consultation.symptoms.reasonForVisit}

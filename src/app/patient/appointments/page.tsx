@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Calendar, Clock, Activity, History } from "lucide-react";
+import { Calendar, Clock, Activity, History, Phone } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
-import { PortalHeading, formatAppointmentTime } from "@/components/portal-ui";
+import { PortalHeading, formatAppointmentRange } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
 import { cancelPatientAppointment, getPatientAppointments } from "@/lib/api";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -17,7 +17,7 @@ import { Alert } from "@/components/ui/alert";
 import { formatDoctorName } from "@/lib/formatters";
 import type { Appointment } from "@/types/appointments";
 
-type Tab = "upcoming" | "requests" | "history";
+type Tab = "upcoming" | "in_progress" | "requests" | "history";
 
 export default function PatientAppointmentsPage() {
   const { session } = useAuth();
@@ -77,10 +77,15 @@ export default function PatientAppointmentsPage() {
       upcoming: appointments
         .filter(
           (a) =>
-            a.status === "CONFIRMED" ||
-            a.consultationStatus === "IN_PROGRESS" ||
-            a.consultationStatus === "SCHEDULED",
+            a.consultationStatus !== "IN_PROGRESS" &&
+            a.consultationStatus !== "COMPLETED" &&
+            a.consultationStatus !== "CANCELLED" &&
+            (a.status === "CONFIRMED" ||
+              a.consultationStatus === "SCHEDULED"),
         )
+        .sort(asc),
+      in_progress: appointments
+        .filter((a) => a.consultationStatus === "IN_PROGRESS")
         .sort(asc),
       requests: appointments.filter((a) => a.status === "REQUESTED").sort(asc),
       history: appointments
@@ -192,8 +197,13 @@ export default function PatientAppointmentsPage() {
                   <p className="font-medium text-teal-700 text-sm mb-3">
                     {appointment.specializationName}
                   </p>
+                  {appointment.doctorPhone && (
+                    <a href={`tel:${appointment.doctorPhone}`} className="mb-2 flex items-center gap-1.5 text-sm font-medium text-teal-700 hover:text-teal-900">
+                      <Phone className="size-4" /> {appointment.doctorPhone}
+                    </a>
+                  )}
                   <p className="text-sm text-slate-600 mb-1">
-                    {formatAppointmentTime(appointment.scheduledStart)}
+                    {formatAppointmentRange(appointment.scheduledStart, appointment.scheduledEnd)}
                   </p>
                   <p className="text-sm text-slate-600">
                     {appointment.hospitalName}
@@ -262,6 +272,10 @@ export default function PatientAppointmentsPage() {
 
                 {expanded && (
                   <dl className="mt-6 grid gap-6 sm:grid-cols-2 text-sm bg-slate-50 p-5 rounded-2xl">
+                    <div>
+                      <dt className="text-slate-500 font-medium mb-1">Patient age</dt>
+                      <dd className="font-medium text-slate-900">{appointment.symptoms.patientAge ?? "Not provided"}</dd>
+                    </div>
                     <div>
                       <dt className="text-slate-500 font-medium mb-1">
                         Reason for consultation
@@ -346,7 +360,13 @@ export default function PatientAppointmentsPage() {
     );
   }
 
-  const currentTab = activeTab || (groups.upcoming.length === 0 && groups.requests.length > 0 ? "requests" : "upcoming");
+  const currentTab = activeTab || (
+    groups.in_progress.length > 0
+      ? "in_progress"
+      : groups.upcoming.length === 0 && groups.requests.length > 0
+        ? "requests"
+        : "upcoming"
+  );
 
   console.log("DEBUG FRONTEND APPOINTMENTS:", appointments);
   console.log("DEBUG FRONTEND GROUPS:", groups);
@@ -388,6 +408,19 @@ export default function PatientAppointmentsPage() {
               </span>
             </button>
             <button
+              onClick={() => setActiveTab("in_progress")}
+              className={`
+                whitespace-nowrap border-b-2 py-4 px-1 text-sm font-semibold transition-colors
+                ${currentTab === "in_progress" ? "border-teal-600 text-teal-700" : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"}
+              `}
+            >
+              <Activity className="inline-block size-4 mr-2 mb-0.5" />
+              In Progress
+              <span className="ml-2 rounded-full bg-teal-50 px-2 py-0.5 text-xs text-teal-700">
+                {groups.in_progress.length}
+              </span>
+            </button>
+            <button
               onClick={() => setActiveTab("requests")}
               className={`
                 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-semibold transition-colors
@@ -420,6 +453,14 @@ export default function PatientAppointmentsPage() {
               "No upcoming consultations",
               "You don't have any confirmed or scheduled consultations.",
               Calendar,
+            )}
+
+          {currentTab === "in_progress" &&
+            renderList(
+              groups.in_progress,
+              "No consultations in progress",
+              "Your active consultation will appear here after the doctor starts it.",
+              Activity,
             )}
 
           {currentTab === "requests" &&

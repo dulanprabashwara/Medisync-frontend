@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Phone } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { formatDoctorName } from "@/lib/formatters";
 import type { DoctorSummary } from "@/types/appointments";
@@ -58,6 +58,19 @@ export function DoctorCard({
             {doctor.departmentName}
           </dd>
         </div>
+
+        {doctor.phone && (
+          <div>
+            <dt className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-0.5">
+              Phone
+            </dt>
+            <dd>
+              <a href={`tel:${doctor.phone}`} className="inline-flex items-center gap-1.5 font-medium text-teal-700 hover:text-teal-900">
+                <Phone className="size-3.5" /> {doctor.phone}
+              </a>
+            </dd>
+          </div>
+        )}
 
         {viewMode === "detail" && (
           <>

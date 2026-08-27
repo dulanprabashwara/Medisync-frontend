@@ -12,7 +12,7 @@ import { useAuth } from "@/components/auth-provider";
 import { ConsultationCancellationPanel } from "@/components/consultation-cancellation-panel";
 import { ConsultationChat } from "@/components/consultation-chat";
 import { LoadingPanel } from "@/components/loading-panel";
-import { PortalHeading, formatAppointmentTime } from "@/components/portal-ui";
+import { PortalHeading, formatAppointmentRange } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
 import { SectionCard } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -274,7 +274,13 @@ export default function PatientConsultationPage() {
           <div>
             <dt className="text-slate-500 mb-1">Scheduled Date & Time</dt>
             <dd className="font-medium text-slate-900">
-              {formatAppointmentTime(consultation.scheduledStart)}
+              {formatAppointmentRange(consultation.scheduledStart, consultation.scheduledEnd)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500 mb-1">Doctor phone</dt>
+            <dd className="font-medium text-slate-900">
+              {consultation.doctorPhone ? <a className="text-teal-700 hover:text-teal-900" href={`tel:${consultation.doctorPhone}`}>{consultation.doctorPhone}</a> : "Not provided"}
             </dd>
           </div>
           <div>

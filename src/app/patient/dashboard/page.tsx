@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/components/auth-provider";
-import { PortalHeading, formatAppointmentTime } from "@/components/portal-ui";
+import { PortalHeading, formatAppointmentRange } from "@/components/portal-ui";
 import { getPatientAppointments, getPatientPrescriptions } from "@/lib/api";
 import { formatDoctorName } from "@/lib/formatters";
 import { LoadingPanel } from "@/components/loading-panel";
@@ -268,9 +268,7 @@ function PatientDashboardContent() {
                       </p>
                       <div className="mt-4 space-y-1">
                         <p className="text-sm text-slate-600">
-                          {formatAppointmentTime(
-                            nextConsultation.scheduledStart,
-                          )}
+                          {formatAppointmentRange(nextConsultation.scheduledStart, nextConsultation.scheduledEnd)}
                         </p>
                         <p className="text-sm text-slate-600">
                           {nextConsultation.hospitalName}
@@ -351,8 +349,7 @@ function PatientDashboardContent() {
                         {formatDoctorName(appt.doctorName)}
                       </p>
                       <p className="text-sm text-slate-500">
-                        Completed ·{" "}
-                        {new Date(appt.scheduledStart).toLocaleDateString()}
+                        Completed · {formatAppointmentRange(appt.scheduledStart, appt.scheduledEnd)}
                       </p>
                     </div>
                     {appt.consultationId && (

@@ -10,6 +10,7 @@ import {
   InlineError,
   PortalHeading,
   StateBadge,
+  formatAppointmentRange,
   formatAppointmentTime,
 } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -20,7 +21,7 @@ import {
   rejectDoctorAppointment,
 } from "@/lib/api";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Calendar } from "lucide-react";
+import { Activity, Calendar } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import type { Appointment } from "@/types/appointments";
 
@@ -37,7 +38,7 @@ function DoctorAppointmentsContent() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [now, setNow] = useState(0);
-  const [activeTab, setActiveTab] = useState<"action_required" | "upcoming" | "past">("action_required");
+  const [activeTab, setActiveTab] = useState<"action_required" | "upcoming" | "in_progress" | "past">("action_required");
 
   const load = useCallback(async () => {
     if (!session) return;
@@ -79,10 +80,15 @@ function DoctorAppointmentsContent() {
       upcoming: appointments
         .filter(
           (value) =>
-            value.status === "CONFIRMED" ||
-            value.consultationStatus === "IN_PROGRESS" ||
-            value.consultationStatus === "SCHEDULED"
+            value.consultationStatus !== "IN_PROGRESS" &&
+            value.consultationStatus !== "COMPLETED" &&
+            value.consultationStatus !== "CANCELLED" &&
+            (value.status === "CONFIRMED" ||
+              value.consultationStatus === "SCHEDULED")
         )
+        .sort(ascending),
+      in_progress: appointments
+        .filter((value) => value.consultationStatus === "IN_PROGRESS")
         .sort(ascending),
       past: appointments
         .filter(
@@ -183,7 +189,7 @@ function DoctorAppointmentsContent() {
         </div>
       )}
 
-      <div className="flex space-x-1 rounded-xl bg-slate-100 p-1 mb-8 overflow-x-auto hide-scrollbar w-full sm:max-w-md">
+      <div className="flex space-x-1 rounded-xl bg-slate-100 p-1 mb-8 overflow-x-auto hide-scrollbar w-full sm:max-w-2xl">
         <button
           onClick={() => setActiveTab("action_required")}
           className={`w-full rounded-lg py-2 text-sm font-medium leading-5 ${
@@ -208,6 +214,20 @@ function DoctorAppointmentsContent() {
           }`}
         >
           Upcoming
+        </button>
+        <button
+          onClick={() => setActiveTab("in_progress")}
+          className={`w-full rounded-lg py-2 text-sm font-medium leading-5 whitespace-nowrap ${
+            activeTab === "in_progress"
+              ? "bg-white text-teal-800 shadow-sm"
+              : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900"
+          }`}
+        >
+          <Activity className="mr-1.5 inline-block size-4" />
+          In Progress
+          <span className="ml-2 inline-flex items-center justify-center rounded-full bg-teal-100 px-2 py-0.5 text-xs font-semibold text-teal-700">
+            {groups.in_progress.length}
+          </span>
         </button>
         <button
           onClick={() => setActiveTab("past")}
@@ -261,6 +281,24 @@ function DoctorAppointmentsContent() {
               tab="upcoming"
             />
           )}
+          {activeTab === "in_progress" && (
+            <DoctorAppointmentSection
+              emptyTitle="No consultations in progress"
+              emptyDescription="Consultations you have started will appear here until they are completed or cancelled."
+              appointments={groups.in_progress}
+              expandedId={expandedId}
+              setExpandedId={setExpandedId}
+              reasonAction={reasonAction}
+              reason={reason}
+              setReason={setReason}
+              busy={busy}
+              now={now}
+              onAccept={accept}
+              onOpenReason={openReason}
+              onSubmitReason={submitReasonAction}
+              tab="in_progress"
+            />
+          )}
           {activeTab === "past" && (
             <DoctorAppointmentSection
               emptyTitle="No past consultations"
@@ -299,7 +337,7 @@ interface SectionProps {
   onAccept: (id: string) => Promise<void>;
   onOpenReason: (id: string, kind: "reject" | "cancel") => void;
   onSubmitReason: () => Promise<void>;
-  tab: "action_required" | "upcoming" | "past";
+  tab: "action_required" | "upcoming" | "in_progress" | "past";
 }
 
 function DoctorAppointmentSection(props: SectionProps) {
@@ -338,7 +376,7 @@ function DoctorAppointmentSection(props: SectionProps) {
                 </div>
                 <div className="mt-2 space-y-1">
                   <p className="text-sm font-medium text-slate-700">
-                    {formatAppointmentTime(appointment.scheduledStart)}
+                    {formatAppointmentRange(appointment.scheduledStart, appointment.scheduledEnd)}
                   </p>
                   <p className="text-sm text-slate-600 line-clamp-2 mt-1">
                     <span className="font-medium text-slate-700">Reason:</span>{" "}
@@ -375,7 +413,7 @@ function DoctorAppointmentSection(props: SectionProps) {
                 </>
               )}
 
-              {props.tab === "upcoming" && appointment.consultationId && (
+              {(props.tab === "upcoming" || props.tab === "in_progress") && appointment.consultationId && (
                 <Link
                   className={buttonVariants()}
                   href={`/doctor/consultations/${appointment.consultationId}`}
@@ -407,6 +445,10 @@ function DoctorAppointmentSection(props: SectionProps) {
             {expanded && (
               <div className="mt-5 rounded-2xl bg-slate-50 p-5 text-sm">
                 <dl className="grid gap-4 sm:grid-cols-2">
+                  <Detail
+                    label="Patient age"
+                    value={appointment.symptoms.patientAge?.toString() ?? null}
+                  />
                   <Detail
                     label="Symptoms"
                     value={appointment.symptoms.symptoms}

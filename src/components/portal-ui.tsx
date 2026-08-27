@@ -91,6 +91,22 @@ export function formatAppointmentTime(value: string) {
   }).format(new Date(value));
 }
 
+export function formatAppointmentRange(startValue: string, endValue: string) {
+  const start = new Date(startValue);
+  const end = new Date(endValue);
+  const dateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
+  const timeFormatter = new Intl.DateTimeFormat(undefined, { timeStyle: "short" });
+  const sameDate =
+    start.getFullYear() === end.getFullYear() &&
+    start.getMonth() === end.getMonth() &&
+    start.getDate() === end.getDate();
+
+  if (sameDate) {
+    return `${dateFormatter.format(start)}, ${timeFormatter.format(start)} – ${timeFormatter.format(end)}`;
+  }
+  return `${formatAppointmentTime(startValue)} – ${formatAppointmentTime(endValue)}`;
+}
+
 export function ConsultationStatusBadge({
   status,
 }: {

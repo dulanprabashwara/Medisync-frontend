@@ -28,6 +28,7 @@ export interface ConsultationDetails {
   cancellationReason: string | null;
   patientName: string;
   doctorName: string;
+  doctorPhone: string | null;
   hospitalName: string;
   departmentName: string;
   specializationName: string;

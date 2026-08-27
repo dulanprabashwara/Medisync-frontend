@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Calendar, CheckCircle2 } from "lucide-react";
+import { Calendar, CheckCircle2, Phone } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
-import { PortalHeading, formatAppointmentTime } from "@/components/portal-ui";
+import { PortalHeading, formatAppointmentRange } from "@/components/portal-ui";
 import { ProtectedRoute } from "@/components/protected-route";
 import { SectionCard } from "@/components/ui/card";
 import { Input, Textarea, Label } from "@/components/ui/forms";
@@ -30,6 +30,7 @@ function dateValue(offsetDays: number) {
 }
 
 const emptyBooking: Omit<CreateAppointmentInput, "slotId"> = {
+  patientAge: Number.NaN,
   reasonForVisit: "",
   symptoms: "",
   symptomDuration: "",
@@ -209,6 +210,12 @@ function PatientDoctorDetailsContent() {
                   <p className="text-slate-600 text-sm">
                     {doctor.departmentName}
                   </p>
+                  {doctor.phone && (
+                    <a href={`tel:${doctor.phone}`} className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-teal-700 hover:text-teal-900">
+                      <Phone className="size-4" />
+                      {doctor.phone}
+                    </a>
+                  )}
                 </div>
               </div>
 
@@ -325,7 +332,7 @@ function PatientDoctorDetailsContent() {
                                 }, 50);
                               }}
                               aria-pressed={isSelected}
-                              aria-label={`Select slot for ${new Date(slot.startsAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+                              aria-label={`Select slot for ${formatAppointmentRange(slot.startsAt, slot.endsAt)}`}
                               className={`
                                 rounded-xl border px-3 py-2 text-sm font-medium transition-all
                                 ${
@@ -336,6 +343,11 @@ function PatientDoctorDetailsContent() {
                               `}
                             >
                               {new Date(slot.startsAt).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                              {" – "}
+                              {new Date(slot.endsAt).toLocaleTimeString([], {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })}
@@ -364,12 +376,27 @@ function PatientDoctorDetailsContent() {
             <p className="mt-2 text-sm text-slate-600 max-w-2xl">
               Selected time:{" "}
               <span className="font-semibold text-slate-900">
-                {formatAppointmentTime(selectedSlot.startsAt)}
+                {formatAppointmentRange(selectedSlot.startsAt, selectedSlot.endsAt)}
               </span>
             </p>
           </div>
 
           <form onSubmit={requestAppointment} className="space-y-6 max-w-3xl">
+            <div className="space-y-1 sm:max-w-xs">
+              <Label htmlFor="patientAge">
+                Patient age <span className="text-rose-600">*</span>
+              </Label>
+              <Input
+                id="patientAge"
+                type="number"
+                min={0}
+                max={130}
+                required
+                value={Number.isNaN(booking.patientAge) ? "" : booking.patientAge}
+                onChange={(e) => setBooking({ ...booking, patientAge: e.target.value === "" ? Number.NaN : Number(e.target.value) })}
+              />
+            </div>
+
             <div className="space-y-1">
               <Label htmlFor="reasonForVisit">
                 Reason for consultation <span className="text-rose-600">*</span>

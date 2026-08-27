@@ -47,6 +47,7 @@ export interface CreateAvailabilityInput {
 export interface DoctorSummary {
   doctorProfileId: string;
   displayName: string;
+  phone: string | null;
   hospitalId: string;
   hospitalName: string;
   departmentId: string;
@@ -65,6 +66,7 @@ export interface DoctorDetails extends Omit<DoctorSummary, "bioSummary"> {
 }
 
 export interface AppointmentSymptoms {
+  patientAge: number | null;
   reasonForVisit: string;
   symptoms: string;
   symptomDuration: string | null;
@@ -76,6 +78,7 @@ export interface Appointment {
   slotId: string;
   patientName: string;
   doctorName: string;
+  doctorPhone: string | null;
   hospitalName: string;
   departmentName: string;
   specializationName: string;
@@ -96,6 +99,7 @@ export interface Appointment {
 
 export interface CreateAppointmentInput {
   slotId: string;
+  patientAge: number;
   reasonForVisit: string;
   symptoms: string;
   symptomDuration: string;
