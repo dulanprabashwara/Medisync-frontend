@@ -13,6 +13,7 @@ export function PortalHeading({
   backHref,
   backLabel = "Back to dashboard",
   action,
+  className = "mb-8",
 }: {
   eyebrow: string;
   title: string;
@@ -20,9 +21,12 @@ export function PortalHeading({
   backHref?: string;
   backLabel?: string;
   action?: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="relative mb-8 overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-[0_14px_40px_rgba(15,23,42,0.055)] sm:p-6 lg:p-7">
+    <div
+      className={`relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-[0_14px_40px_rgba(15,23,42,0.055)] sm:p-6 lg:p-7 ${className}`}
+    >
       <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-[var(--portal-accent)]" />
       <div className="pointer-events-none absolute -right-16 -top-20 size-52 rounded-full bg-[var(--portal-accent-soft)] opacity-60 blur-3xl" />
       {backHref && (
@@ -94,8 +98,12 @@ export function formatAppointmentTime(value: string) {
 export function formatAppointmentRange(startValue: string, endValue: string) {
   const start = new Date(startValue);
   const end = new Date(endValue);
-  const dateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
-  const timeFormatter = new Intl.DateTimeFormat(undefined, { timeStyle: "short" });
+  const dateFormatter = new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+  });
+  const timeFormatter = new Intl.DateTimeFormat(undefined, {
+    timeStyle: "short",
+  });
   const sameDate =
     start.getFullYear() === end.getFullYear() &&
     start.getMonth() === end.getMonth() &&

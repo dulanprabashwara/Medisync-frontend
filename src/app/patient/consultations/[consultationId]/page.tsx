@@ -3,11 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import {
-  Info,
-  Receipt,
-  PanelRight,
-} from "lucide-react";
+import { Info, Receipt, PanelRight } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { ConsultationCancellationPanel } from "@/components/consultation-cancellation-panel";
 import { ConsultationChat } from "@/components/consultation-chat";
@@ -110,8 +106,8 @@ export default function PatientConsultationPage() {
       if (event.eventType === "MESSAGE_DELETED" && event.message) {
         setMessages((current) =>
           current.map((msg) =>
-            msg.messageId === event.message!.messageId ? event.message! : msg
-          )
+            msg.messageId === event.message!.messageId ? event.message! : msg,
+          ),
         );
       }
     },
@@ -131,7 +127,9 @@ export default function PatientConsultationPage() {
       await notifyPaymentSent(session.access_token, consultationId);
       toast.success("Doctor has been notified that your payment was sent.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to notify doctor.");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to notify doctor.",
+      );
     } finally {
       setNotifyingPayment(false);
     }
@@ -165,7 +163,11 @@ export default function PatientConsultationPage() {
 
   async function handleDelete(messageId: string) {
     if (!session) throw new Error("Your authentication session has expired.");
-    await deletePatientConsultationMessage(session.access_token, consultationId, messageId);
+    await deletePatientConsultationMessage(
+      session.access_token,
+      consultationId,
+      messageId,
+    );
   }
 
   // ── Video handlers ──────────────────────────────────────────────────
@@ -174,7 +176,10 @@ export default function PatientConsultationPage() {
     if (!session) return;
     setVideoBusy(true);
     try {
-      const tokenResp = await patientJoinVideo(session.access_token, consultationId);
+      const tokenResp = await patientJoinVideo(
+        session.access_token,
+        consultationId,
+      );
       setVideoToken(tokenResp);
     } catch (videoError) {
       setError(
@@ -198,9 +203,14 @@ export default function PatientConsultationPage() {
     }
     async function fetchVideoStatus() {
       try {
-        const status = await getPatientVideoStatus(session!.access_token, consultationId);
+        const status = await getPatientVideoStatus(
+          session!.access_token,
+          consultationId,
+        );
         setVideoActive(status.active);
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
     void fetchVideoStatus();
   }, [session, consultationId, consultation?.status]);
@@ -211,14 +221,22 @@ export default function PatientConsultationPage() {
       return;
     }
     const hasNewVideoStart = latestNotifications.some(
-      (n) => n.type === "VIDEO_CALL_STARTED" && !n.read && n.entityId === consultationId
+      (n) =>
+        n.type === "VIDEO_CALL_STARTED" &&
+        !n.read &&
+        n.entityId === consultationId,
     );
     if (hasNewVideoStart) {
       async function fetchVideoStatus() {
         try {
-          const status = await getPatientVideoStatus(session!.access_token, consultationId);
+          const status = await getPatientVideoStatus(
+            session!.access_token,
+            consultationId,
+          );
           setVideoActive(status.active);
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
       void fetchVideoStatus();
     }
@@ -274,13 +292,25 @@ export default function PatientConsultationPage() {
           <div>
             <dt className="text-slate-500 mb-1">Scheduled Date & Time</dt>
             <dd className="font-medium text-slate-900">
-              {formatAppointmentRange(consultation.scheduledStart, consultation.scheduledEnd)}
+              {formatAppointmentRange(
+                consultation.scheduledStart,
+                consultation.scheduledEnd,
+              )}
             </dd>
           </div>
           <div>
             <dt className="text-slate-500 mb-1">Doctor phone</dt>
             <dd className="font-medium text-slate-900">
-              {consultation.doctorPhone ? <a className="text-teal-700 hover:text-teal-900" href={`tel:${consultation.doctorPhone}`}>{consultation.doctorPhone}</a> : "Not provided"}
+              {consultation.doctorPhone ? (
+                <a
+                  className="text-teal-700 hover:text-teal-900"
+                  href={`tel:${consultation.doctorPhone}`}
+                >
+                  {consultation.doctorPhone}
+                </a>
+              ) : (
+                "Not provided"
+              )}
             </dd>
           </div>
           <div>
@@ -311,9 +341,12 @@ export default function PatientConsultationPage() {
       )}
 
       {/* Video Call Section */}
-      {(consultation.status === "IN_PROGRESS" || consultation.status === "SCHEDULED") && (
+      {(consultation.status === "IN_PROGRESS" ||
+        consultation.status === "SCHEDULED") && (
         <SectionCard className="border-teal-200 bg-linear-to-br from-teal-50 to-emerald-50">
-          <h3 className="font-semibold text-teal-900 mb-3">Video Consultation</h3>
+          <h3 className="font-semibold text-teal-900 mb-3">
+            Video Consultation
+          </h3>
           <PatientVideoButton
             consultationStatus={consultation.status}
             videoActive={videoActive}
@@ -423,7 +456,9 @@ export default function PatientConsultationPage() {
                       disabled={notifyingPayment}
                       className="w-full text-xs py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg shadow-sm disabled:opacity-50 transition-colors"
                     >
-                      {notifyingPayment ? "Notifying..." : "Notify Doctor that Payment is Sent"}
+                      {notifyingPayment
+                        ? "Notifying..."
+                        : "Notify Doctor that Payment is Sent"}
                     </button>
                   </div>
                 )}
@@ -458,9 +493,10 @@ export default function PatientConsultationPage() {
   return (
     <ProtectedRoute roles={["PATIENT"]}>
       <div className="flex flex-col h-full pt-6 sm:pt-8">
-        <div className="shrink-0 mb-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="shrink-0 px-4 sm:px-6 lg:px-8">
           <PortalHeading
             eyebrow="Online Consultation"
+            className="mb-6"
             title={
               consultation
                 ? formatDoctorName(consultation.doctorName)
@@ -469,36 +505,38 @@ export default function PatientConsultationPage() {
             backHref="/patient/appointments"
             backLabel="Back to consultations"
             description="Chat with your doctor and review consultation details."
-          />
-          {consultation && (
-            <div className="shrink-0 pt-2 lg:pt-8 flex">
-              {/* Desktop Details Toggle */}
-              <Button
-                variant="secondary"
-                onClick={() => setDetailsOpen(!detailsOpen)}
-                className="hidden lg:flex"
-                aria-expanded={detailsOpen}
-                aria-controls="consultation-details-sidebar"
-              >
-                <PanelRight className="size-4 mr-2" />
-                {detailsOpen ? "Hide Details" : "Show Details"}
-              </Button>
+            action={
+              consultation ? (
+                <div className="w-full sm:w-auto">
+                  {/* Desktop Details Toggle */}
+                  <Button
+                    variant="secondary"
+                    onClick={() => setDetailsOpen(!detailsOpen)}
+                    className="hidden lg:flex"
+                    aria-expanded={detailsOpen}
+                    aria-controls="consultation-details-sidebar"
+                  >
+                    <PanelRight className="size-4 mr-2" />
+                    {detailsOpen ? "Hide Details" : "Show Details"}
+                  </Button>
 
-              {/* Mobile Details Toggle */}
-              <Button
-                variant="secondary"
-                onClick={() => setMobileDrawerOpen(true)}
-                className="lg:hidden w-full sm:w-auto"
-                aria-expanded={mobileDrawerOpen}
-              >
-                <Info className="size-4 mr-2" />
-                View Details
-              </Button>
-            </div>
-          )}
+                  {/* Mobile Details Toggle */}
+                  <Button
+                    variant="secondary"
+                    onClick={() => setMobileDrawerOpen(true)}
+                    className="lg:hidden w-full sm:w-auto"
+                    aria-expanded={mobileDrawerOpen}
+                  >
+                    <Info className="size-4 mr-2" />
+                    View Details
+                  </Button>
+                </div>
+              ) : null
+            }
+          />
         </div>
         {error && (
-          <Alert tone="error" className="mb-6 shrink-0">
+          <Alert tone="error" className="mb-6 shrink-0 mx-4 sm:mx-6 lg:mx-8">
             {error}
           </Alert>
         )}

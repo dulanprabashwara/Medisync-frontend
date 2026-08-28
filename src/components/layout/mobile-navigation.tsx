@@ -63,7 +63,10 @@ export function MobileNavigation() {
         className="m-0 h-full w-[min(88vw,360px)] max-w-sm max-h-none bg-white p-0 backdrop:bg-slate-950/35 backdrop:backdrop-blur-sm open:flex flex-col border-r border-slate-200 shadow-2xl"
       >
         <div className="flex h-18 shrink-0 items-center justify-between px-5 border-b border-slate-100">
-          <MediSyncBrand size="compact" href={`/${profile.role.toLowerCase()}/dashboard`} />
+          <MediSyncBrand
+            size="compact"
+            href={`/${profile.role.toLowerCase()}/dashboard`}
+          />
           <button
             onClick={() => setOpen(false)}
             className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100"
@@ -85,13 +88,19 @@ export function MobileNavigation() {
           </p>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-7">
+        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-7 hide-scrollbar">
           {groups.map((group) => (
             <div key={group.name}>
-              <h3 id={`mobile-nav-group-${group.name.replace(/\s+/g, '-')}`} className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em] mb-2.5">
+              <h3
+                id={`mobile-nav-group-${group.name.replace(/\s+/g, "-")}`}
+                className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em] mb-2.5"
+              >
                 {group.name}
               </h3>
-              <nav aria-labelledby={`mobile-nav-group-${group.name.replace(/\s+/g, '-')}`} className="space-y-1.5">
+              <nav
+                aria-labelledby={`mobile-nav-group-${group.name.replace(/\s+/g, "-")}`}
+                className="space-y-1.5"
+              >
                 {group.items.map((item) => {
                   const isActive = activeHref === item.href;
                   return (
@@ -105,16 +114,20 @@ export function MobileNavigation() {
                           : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
                       }`}
                     >
-                      {isActive && <span className="absolute -left-1 h-6 w-1 rounded-full bg-[var(--portal-accent)]" />}
-                      <span className={`flex size-8 items-center justify-center rounded-lg ${isActive ? "bg-white/80" : "bg-slate-100"}`}>
-                      <item.icon
-                        className={`size-[18px] shrink-0 ${
-                          isActive
-                            ? "text-[var(--portal-accent)]"
-                            : "text-slate-400 group-hover:text-slate-600"
-                        }`}
-                        aria-hidden="true"
-                      />
+                      {isActive && (
+                        <span className="absolute -left-1 h-6 w-1 rounded-full bg-[var(--portal-accent)]" />
+                      )}
+                      <span
+                        className={`flex size-8 items-center justify-center rounded-lg ${isActive ? "bg-white/80" : "bg-slate-100"}`}
+                      >
+                        <item.icon
+                          className={`size-[18px] shrink-0 ${
+                            isActive
+                              ? "text-[var(--portal-accent)]"
+                              : "text-slate-400 group-hover:text-slate-600"
+                          }`}
+                          aria-hidden="true"
+                        />
                       </span>
                       {item.name}
                     </Link>

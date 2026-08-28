@@ -24,7 +24,11 @@ html {
 body {
   margin: 0;
   background:
-    radial-gradient(circle at 10% 0%, rgba(13, 148, 136, 0.08), transparent 28rem),
+    radial-gradient(
+      circle at 10% 0%,
+      rgba(13, 148, 136, 0.08),
+      transparent 28rem
+    ),
     var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
@@ -34,7 +38,11 @@ button,
 a,
 input,
 select {
-  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 :focus-visible {
@@ -96,7 +104,11 @@ select {
 
 .portal-main {
   background:
-    radial-gradient(circle at 92% 2%, var(--portal-accent-halo), transparent 22rem),
+    radial-gradient(
+      circle at 92% 2%,
+      var(--portal-accent-halo),
+      transparent 22rem
+    ),
     linear-gradient(180deg, #f8fafc 0%, #f4f7fb 55%, #f7f9fc 100%);
 }
 
@@ -158,6 +170,25 @@ select {
 .portal-shell *::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
   background-clip: padding-box;
+}
+
+.portal-sidebar,
+.portal-sidebar *,
+.portal-shell .hide-scrollbar,
+.portal-shell .hide-scrollbar * {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+.portal-sidebar::-webkit-scrollbar,
+.portal-sidebar *::-webkit-scrollbar,
+.portal-shell .portal-sidebar::-webkit-scrollbar,
+.portal-shell .portal-sidebar *::-webkit-scrollbar,
+.portal-shell .hide-scrollbar::-webkit-scrollbar,
+.portal-shell .hide-scrollbar *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .portal-shell ::selection {
@@ -230,4 +261,3 @@ select {
     box-shadow: none !important;
   }
 }
-

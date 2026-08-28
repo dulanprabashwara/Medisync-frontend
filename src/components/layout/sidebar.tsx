@@ -39,13 +39,19 @@ export function Sidebar() {
         </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-7">
+      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-7 hide-scrollbar">
         {groups.map((group) => (
           <div key={group.name}>
-            <h3 id={`nav-group-${group.name.replace(/\s+/g, '-')}`} className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em] mb-2.5">
+            <h3
+              id={`nav-group-${group.name.replace(/\s+/g, "-")}`}
+              className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em] mb-2.5"
+            >
               {group.name}
             </h3>
-            <nav aria-labelledby={`nav-group-${group.name.replace(/\s+/g, '-')}`} className="space-y-1.5">
+            <nav
+              aria-labelledby={`nav-group-${group.name.replace(/\s+/g, "-")}`}
+              className="space-y-1.5"
+            >
               {group.items.map((item) => {
                 const isActive = activeHref === item.href;
                 return (
@@ -62,15 +68,17 @@ export function Sidebar() {
                     {isActive && (
                       <span className="absolute -left-1 h-6 w-1 rounded-full bg-[var(--portal-accent)]" />
                     )}
-                    <span className={`flex size-8 items-center justify-center rounded-lg transition-colors ${isActive ? "bg-white/80" : "bg-slate-100/70 group-hover:bg-white"}`}>
-                    <item.icon
-                      className={`size-[18px] shrink-0 ${
-                        isActive
-                          ? "text-[var(--portal-accent)]"
-                          : "text-slate-400 group-hover:text-slate-700"
-                      }`}
-                      aria-hidden="true"
-                    />
+                    <span
+                      className={`flex size-8 items-center justify-center rounded-lg transition-colors ${isActive ? "bg-white/80" : "bg-slate-100/70 group-hover:bg-white"}`}
+                    >
+                      <item.icon
+                        className={`size-[18px] shrink-0 ${
+                          isActive
+                            ? "text-[var(--portal-accent)]"
+                            : "text-slate-400 group-hover:text-slate-700"
+                        }`}
+                        aria-hidden="true"
+                      />
                     </span>
                     {item.name}
                   </Link>
