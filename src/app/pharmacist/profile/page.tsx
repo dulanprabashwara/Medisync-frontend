@@ -333,7 +333,9 @@ function Content() {
               onClick={() => void submit()}
               loading={busy === "submit"}
             >
-              Save and submit for verification
+              {value.verificationStatus === "REJECTED"
+                ? "Save and resubmit for verification"
+                : "Save and submit for verification"}
             </Button>
           </div>
         ) : null}

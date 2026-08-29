@@ -20,6 +20,11 @@ import type { AdminDoctorReview, AdminPharmacistReview } from "@/types/user";
 
 type Tab = "doctors" | "pharmacists";
 
+const reviewBackdropClassName =
+  "fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/20 p-4 backdrop-blur-[2px] sm:p-8";
+const reviewPanelClassName =
+  "mx-auto flex max-h-[90vh] w-full max-w-3xl flex-col rounded-[28px] border border-slate-200/90 bg-white p-6 shadow-[0_20px_55px_rgba(15,23,42,0.14)] ring-1 ring-white/70 sm:p-8";
+
 function ReviewDetail({ label, value }: { label: string; value: string | null }) {
   return (
     <div className="flex flex-col border-b border-slate-100 pb-3">
@@ -242,8 +247,8 @@ export default function ProfessionalVerificationPage() {
 
       {/* Doctor Review Dialog */}
       {selectedDoctor && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 p-4 sm:p-8 backdrop-blur-sm flex items-center justify-center">
-          <div className="mx-auto w-full max-w-3xl rounded-3xl bg-white p-6 shadow-2xl sm:p-8 max-h-[90vh] flex flex-col">
+        <div className={reviewBackdropClassName}>
+          <div className={reviewPanelClassName}>
             <div className="flex items-start justify-between gap-4 shrink-0 border-b border-slate-100 pb-5 mb-5">
               <div>
                 <h2 className="text-2xl font-semibold text-slate-900">Verify Doctor?</h2>
@@ -336,8 +341,8 @@ export default function ProfessionalVerificationPage() {
 
       {/* Pharmacist Review Dialog */}
       {selectedPharmacist && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 p-4 sm:p-8 backdrop-blur-sm flex items-center justify-center">
-          <div className="mx-auto w-full max-w-3xl rounded-3xl bg-white p-6 shadow-2xl sm:p-8 max-h-[90vh] flex flex-col">
+        <div className={reviewBackdropClassName}>
+          <div className={reviewPanelClassName}>
             <div className="flex items-start justify-between gap-4 shrink-0 border-b border-slate-100 pb-5 mb-5">
               <div>
                 <h2 className="text-2xl font-semibold text-slate-900">Verify Pharmacist?</h2>
