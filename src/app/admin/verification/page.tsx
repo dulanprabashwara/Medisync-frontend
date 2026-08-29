@@ -17,6 +17,7 @@ import {
   verifyPharmacist,
 } from "@/lib/api";
 import type { AdminDoctorReview, AdminPharmacistReview } from "@/types/user";
+import toast from "react-hot-toast";
 
 type Tab = "doctors" | "pharmacists";
 
@@ -43,7 +44,6 @@ export default function ProfessionalVerificationPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
 
   const [selectedDoctor, setSelectedDoctor] = useState<AdminDoctorReview | null>(null);
   const [selectedPharmacist, setSelectedPharmacist] = useState<AdminPharmacistReview | null>(null);
@@ -75,11 +75,10 @@ export default function ProfessionalVerificationPage() {
   async function runAction(key: string, success: string, action: () => Promise<unknown>) {
     setBusy(key);
     setError(null);
-    setMessage(null);
     try {
       await action();
       await load(false);
-      setMessage(success);
+      toast.success(success);
     } catch (actionError) {
       setError(actionError instanceof Error ? actionError.message : "The operation could not be completed.");
     } finally {
@@ -88,7 +87,7 @@ export default function ProfessionalVerificationPage() {
   }
 
   async function approveDoctor(doctor: AdminDoctorReview) {
-    if (!session || !window.confirm(`Verify Dr. ${doctor.firstName} ${doctor.lastName}?`)) return;
+    if (!session) return;
     await runAction(`doctor-${doctor.doctorId}`, "Doctor verified successfully.", async () => {
       await verifyDoctor(session.access_token, doctor.doctorId);
       setSelectedDoctor(null);
@@ -101,7 +100,6 @@ export default function ProfessionalVerificationPage() {
       setError("Enter a rejection reason.");
       return;
     }
-    if (!window.confirm(`Reject Dr. ${selectedDoctor.firstName} ${selectedDoctor.lastName}'s submission?`)) return;
     await runAction(`doctor-${selectedDoctor.doctorId}`, "Doctor submission rejected with feedback.", async () => {
       await rejectDoctor(session.access_token, selectedDoctor.doctorId, rejectionReason.trim());
       setSelectedDoctor(null);
@@ -110,7 +108,7 @@ export default function ProfessionalVerificationPage() {
   }
 
   async function approvePharmacist(pharmacist: AdminPharmacistReview) {
-    if (!session || !window.confirm(`Verify ${pharmacist.firstName} ${pharmacist.lastName} as a verified pharmacist?`)) return;
+    if (!session) return;
     await runAction(`pharmacist-${pharmacist.pharmacistId}`, "Pharmacist verified successfully.", async () => {
       await verifyPharmacist(session.access_token, pharmacist.pharmacistId);
       setSelectedPharmacist(null);
@@ -123,7 +121,6 @@ export default function ProfessionalVerificationPage() {
       setError("Enter a rejection reason.");
       return;
     }
-    if (!window.confirm(`Reject ${selectedPharmacist.firstName} ${selectedPharmacist.lastName}'s submission?`)) return;
     await runAction(`pharmacist-${selectedPharmacist.pharmacistId}`, "Pharmacist submission rejected with feedback.", async () => {
       await rejectPharmacist(session.access_token, selectedPharmacist.pharmacistId, rejectionReason.trim());
       setSelectedPharmacist(null);
@@ -162,7 +159,6 @@ export default function ProfessionalVerificationPage() {
       </div>
 
       {error && !selectedDoctor && !selectedPharmacist ? <Alert tone="error">{error}</Alert> : null}
-      {message && !selectedDoctor && !selectedPharmacist ? <Alert tone="success">{message}</Alert> : null}
 
       {tab === "doctors" && (
         <div className="space-y-6">

@@ -411,9 +411,6 @@ function DoctorProfileContent() {
                   </p>
                 </div>
               </div>
-              <Button onClick={submitVerification} disabled={busy !== null} className="w-fit">
-                {busy === "submit" ? "Submitting..." : "Edit & Resubmit"}
-              </Button>
             </div>
           ) : pending ? (
             <div className="flex items-start gap-4">
@@ -440,13 +437,6 @@ function DoctorProfileContent() {
                   </p>
                 </div>
               </div>
-              <Button 
-                onClick={submitVerification} 
-                disabled={busy !== null || hospitals.length === 0 || specializations.length === 0}
-                className="w-fit"
-              >
-                {busy === "submit" ? "Submitting..." : "Submit for Verification"}
-              </Button>
             </div>
           )}
         </SectionCard>
