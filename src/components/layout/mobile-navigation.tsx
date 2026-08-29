@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { navigationByRole, getActiveRoute } from "@/lib/navigation";
 import { MediSyncBrand } from "@/components/branding/medisync-brand";
+import { portalEntryPath, requiresProfessionalVerification } from "@/types/user";
 
 export function MobileNavigation() {
   const [open, setOpen] = useState(false);
@@ -34,7 +35,14 @@ export function MobileNavigation() {
 
   if (!profile) return null;
 
-  const groups = navigationByRole[profile.role];
+  const groups = requiresProfessionalVerification(profile)
+    ? navigationByRole[profile.role]
+        .map((group) => ({
+          ...group,
+          items: group.items.filter((item) => item.href === portalEntryPath(profile)),
+        }))
+        .filter((group) => group.items.length > 0)
+    : navigationByRole[profile.role];
   const activeHref = getActiveRoute(pathname, profile.role);
   const workspaceLabels = {
     PATIENT: "Personal care workspace",
@@ -65,7 +73,7 @@ export function MobileNavigation() {
         <div className="flex h-18 shrink-0 items-center justify-between px-5 border-b border-slate-100">
           <MediSyncBrand
             size="compact"
-            href={`/${profile.role.toLowerCase()}/dashboard`}
+            href={portalEntryPath(profile)}
           />
           <button
             onClick={() => setOpen(false)}

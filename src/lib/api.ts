@@ -455,6 +455,16 @@ export const searchPatientDoctors = (
 export const getPatientDoctor = (accessToken: string, doctorId: string) =>
   apiRequest<DoctorDetails>(`/api/patient/doctors/${doctorId}`, accessToken);
 
+export const getPatientDoctorSpecializations = (
+  accessToken: string,
+  hospitalId: string,
+  departmentId: string,
+) =>
+  apiRequest<SpecializationReference[]>(
+    `/api/patient/doctors/specializations?hospitalId=${encodeURIComponent(hospitalId)}&departmentId=${encodeURIComponent(departmentId)}`,
+    accessToken,
+  );
+
 export const getPatientDoctorSlots = (
   accessToken: string,
   doctorId: string,

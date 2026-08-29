@@ -10,7 +10,8 @@ import {
 } from "@/components/auth-card";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { useAuth } from "@/components/auth-provider";
-import { dashboardPath } from "@/types/user";
+import { portalEntryPath } from "@/types/user";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -18,13 +19,15 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && session && profile) {
-      router.replace(dashboardPath(profile.role));
+      router.replace(portalEntryPath(profile));
     }
   }, [loading, profile, router, session]);
 
@@ -97,33 +100,55 @@ export default function RegisterPage() {
           <label htmlFor="password" className="block text-sm font-medium text-slate-700">
             Password
           </label>
-          <input
-            id="password"
-            className={inputClassName}
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-            minLength={8}
-            aria-invalid={errorMessage ? "true" : undefined}
-          />
+          <div className="relative">
+            <input
+              id="password"
+              className={`${inputClassName} pr-12`}
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              minLength={8}
+              aria-invalid={errorMessage ? "true" : undefined}
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-xl text-slate-500 hover:text-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-600"
+              onClick={() => setShowPassword((current) => !current)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+            >
+              {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+            </button>
+          </div>
         </div>
         <div className="space-y-1">
           <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700">
             Confirm password
           </label>
-          <input
-            id="confirmPassword"
-            className={inputClassName}
-            type="password"
-            autoComplete="new-password"
-            value={confirmPassword}
-            onChange={(event) => setConfirmPassword(event.target.value)}
-            required
-            minLength={8}
-            aria-invalid={errorMessage ? "true" : undefined}
-          />
+          <div className="relative">
+            <input
+              id="confirmPassword"
+              className={`${inputClassName} pr-12`}
+              type={showConfirmPassword ? "text" : "password"}
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              required
+              minLength={8}
+              aria-invalid={errorMessage ? "true" : undefined}
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-xl text-slate-500 hover:text-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-600"
+              onClick={() => setShowConfirmPassword((current) => !current)}
+              aria-label={showConfirmPassword ? "Hide confirmation password" : "Show confirmation password"}
+              aria-pressed={showConfirmPassword}
+            >
+              {showConfirmPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+            </button>
+          </div>
         </div>
         <button
           className={primaryButtonClassName}

@@ -20,7 +20,7 @@ export function AccountSettingsDangerZone() {
     setError(null);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/users/me`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080"}/api/users/me`,
         {
           method: "DELETE",
           headers: {

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { navigationByRole, getActiveRoute } from "@/lib/navigation";
 import { MediSyncBrand } from "@/components/branding/medisync-brand";
+import { portalEntryPath, requiresProfessionalVerification } from "@/types/user";
 
 export function Sidebar() {
   const { profile } = useAuth();
@@ -12,7 +13,15 @@ export function Sidebar() {
 
   if (!profile) return null;
 
-  const groups = navigationByRole[profile.role];
+  const verificationOnly = requiresProfessionalVerification(profile);
+  const groups = verificationOnly
+    ? navigationByRole[profile.role]
+        .map((group) => ({
+          ...group,
+          items: group.items.filter((item) => item.href === portalEntryPath(profile)),
+        }))
+        .filter((group) => group.items.length > 0)
+    : navigationByRole[profile.role];
   const activeHref = getActiveRoute(pathname, profile.role);
   const workspaceLabels = {
     PATIENT: "Personal care workspace",
@@ -24,7 +33,7 @@ export function Sidebar() {
   return (
     <aside className="portal-sidebar hidden lg:flex w-[272px] flex-col border-r border-slate-200/80 bg-white/95 h-screen sticky top-0 print:hidden shadow-[8px_0_30px_rgba(15,23,42,0.025)]">
       <div className="flex h-20 shrink-0 items-center px-6 border-b border-slate-100">
-        <MediSyncBrand href={`/${profile.role.toLowerCase()}/dashboard`} />
+        <MediSyncBrand href={portalEntryPath(profile)} />
       </div>
 
       <div className="mx-4 mt-5 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3.5">
@@ -96,7 +105,9 @@ export function Sidebar() {
         </span>
         <div>
           <p className="text-xs font-semibold text-slate-700">Secure session</p>
-          <p className="text-[11px] text-slate-400">Protected workspace</p>
+          <p className="text-[11px] text-slate-400">
+            {verificationOnly ? "Verification required" : "Protected workspace"}
+          </p>
         </div>
       </div>
     </aside>

@@ -10,6 +10,7 @@ import { formatDoctorName } from "@/lib/formatters";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { getActiveRoute, navigationByRole } from "@/lib/navigation";
 import { usePathname } from "next/navigation";
+import { portalEntryPath, requiresProfessionalVerification } from "@/types/user";
 
 function roleLabel(role: string) {
   switch (role) {
@@ -85,7 +86,7 @@ export function TopBar() {
       <div className="flex flex-1 items-center gap-x-4 self-stretch lg:gap-x-6">
         <div className="flex items-center gap-2 lg:hidden">
           <MobileNavigation />
-          <MediSyncBrand size="compact" href={`/${profile.role.toLowerCase()}/dashboard`} />
+          <MediSyncBrand size="compact" href={portalEntryPath(profile)} />
         </div>
 
         <div className="hidden lg:block min-w-0">
@@ -98,7 +99,9 @@ export function TopBar() {
         </div>
 
         <div className="flex flex-1 justify-end items-center gap-x-2 sm:gap-x-4 lg:gap-x-6">
-          <NotificationBell viewAllRoute={`/${profile.role.toLowerCase()}/notifications`} />
+          {!requiresProfessionalVerification(profile) ? (
+            <NotificationBell viewAllRoute={`/${profile.role.toLowerCase()}/notifications`} />
+          ) : null}
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen(!menuOpen)}

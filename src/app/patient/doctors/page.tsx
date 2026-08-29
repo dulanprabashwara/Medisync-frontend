@@ -17,7 +17,7 @@ import { Alert } from "@/components/ui/alert";
 import {
   getReferenceDepartments,
   getReferenceHospitals,
-  getReferenceSpecializations,
+  getPatientDoctorSpecializations,
   searchPatientDoctors,
 } from "@/lib/api";
 import type { DoctorSummary, PageResponse } from "@/types/appointments";
@@ -45,6 +45,7 @@ function PatientDoctorSearchContent() {
   );
   const [loading, setLoading] = useState(true);
   const [departmentsLoading, setDepartmentsLoading] = useState(false);
+  const [specializationsLoading, setSpecializationsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
@@ -53,14 +54,12 @@ function PatientDoctorSearchContent() {
     const token = session.access_token;
     async function init() {
       try {
-        const [hospitalValues, specializationValues, doctorValues] =
+        const [hospitalValues, doctorValues] =
           await Promise.all([
             getReferenceHospitals(token),
-            getReferenceSpecializations(token),
             searchPatientDoctors(token, { page: 0, size: 12 }),
           ]);
         setHospitals(hospitalValues);
-        setSpecializations(specializationValues);
         setResults(doctorValues);
       } catch (loadError) {
         setError(
@@ -78,7 +77,9 @@ function PatientDoctorSearchContent() {
   async function chooseHospital(nextHospitalId: string) {
     setHospitalId(nextHospitalId);
     setDepartmentId("");
+    setSpecializationId("");
     setDepartments([]);
+    setSpecializations([]);
     if (!session || !nextHospitalId) return;
     setDepartmentsLoading(true);
     try {
@@ -89,6 +90,32 @@ function PatientDoctorSearchContent() {
       console.error(err);
     } finally {
       setDepartmentsLoading(false);
+    }
+  }
+
+  async function chooseDepartment(nextDepartmentId: string) {
+    setDepartmentId(nextDepartmentId);
+    setSpecializationId("");
+    setSpecializations([]);
+    if (!session || !hospitalId || !nextDepartmentId) return;
+    setSpecializationsLoading(true);
+    setError(null);
+    try {
+      setSpecializations(
+        await getPatientDoctorSpecializations(
+          session.access_token,
+          hospitalId,
+          nextDepartmentId,
+        ),
+      );
+    } catch (loadError) {
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Specializations could not be loaded.",
+      );
+    } finally {
+      setSpecializationsLoading(false);
     }
   }
 
@@ -130,6 +157,7 @@ function PatientDoctorSearchContent() {
     setDepartmentId("");
     setSpecializationId("");
     setDepartments([]);
+    setSpecializations([]);
     if (!session) return;
     setLoading(true);
     setError(null);
@@ -175,7 +203,7 @@ function PatientDoctorSearchContent() {
           id="departmentId"
           disabled={!hospitalId || departmentsLoading}
           value={departmentId}
-          onChange={(e) => setDepartmentId(e.target.value)}
+          onChange={(e) => void chooseDepartment(e.target.value)}
         >
           <option value="">
             {departmentsLoading ? "Loading..." : "All departments"}
@@ -191,10 +219,19 @@ function PatientDoctorSearchContent() {
         <Label htmlFor="specializationId">Specialization</Label>
         <Select
           id="specializationId"
+          disabled={!departmentId || specializationsLoading}
           value={specializationId}
           onChange={(e) => setSpecializationId(e.target.value)}
         >
-          <option value="">All specializations</option>
+          <option value="">
+            {!departmentId
+              ? "Select a department first"
+              : specializationsLoading
+                ? "Loading..."
+                : specializations.length === 0
+                  ? "No specializations available"
+                  : "All specializations"}
+          </option>
           {specializations.map((s) => (
             <option key={s.id} value={s.id}>
               {s.name}

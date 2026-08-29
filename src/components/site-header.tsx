@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "./auth-provider";
-import { dashboardPath } from "@/types/user";
+import { portalEntryPath } from "@/types/user";
 import { MediSyncBrand } from "@/components/branding/medisync-brand";
 
 export function SiteHeader() {
@@ -24,7 +24,7 @@ export function SiteHeader() {
             <>
               <Link
                 className="rounded-xl px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                href={dashboardPath(profile.role)}
+                href={portalEntryPath(profile)}
               >
                 Dashboard
               </Link>

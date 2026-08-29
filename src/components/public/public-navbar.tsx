@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
-import { dashboardPath } from "@/types/user";
+import { portalEntryPath } from "@/types/user";
 import { Menu, X } from "lucide-react";
 import { MediSyncBrand } from "@/components/branding/medisync-brand";
 
@@ -77,7 +77,7 @@ export function PublicNavbar() {
           {session && profile ? (
             <Link
               className="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-800"
-              href={dashboardPath(profile.role)}
+              href={portalEntryPath(profile)}
             >
               Open Dashboard
             </Link>
@@ -145,7 +145,7 @@ export function PublicNavbar() {
                   {session && profile ? (
                     <Link
                       className="rounded-xl bg-teal-700 px-5 py-3 text-center text-base font-semibold text-white hover:bg-teal-800"
-                      href={dashboardPath(profile.role)}
+                      href={portalEntryPath(profile)}
                     >
                       Open Dashboard
                     </Link>

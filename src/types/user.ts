@@ -19,6 +19,7 @@ export interface MediSyncProfile {
   phone: string | null;
   role: UserRole;
   status: AccountStatus;
+  professionalVerificationStatus: VerificationStatus | null;
   profileImageUrl: string | null;
   profileImageUpdatedAt: string | null;
 }
@@ -194,3 +195,32 @@ export interface AdminPharmacistReview {
 
 export const dashboardPath = (role: UserRole): string =>
   `/${role.toLowerCase()}/dashboard`;
+
+export const professionalProfilePath = (role: UserRole): string | null => {
+  if (role === "DOCTOR") return "/doctor/profile";
+  if (role === "PHARMACIST") return "/pharmacist/profile";
+  return null;
+};
+
+export const requiresProfessionalVerification = (
+  profile: Pick<
+    MediSyncProfile,
+    "role" | "status" | "professionalVerificationStatus"
+  >,
+): boolean =>
+  (profile.role === "DOCTOR" || profile.role === "PHARMACIST") &&
+  (profile.status === "PENDING_VERIFICATION" ||
+    profile.professionalVerificationStatus !== "VERIFIED");
+
+export const portalEntryPath = (
+  profile: Pick<
+    MediSyncProfile,
+    "role" | "status" | "professionalVerificationStatus"
+  >,
+): string => {
+  if (profile.status === "DELETED") return "/account-deleted";
+  if (profile.status === "BANNED") return "/account-restricted";
+  return requiresProfessionalVerification(profile)
+    ? (professionalProfilePath(profile.role) ?? dashboardPath(profile.role))
+    : dashboardPath(profile.role);
+};

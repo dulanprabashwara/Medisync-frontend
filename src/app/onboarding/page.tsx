@@ -10,7 +10,7 @@ import {
 import { useAuth } from "@/components/auth-provider";
 import { LoadingPanel } from "@/components/loading-panel";
 import { ApiError, completeOnboarding } from "@/lib/api";
-import { dashboardPath, type OnboardingInput } from "@/types/user";
+import { portalEntryPath, type OnboardingInput } from "@/types/user";
 
 const roleOptions: Array<{
   value: OnboardingInput["role"];
@@ -56,7 +56,7 @@ export default function OnboardingPage() {
   useEffect(() => {
     if (loading || authError) return;
     if (!session) router.replace("/login");
-    else if (profile) router.replace(dashboardPath(profile.role));
+    else if (profile) router.replace(portalEntryPath(profile));
   }, [authError, loading, profile, router, session]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -78,7 +78,7 @@ export default function OnboardingPage() {
         phone: form.phone.trim(),
       });
       await refreshProfile();
-      router.replace(dashboardPath(created.role));
+      router.replace(portalEntryPath(created));
     } catch (onboardingError) {
       if (onboardingError instanceof ApiError) {
         setFieldErrors(onboardingError.fieldErrors);

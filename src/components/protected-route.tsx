@@ -5,7 +5,12 @@ import { useEffect, type ReactNode } from "react";
 import { useAuth } from "./auth-provider";
 import { LoadingPanel } from "./loading-panel";
 import { StatusPanel } from "./status-panel";
-import { dashboardPath, type UserRole } from "@/types/user";
+import {
+  dashboardPath,
+  professionalProfilePath,
+  requiresProfessionalVerification,
+  type UserRole,
+} from "@/types/user";
 
 export function ProtectedRoute({
   roles,
@@ -24,8 +29,15 @@ export function ProtectedRoute({
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
     } else if (!profile) {
       router.replace("/onboarding");
+    } else if (profile.status === "DELETED") {
+      router.replace("/account-deleted");
     } else if (profile.status === "BANNED") {
       router.replace("/account-restricted");
+    } else if (
+      requiresProfessionalVerification(profile) &&
+      pathname !== professionalProfilePath(profile.role)
+    ) {
+      router.replace(professionalProfilePath(profile.role)!);
     } else if (!roles.includes(profile.role)) {
       router.replace(dashboardPath(profile.role));
     }
@@ -53,7 +65,10 @@ export function ProtectedRoute({
   if (
     !session ||
     !profile ||
+    profile.status === "DELETED" ||
     profile.status === "BANNED" ||
+    (requiresProfessionalVerification(profile) &&
+      pathname !== professionalProfilePath(profile.role)) ||
     !roles.includes(profile.role)
   ) {
     return <LoadingPanel label="Taking you to the right place…" />;
