@@ -22,6 +22,7 @@ import type {
   PharmacistProfessionalProfile,
   PharmacistProfileInput,
 } from "@/types/user";
+import toast from "react-hot-toast";
 
 const emptyForm: PharmacistProfileInput = {
   professionalRegistrationNumber: "",
@@ -101,7 +102,6 @@ function Content() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
   const [draftAvailable, setDraftAvailable] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
 
@@ -148,7 +148,6 @@ function Content() {
     });
     setDraftAvailable(true);
     setDraftRestored(false);
-    setMessage(null);
   }
 
   useEffect(() => {
@@ -161,7 +160,6 @@ function Content() {
     if (!session || !value?.editable) return;
     setBusy("save");
     setError(null);
-    setMessage(null);
     try {
       const next = await updatePharmacistProfessionalProfile(
         session.access_token,
@@ -171,7 +169,7 @@ function Content() {
       setDraftAvailable(false);
       setDraftRestored(false);
       apply(next);
-      setMessage("Professional profile saved.");
+      toast.success("Professional profile saved.");
     } catch (saveError) {
       setError(
         saveError instanceof Error
@@ -194,7 +192,6 @@ function Content() {
       return;
     setBusy("submit");
     setError(null);
-    setMessage(null);
     try {
       await updatePharmacistProfessionalProfile(session.access_token, form);
       const next = await submitPharmacistVerification(session.access_token);
@@ -202,7 +199,7 @@ function Content() {
       setDraftAvailable(false);
       setDraftRestored(false);
       apply(next);
-      setMessage("Profile submitted for verification.");
+      toast.success("Profile submitted for administrator approval.");
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -233,7 +230,6 @@ function Content() {
         <SectionCard title="Professional Profile">
           <div className="space-y-3">
         {error ? <FormAlert message={error} /> : null}
-        {message ? <FormAlert message={message} success /> : null}
       </div>
       {value?.verificationStatus === "REJECTED" ? (
         <Alert tone="error" title="Verification rejected">

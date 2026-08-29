@@ -28,6 +28,7 @@ import type {
   SpecializationReference,
 } from "@/types/user";
 import { CheckCircle2, AlertCircle, Clock } from "lucide-react";
+import toast from "react-hot-toast";
 
 function DoctorProfileContent() {
   const { profile: user, session, refreshProfile } = useAuth();
@@ -39,7 +40,6 @@ function DoctorProfileContent() {
   const [phone, setPhone] = useState(user?.phone ?? "");
   const [isSavingPersonal, setIsSavingPersonal] = useState(false);
   const [personalError, setPersonalError] = useState<string | null>(null);
-  const [personalSuccess, setPersonalSuccess] = useState(false);
 
   // Professional Info State
   const [doctor, setDoctor] = useState<DoctorProfessionalProfile | null>(null);
@@ -57,7 +57,6 @@ function DoctorProfileContent() {
   const [loading, setLoading] = useState(true);
   const [departmentsLoading, setDepartmentsLoading] = useState(false);
   const [busy, setBusy] = useState<"save" | "submit" | null>(null);
-  const [professionalMessage, setProfessionalMessage] = useState<string | null>(null);
   const [professionalError, setProfessionalError] = useState<string | null>(null);
 
   const applyProfile = useCallback((value: DoctorProfessionalProfile) => {
@@ -113,12 +112,11 @@ function DoctorProfileContent() {
     if (!session) return;
     setIsSavingPersonal(true);
     setPersonalError(null);
-    setPersonalSuccess(false);
     try {
       await updateMyProfile(session.access_token, { firstName, lastName, phone: phone || null });
       await refreshProfile();
-      setPersonalSuccess(true);
       setIsEditingPersonal(false);
+      toast.success("Personal information updated.");
     } catch (err) {
       setPersonalError(err instanceof Error ? err.message : "Failed to update profile");
     } finally {
@@ -132,7 +130,6 @@ function DoctorProfileContent() {
     setPhone(user?.phone ?? "");
     setIsEditingPersonal(false);
     setPersonalError(null);
-    setPersonalSuccess(false);
   }
 
   // Professional Info Handlers
@@ -155,10 +152,9 @@ function DoctorProfileContent() {
     if (!session) return;
     setBusy("save");
     setProfessionalError(null);
-    setProfessionalMessage(null);
     try {
       applyProfile(await updateDoctorProfile(session.access_token, form));
-      setProfessionalMessage("Professional profile saved.");
+      toast.success("Profile changes saved.");
     } catch (saveError) {
       setProfessionalError(saveError instanceof Error ? saveError.message : "The profile could not be saved.");
     } finally {
@@ -177,11 +173,11 @@ function DoctorProfileContent() {
     }
     setBusy("submit");
     setProfessionalError(null);
-    setProfessionalMessage(null);
     try {
       await updateDoctorProfile(session.access_token, form);
       applyProfile(await submitDoctorVerification(session.access_token));
-      setProfessionalMessage("Your professional profile has been submitted for verification.");
+      await refreshProfile();
+      toast.success("Professional profile submitted for administrator approval.");
     } catch (submitError) {
       setProfessionalError(submitError instanceof Error ? submitError.message : "The profile could not be submitted.");
     } finally {
@@ -192,7 +188,7 @@ function DoctorProfileContent() {
   if (loading || !doctor) return <LoadingPanel label="Loading your professional profile..." />;
 
   const verified = doctor.verificationStatus === "VERIFIED";
-  const pending = doctor.verificationStatus === "PENDING";
+  const pending = doctor.submitted && doctor.verificationStatus === "PENDING";
   const rejected = doctor.verificationStatus === "REJECTED";
 
   return (
@@ -209,7 +205,6 @@ function DoctorProfileContent() {
         {/* 1. Personal Information */}
         <SectionCard title="Personal Information">
           {personalError && <Alert tone="error" className="mb-6">{personalError}</Alert>}
-          {personalSuccess && <Alert tone="success" className="mb-6">Profile updated successfully.</Alert>}
           
           <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
             <div className="w-full md:w-56 shrink-0">
@@ -270,7 +265,6 @@ function DoctorProfileContent() {
         {/* 2. Professional Information */}
         <SectionCard title="Professional Information">
           {professionalError && <Alert tone="error" className="mb-6">{professionalError}</Alert>}
-          {professionalMessage && <Alert tone="success" className="mb-6">{professionalMessage}</Alert>}
 
           <form onSubmit={saveProfessional} className="space-y-6">
             <div className="grid gap-6 sm:grid-cols-2">
@@ -367,15 +361,25 @@ function DoctorProfileContent() {
                 id="bio"
                 className="w-full min-h-24 resize-y rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
                 maxLength={2000}
+                disabled={doctor.submitted}
                 value={form.bio}
                 onChange={(e) => setForm({ ...form, bio: e.target.value })}
               />
             </div>
 
             <div className="pt-4 border-t border-slate-100 flex flex-wrap gap-3">
-              <Button type="submit" disabled={busy !== null}>
+              <Button type="submit" variant="secondary" disabled={busy !== null || doctor.submitted}>
                 {busy === "save" ? "Saving..." : "Save Professional Information"}
               </Button>
+              {!verified && !doctor.submitted ? (
+                <Button type="button" onClick={() => void submitVerification()} disabled={busy !== null}>
+                  {busy === "submit"
+                    ? "Submitting..."
+                    : rejected
+                      ? "Save and resubmit for verification"
+                      : "Save and submit for verification"}
+                </Button>
+              ) : null}
             </div>
           </form>
         </SectionCard>
@@ -411,7 +415,7 @@ function DoctorProfileContent() {
                 {busy === "submit" ? "Submitting..." : "Edit & Resubmit"}
               </Button>
             </div>
-          ) : pending || doctor.submitted ? (
+          ) : pending ? (
             <div className="flex items-start gap-4">
               <div className="rounded-full bg-amber-100 p-2 text-amber-600">
                 <Clock className="h-6 w-6" />
