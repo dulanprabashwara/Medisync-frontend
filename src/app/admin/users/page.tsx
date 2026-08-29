@@ -235,7 +235,12 @@ function UsersContent() {
             <NamedFilter
               value={filters.specializationId ?? ""}
               label="All specializations"
-              values={specializations.map((item) => [item.id, item.name])}
+              values={specializations.map((item) => [
+                item.id,
+                item.departmentName && item.hospitalName
+                  ? `${item.name} — ${item.departmentName}, ${item.hospitalName}`
+                  : `${item.name} — legacy`,
+              ])}
               onChange={(value) =>
                 setFilters((current) => ({
                   ...current,

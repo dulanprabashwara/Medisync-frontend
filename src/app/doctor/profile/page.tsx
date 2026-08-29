@@ -56,6 +56,7 @@ function DoctorProfileContent() {
   const [form, setForm] = useState<DoctorProfileInput>(emptyForm);
   const [loading, setLoading] = useState(true);
   const [departmentsLoading, setDepartmentsLoading] = useState(false);
+  const [specializationsLoading, setSpecializationsLoading] = useState(false);
   const [busy, setBusy] = useState<"save" | "submit" | null>(null);
   const [professionalError, setProfessionalError] = useState<string | null>(null);
 
@@ -81,19 +82,40 @@ function DoctorProfileContent() {
     setLoading(true);
     setProfessionalError(null);
     try {
-      const [profileValue, hospitalValues, specializationValues] = await Promise.all([
+      const [profileValue, hospitalValues] = await Promise.all([
         getDoctorProfile(session.access_token),
         getReferenceHospitals(session.access_token),
-        getReferenceSpecializations(session.access_token),
       ]);
+      const [departmentValues, filteredSpecializationValues] =
+        profileValue.hospitalId && profileValue.departmentId
+          ? await Promise.all([
+              getReferenceDepartments(session.access_token, profileValue.hospitalId),
+              getReferenceSpecializations(
+                session.access_token,
+                profileValue.hospitalId,
+                profileValue.departmentId,
+              ),
+            ])
+          : [[], []];
+      const specializationValues =
+        profileValue.specializationId &&
+        profileValue.specializationName &&
+        !filteredSpecializationValues.some(
+          (specialization) => specialization.id === profileValue.specializationId,
+        )
+          ? [
+              {
+                id: profileValue.specializationId,
+                name: `${profileValue.specializationName} (existing assignment)`,
+                description: null,
+              },
+              ...filteredSpecializationValues,
+            ]
+          : filteredSpecializationValues;
       applyProfile(profileValue);
       setHospitals(hospitalValues);
       setSpecializations(specializationValues);
-      setDepartments(
-        profileValue.hospitalId
-          ? await getReferenceDepartments(session.access_token, profileValue.hospitalId)
-          : []
-      );
+      setDepartments(departmentValues);
     } catch (loadError) {
       setProfessionalError(loadError instanceof Error ? loadError.message : "The professional profile could not be loaded.");
     } finally {
@@ -134,8 +156,14 @@ function DoctorProfileContent() {
 
   // Professional Info Handlers
   async function chooseHospital(hospitalId: string) {
-    setForm((current) => ({ ...current, hospitalId: hospitalId || null, departmentId: null }));
+    setForm((current) => ({
+      ...current,
+      hospitalId: hospitalId || null,
+      departmentId: null,
+      specializationId: null,
+    }));
     setDepartments([]);
+    setSpecializations([]);
     if (!session || !hospitalId) return;
     setDepartmentsLoading(true);
     try {
@@ -144,6 +172,36 @@ function DoctorProfileContent() {
       setProfessionalError(departmentError instanceof Error ? departmentError.message : "Departments could not be loaded.");
     } finally {
       setDepartmentsLoading(false);
+    }
+  }
+
+  async function chooseDepartment(departmentId: string) {
+    const hospitalId = form.hospitalId;
+    setForm((current) => ({
+      ...current,
+      departmentId: departmentId || null,
+      specializationId: null,
+    }));
+    setSpecializations([]);
+    if (!session || !hospitalId || !departmentId) return;
+    setSpecializationsLoading(true);
+    setProfessionalError(null);
+    try {
+      setSpecializations(
+        await getReferenceSpecializations(
+          session.access_token,
+          hospitalId,
+          departmentId,
+        ),
+      );
+    } catch (specializationError) {
+      setProfessionalError(
+        specializationError instanceof Error
+          ? specializationError.message
+          : "Specializations could not be loaded.",
+      );
+    } finally {
+      setSpecializationsLoading(false);
     }
   }
 
@@ -316,7 +374,7 @@ function DoctorProfileContent() {
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:bg-slate-50 disabled:text-slate-500"
                   disabled={verified || doctor.submitted || !form.hospitalId || departmentsLoading}
                   value={form.departmentId ?? ""}
-                  onChange={(e) => setForm({ ...form, departmentId: e.target.value || null })}
+                  onChange={(e) => void chooseDepartment(e.target.value)}
                   required
                 >
                   <option value="">{departmentsLoading ? "Loading departments..." : "Select department"}</option>
@@ -331,11 +389,22 @@ function DoctorProfileContent() {
                   id="specialization"
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:bg-slate-50 disabled:text-slate-500"
                   value={form.specializationId ?? ""}
-                  disabled={verified || doctor.submitted}
+                  disabled={
+                    verified ||
+                    doctor.submitted ||
+                    !form.departmentId ||
+                    specializationsLoading
+                  }
                   onChange={(e) => setForm({ ...form, specializationId: e.target.value || null })}
                   required
                 >
-                  <option value="">Select specialization</option>
+                  <option value="">
+                    {specializationsLoading
+                      ? "Loading specializations..."
+                      : form.departmentId
+                        ? "Select specialization"
+                        : "Select a department first"}
+                  </option>
                   {specializations.map((spec) => (
                     <option key={spec.id} value={spec.id}>{spec.name}</option>
                   ))}

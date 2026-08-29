@@ -119,6 +119,10 @@ export interface AdminDepartment {
 
 export interface AdminSpecialization {
   id: string;
+  hospitalId: string | null;
+  hospitalName: string | null;
+  departmentId: string | null;
+  departmentName: string | null;
   name: string;
   description: string | null;
   active: boolean;

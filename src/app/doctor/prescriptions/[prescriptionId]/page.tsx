@@ -26,6 +26,9 @@ import type {
 import type { DoctorProfessionalProfile } from "@/types/user";
 import { getDoctorProfile } from "@/lib/api";
 import Link from "next/link";
+import { Dialog } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
 const emptyItem = (): PrescriptionItemInput => ({
   medicineName: "",
@@ -83,6 +86,7 @@ function Content() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
+  const [issueConfirmOpen, setIssueConfirmOpen] = useState(false);
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
@@ -229,14 +233,11 @@ function Content() {
     }
   }
   async function issue() {
-    if (
-      !session ||
-      !validateDraft() ||
-      !window.confirm("Issue this prescription? It will become immutable.")
-    )
-      return;
+    if (!session) return;
+    setIssueConfirmOpen(false);
     setBusy("issue");
     setError(null);
+    setNotice(null);
     try {
       const payload = {
         ...form,
@@ -250,12 +251,17 @@ function Content() {
         ),
       );
       apply(await issuePrescription(session.access_token, prescriptionId));
-      setNotice("Prescription issued securely.");
+      toast.success("Prescription issued securely.");
     } catch (e) {
       setError(requestMessage(e, "The prescription could not be issued."));
     } finally {
       setBusy(null);
     }
+  }
+
+  function requestIssue() {
+    if (!validateDraft()) return;
+    setIssueConfirmOpen(true);
   }
   async function cancel() {
     if (!session) return;
@@ -605,7 +611,7 @@ function Content() {
                       type="button"
                       className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
                       disabled={busy !== null || form.items.length === 0}
-                      onClick={() => void issue()}
+                      onClick={requestIssue}
                     >
                       {busy === "issue" ? "Issuing..." : "Issue prescription"}
                     </button>
@@ -689,6 +695,32 @@ function Content() {
           )}
         </>
       ) : null}
+      <Dialog
+        open={issueConfirmOpen}
+        onClose={() => {
+          if (busy !== "issue") setIssueConfirmOpen(false);
+        }}
+        title="Issue this prescription?"
+        description="Issuing makes the prescription immutable. Review the medicines, instructions, validity, and consultation fee before continuing."
+      >
+        <div className="flex justify-end gap-3">
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={busy === "issue"}
+            onClick={() => setIssueConfirmOpen(false)}
+          >
+            Continue editing
+          </Button>
+          <Button
+            type="button"
+            disabled={busy === "issue"}
+            onClick={() => void issue()}
+          >
+            {busy === "issue" ? "Issuing..." : "Issue prescription"}
+          </Button>
+        </div>
+      </Dialog>
     </div>
   );
 }

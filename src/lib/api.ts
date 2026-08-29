@@ -228,9 +228,13 @@ export const getReferenceDepartments = (
     accessToken,
   );
 
-export const getReferenceSpecializations = (accessToken: string) =>
+export const getReferenceSpecializations = (
+  accessToken: string,
+  hospitalId: string,
+  departmentId: string,
+) =>
   apiRequest<SpecializationReference[]>(
-    "/api/reference/specializations",
+    `/api/reference/hospitals/${hospitalId}/departments/${departmentId}/specializations`,
     accessToken,
   );
 
@@ -289,7 +293,10 @@ export const getAdminSpecializations = (accessToken: string) =>
 
 export const createAdminSpecialization = (
   accessToken: string,
-  input: Pick<AdminSpecialization, "name" | "description" | "active">,
+  input: Pick<
+    AdminSpecialization,
+    "hospitalId" | "departmentId" | "name" | "description" | "active"
+  >,
 ) =>
   apiRequest<AdminSpecialization>("/api/admin/specializations", accessToken, {
     method: "POST",
@@ -300,7 +307,7 @@ export const updateAdminSpecialization = (
   accessToken: string,
   specialization: Pick<
     AdminSpecialization,
-    "id" | "name" | "description" | "active"
+    "id" | "hospitalId" | "departmentId" | "name" | "description" | "active"
   >,
 ) =>
   apiRequest<AdminSpecialization>(
