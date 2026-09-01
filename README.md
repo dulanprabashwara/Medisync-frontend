@@ -208,7 +208,7 @@ sequenceDiagram
 
     P->>FE: Select slot and submit symptoms
     FE->>BE: POST /api/patient/appointments
-    BE->>DB: Lock Patient and slot; create request
+    BE->>DB: Lock Patient and slot and create request
 
     D->>BE: POST /api/doctor/appointments/{id}/accept
     BE->>DB: Confirm booking and create consultation
@@ -240,7 +240,7 @@ sequenceDiagram
     BE-->>FE: Return raw token for in-memory QR rendering
     PH->>FE: Scan QR with device camera
     FE->>BE: POST /api/pharmacist/prescriptions/verify
-    BE->>DB: Hash lookup; return safe prescription view
+    BE->>DB: Hash lookup and return safe prescription view
     PH->>BE: POST /api/pharmacist/prescriptions/dispense
     BE->>DB: Lock, dispense once, and revoke token
     BE-->>P: DISPENSED notification
